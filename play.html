@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, user-scalable=no">
+<title>Road to Nowhere</title>
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="stylesheet" href="/common/client.css">
+<link rel="stylesheet" href="play.css">
+<script defer src="/common/client.js"></script>
+<script defer src="play.js"></script>
+</head>
+<body>
+
+<header>
+  <div class="title">ROAD TO NOWHERE</div>
+  <div id="phase-badge" class="phase-badge">—</div>
+  <div id="round-lbl" class="round-lbl"></div>
+</header>
+
+<div class="game-layout">
+
+  <div class="lpanel">
+    <div class="psec">
+      <div class="plbl">Companies</div>
+      <div id="co-list"></div>
+    </div>
+    <div class="psec">
+      <div class="plbl">Turn Order</div>
+      <div id="ttrack" class="ttrack"></div>
+    </div>
+    <div class="psec">
+      <div class="plbl">Active Box</div>
+      <div id="abox" class="abox"></div>
+    </div>
+    <div class="psec logarea">
+      <div class="plbl">Log</div>
+      <div id="log"></div>
+    </div>
+  </div>
+
+  <div class="cpanel">
+    <svg id="map"></svg>
+  </div>
+
+  <div class="rpanel">
+    <div class="psec">
+      <div class="plbl">Players</div>
+      <div id="pl-list"></div>
+    </div>
+    <div class="actarea">
+      <div class="actlbl">Actions</div>
+      <div id="actmsg" class="actmsg"></div>
+      <div id="actbtns"></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="tooltip" id="tt"></div>
+
+<div id="scorecard" class="scorecard" style="display:none">
+  <div class="scorecard-header" id="scorecard-header">
+    <div class="scoretitle">FINAL SCORES</div>
+    <div class="score-btns">
+      <button class="score-btn" id="score-minimize">—</button>
+    </div>
+  </div>
+  <div class="scorecard-body">
+    <div id="scorerows"></div>
+  </div>
+</div>
+
+</body>
+</html>
