@@ -97,9 +97,11 @@ let bid_amount = 1
 // ── RTT client callback ───────────────────────────────────────────
 
 function on_update() {
+	if (!view || !view.players || !view.players.length) return
+
 	const pc   = view.players.length
 	const skip = PLAYER_ROW_SKIP[pc] || 0
-	const br   = view.build_roads
+	const br   = view.build_roads || { state: "draft", current_company: null, build_points_remaining: 0 }
 
 	const phase_labels = {
 		initial_share_pick: "Initial Shares",

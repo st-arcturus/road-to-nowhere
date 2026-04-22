@@ -708,6 +708,27 @@ exports.action = function (state, current, action, arg) {
 
 exports.view = function (state, current) {
 	load_game(state)
+
+	// Observer or unexpected role — return a read-only snapshot
+	if (!current || typeof current !== "string" || !/^P\d+$/.test(current)) {
+		return {
+			prompt: null,
+			phase: game.phase,
+			round: game.round,
+			active_player: game.active_player,
+			companies: game.companies,
+			players: game.players,
+			active_box: game.active_box,
+			turn_track: game.turn_track,
+			hex_state: game.hex_state,
+			build_roads: game.build_roads,
+			bid: game.bid,
+			buy_shares: game.buy_shares,
+			log: game.log,
+			final_scores: game.final_scores,
+		}
+	}
+
 	const player = role_to_idx(current)
 	const br = game.build_roads
 	const is_active = game.active_player === player
