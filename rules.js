@@ -593,6 +593,12 @@ function do_claim(player, action, arg) {
 	claim_advance()
 }
 
+// ── exports.static_view ───────────────────────────────────────────
+
+exports.static_view = function (game) {
+	return null
+}
+
 // ── exports.setup ─────────────────────────────────────────────────
 
 exports.setup = function (seed, scenario, options) {
