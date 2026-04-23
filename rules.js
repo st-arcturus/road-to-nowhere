@@ -54,6 +54,7 @@ function load_game(state) {
 }
 
 function save_game() {
+	game.active = game.phase === "game_end" ? "None" : "P" + (game.active_player + 1)
 	return game
 }
 
@@ -276,6 +277,7 @@ function compute_scores() {
 		return built_on_count(a.player) - built_on_count(b.player)
 	})
 	game.final_scores = scores
+	game.result = "P" + (scores[0].player + 1)
 	for (const s of scores) add_log(`P${s.player + 1}: $${s.total}`)
 }
 
@@ -587,6 +589,12 @@ function do_claim(player, action, arg) {
 	game.claim_land.pending.shift()
 	add_log(`P${player + 1} claims ${hex_id}.`)
 	claim_advance()
+}
+
+// ── exports.static_view ───────────────────────────────────────────
+
+exports.static_view = function (game) {
+	return null
 }
 
 // ── exports.setup ─────────────────────────────────────────────────

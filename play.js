@@ -94,7 +94,12 @@ function hex_corners(cx, cy, s) {
 
 let bid_amount = 1
 
-// ── RTT client callback ───────────────────────────────────────────
+// ── RTT client callbacks ──────────────────────────────────────────
+
+function on_init(scenario, options) {
+	// scenario ("3P"/"4P"/"5P") and options are fixed at game creation.
+	// All dynamic state arrives through the view in on_update.
+}
 
 function on_update() {
 	const pc   = view.players.length
