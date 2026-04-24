@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, height=device-height, user-scalable=no">
+<title>Road to Nowhere — Layout Preview</title>
+<style>
+:root {
+  --bg:      #323232;
+  --bg2:     #3c3c3c;
+  --bg3:     #464646;
+  --surface: #505050;
+  --border:  #626262;
+  --text:    #e8e4d8;
+  --muted:   #7a7660;
+  --accent:  #c8a84b;
+  --accent2: #8fb3c8;
+  --font-m:  monospace;
+  --font-b:  Arial, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── Overall layout ── */
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-b);
+  font-size: 13px;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  grid-template-columns: 1fr 224px;
+  grid-template-areas:
+    "header header"
+    "main   aside"
+    "footer footer";
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ── Header ── */
+header {
+  grid-area: header;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  padding: 7px 14px;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+}
+
+#toolbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+#toolbar summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 3px 7px;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  font-family: var(--font-m);
+  font-size: 10px;
+  color: var(--muted);
+}
+#toolbar summary:hover { color: var(--text); border-color: var(--accent); }
+#toolbar menu {
+  position: absolute;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  margin-top: 4px;
+  padding: 4px 0;
+  min-width: 120px;
+  z-index: 100;
+  list-style: none;
+}
+#toolbar menu li a { display: block; padding: 5px 12px; font-size: 11px; color: var(--text); text-decoration: none; }
+#toolbar menu li a:hover { background: var(--surface); }
+
+.title {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  color: var(--accent);
+  text-transform: uppercase;
+}
+.phase-badge {
+  font-family: var(--font-m);
+  font-size: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 3px 8px;
+  border-radius: 2px;
+  color: var(--accent2);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  white-space: nowrap;
+}
+.round-lbl {
+  font-family: var(--font-m);
+  font-size: 10px;
+  color: var(--muted);
+}
+
+/* Framework injects these as last children of header */
+#prompt {
+  flex-basis: 100%;
+  font-size: 11px;
+  color: var(--text);
+  padding: 2px 0 0;
+  line-height: 1.4;
+}
+#actions {
+  flex-basis: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding-bottom: 2px;
+}
+
+/* ── Main / map ── */
+main {
+  grid-area: main;
+  overflow: auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 10px;
+  background: var(--bg);
+}
+
+/* ── Aside ── */
+aside {
+  grid-area: aside;
+  background: var(--bg2);
+  border-left: 1px solid var(--border);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+#roles {
+  padding: 7px 11px;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-m);
+  font-size: 9px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .1em;
+}
+
+.aside-sec {
+  padding: 8px 11px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+#log {
+  flex: 1;
+  padding: 8px 11px;
+  overflow-y: auto;
+  min-height: 60px;
+}
+
+/* ── Footer ── */
+footer#status {
+  grid-area: footer;
+  padding: 5px 14px;
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  font-family: var(--font-m);
+  font-size: 10px;
+  color: var(--muted);
+}
+
+/* ── Section labels ── */
+.plbl {
+  font-family: var(--font-m);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: .15em;
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+
+/* ── Buttons ── */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 10px;
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--text); font-family: var(--font-b); font-size: 11px; cursor: pointer;
+}
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #1a1610; font-weight: 500; }
+.btn.primary:hover { background: #d4b558; }
+.btn.danger  { border-color: #6b3030; color: #c06060; }
+.draft-dot { width: 10px; height: 10px; flex-shrink: 0; }
+
+/* ── Company cards ── */
+.co-card { display: flex; align-items: center; gap: 5px; padding: 3px 0; border-bottom: 1px solid var(--bg3); }
+.co-card:last-child { border-bottom: none; }
+.co-card.inactive { opacity: .35; }
+.co-dot { width: 10px; height: 10px; flex-shrink: 0; }
+.co-nm { font-size: 11px; font-weight: 500; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.co-stats { display: flex; gap: 6px; font-family: var(--font-m); font-size: 10px; }
+.co-val   { color: var(--accent); }
+.co-treas { color: var(--accent2); }
+
+/* ── Player cards ── */
+.plcard { padding: 4px 0; border-bottom: 1px solid var(--bg3); }
+.plcard:last-child { border-bottom: none; }
+.plhdr { display: flex; align-items: center; gap: 4px; }
+.plpos { font-family: var(--font-m); font-size: 9px; color: var(--muted); width: 16px; }
+.pldot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink: 0; animation: pulse 1s infinite; }
+.plnm  { font-size: 11px; font-weight: 500; flex: 1; padding: 1px 5px; border-radius: 2px; border-left: 2px solid; }
+.plcash { font-family: var(--font-m); font-size: 11px; color: var(--accent); }
+.pl-meta { display: flex; gap: 8px; margin-left: 20px; margin-top: 2px; }
+.pl-claims { font-family: var(--font-m); font-size: 9px; color: var(--muted); }
+.pips { display: flex; gap: 3px; flex-wrap: wrap; margin-left: 20px; margin-top: 2px; }
+.pip-counter {
+  display: flex; align-items: center; justify-content: center;
+  min-width: 16px; height: 16px; padding: 0 3px;
+  font-family: var(--font-m); font-size: 9px; font-weight: 500; color: #0a0a08;
+}
+
+/* ── Turn track ── */
+.ttrack     { display: flex; flex-direction: column; gap: 2px; }
+.ttrack-row { display: flex; gap: 3px; }
+.tslot      { flex: 1; min-width: 0; border: 1px solid var(--border); border-radius: 2px; padding: 2px 3px; text-align: center; }
+.tslot.empty { border-color: var(--bg3); opacity: .4; }
+.tpos       { font-family: var(--font-m); font-size: 7px; color: var(--muted); margin-bottom: 1px; }
+.tplayer-badge { font-size: 9px; border-radius: 2px; padding: 1px 3px; border-left: 2px solid transparent; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tcube-bot  { width: 100%; height: 9px; }
+
+/* ── Active box ── */
+.abox  { display: flex; gap: 3px; flex-wrap: wrap; border: 1px solid var(--border); border-radius: 3px; padding: 3px; margin-top: 4px; min-height: 20px; }
+.acube { width: 13px; height: 13px; }
+
+/* ── Log ── */
+.logentry { font-family: var(--font-m); font-size: 9px; line-height: 1.6; color: var(--muted); border-bottom: 1px solid var(--bg3); padding: 1px 0; }
+.logentry.hi { color: var(--text); }
+
+/* ── Tooltip ── */
+.tooltip { position: fixed; background: var(--bg2); border: 1px solid var(--border); padding: 4px 8px; font-family: var(--font-m); font-size: 10px; pointer-events: none; z-index: 50; display: none; border-radius: 2px; }
+
+/* ── Score card ── */
+.scorecard { position: fixed; bottom: 32px; right: 234px; background: var(--bg2); border: 1px solid var(--accent); min-width: 280px; z-index: 100; box-shadow: 0 4px 24px rgba(0,0,0,.5); }
+.scorecard-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; background: var(--surface); border-bottom: 1px solid var(--accent); cursor: move; user-select: none; }
+.scoretitle { font-size: 18px; font-weight: 700; letter-spacing: .1em; color: var(--accent); text-transform: uppercase; }
+.score-btns { display: flex; gap: 6px; }
+.score-btn  { background: none; border: 1px solid var(--border); color: var(--muted); font-size: 11px; padding: 2px 7px; cursor: pointer; }
+.score-btn:hover { border-color: var(--accent); color: var(--accent); }
+.scorecard-body { padding: 12px 20px; }
+.scorerow { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid var(--border); font-family: var(--font-m); font-size: 12px; }
+.scorerow.winner { font-size: 14px; color: var(--accent); }
+.scoredet { font-size: 9px; color: var(--muted); padding: 1px 0 4px; font-family: var(--font-m); }
+
+/* ── Preview badge ── */
+.preview-badge {
+  position: fixed; top: 6px; left: 50%; transform: translateX(-50%);
+  background: rgba(200,168,75,.12); border: 1px solid var(--accent);
+  padding: 2px 10px; font-family: var(--font-m); font-size: 9px;
+  color: var(--accent); letter-spacing: .1em; pointer-events: none; z-index: 999;
+  text-transform: uppercase;
+}
+
+@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.4; } }
+</style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header>
+  <div id="toolbar">
+    <details>
+      <summary>☰ Menu</summary>
+      <menu>
+        <li><a href="#">Rules</a></li>
+      </menu>
+    </details>
+  </div>
+  <div class="title">Road to Nowhere</div>
+  <div id="phase-badge" class="phase-badge">Build Roads — Draft</div>
+  <div id="round-lbl" class="round-lbl">Round 2</div>
+  <!-- Framework appends #prompt and #actions here at runtime -->
+  <div id="prompt">Pick a company to build roads with</div>
+  <div id="actions">
+    <button class="btn primary"><div class="draft-dot" style="background:#56B4E9"></div>Hovering Highways</button>
+    <button class="btn primary"><div class="draft-dot" style="background:#191919;border:1px solid #888"></div>Whooping Workzone</button>
+    <button class="btn primary"><div class="draft-dot" style="background:#E69F00"></div>Buzzing Blacktop</button>
+  </div>
+</header>
+
+<!-- ── Map ── -->
+<main>
+  <svg id="map"></svg>
+</main>
+
+<!-- ── Right panel ── -->
+<aside>
+
+  <div id="roles">
+    Framework: player seat assignments
+  </div>
+
+  <div class="aside-sec">
+    <div class="plbl">Players</div>
+    <div id="pl-list">
+      <div class="plcard">
+        <div class="plhdr">
+          <div class="plpos">1.</div>
+          <div class="pldot"></div>
+          <div class="plnm" style="background:rgba(0,114,178,.28);border-left-color:#0072B2">P1</div>
+          <div class="plcash">$45</div>
+        </div>
+        <div class="pl-meta"><span class="pl-claims">8/10 claims</span></div>
+        <div class="pips">
+          <div class="pip-counter" style="background:#56B4E9">2</div>
+          <div class="pip-counter" style="background:#191919;border:1px solid #888;color:#f0f0f0">1</div>
+        </div>
+      </div>
+      <div class="plcard">
+        <div class="plhdr">
+          <div class="plpos">2.</div>
+          <div class="plnm" style="background:rgba(213,94,0,.28);border-left-color:#D55E00">P2</div>
+          <div class="plcash">$32</div>
+        </div>
+        <div class="pl-meta"><span class="pl-claims">9/10 claims</span></div>
+        <div class="pips">
+          <div class="pip-counter" style="background:#CC79A7">1</div>
+          <div class="pip-counter" style="background:#191919;border:1px solid #888;color:#f0f0f0">1</div>
+        </div>
+      </div>
+      <div class="plcard">
+        <div class="plhdr">
+          <div class="plpos">3.</div>
+          <div class="plnm" style="background:rgba(148,103,189,.28);border-left-color:#9467BD">P3</div>
+          <div class="plcash">$28</div>
+        </div>
+        <div class="pl-meta"><span class="pl-claims">10/10 claims</span></div>
+        <div class="pips">
+          <div class="pip-counter" style="background:#BBBBBB;color:#111">1</div>
+          <div class="pip-counter" style="background:#E69F00;color:#111">1</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="aside-sec">
+    <div class="plbl">Companies</div>
+    <div id="co-list">
+      <div class="co-card">
+        <div class="co-dot" style="background:#56B4E9"></div>
+        <div class="co-nm">Hovering</div>
+        <div class="co-stats"><span class="co-val">$4/sh</span><span class="co-treas">$24t</span></div>
+      </div>
+      <div class="co-card">
+        <div class="co-dot" style="background:#CC79A7"></div>
+        <div class="co-nm">Muddy</div>
+        <div class="co-stats"><span class="co-val">$2/sh</span><span class="co-treas">$16t</span></div>
+      </div>
+      <div class="co-card inactive">
+        <div class="co-dot" style="background:#BBBBBB"></div>
+        <div class="co-nm">Scuttle</div>
+        <div class="co-stats"><span class="co-val">—</span><span class="co-treas">$0t</span></div>
+      </div>
+      <div class="co-card">
+        <div class="co-dot" style="background:#191919;border:1px solid #888"></div>
+        <div class="co-nm">Whooping</div>
+        <div class="co-stats"><span class="co-val">$2/sh</span><span class="co-treas">$12t</span></div>
+      </div>
+      <div class="co-card">
+        <div class="co-dot" style="background:#E69F00"></div>
+        <div class="co-nm">Buzzing</div>
+        <div class="co-stats"><span class="co-val">$3/sh</span><span class="co-treas">$20t</span></div>
+      </div>
+      <div class="co-card inactive">
+        <div class="co-dot" style="background:#A8F1A4"></div>
+        <div class="co-nm">Coiled</div>
+        <div class="co-stats"><span class="co-val">$1/sh</span><span class="co-treas">$8t</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="aside-sec">
+    <div class="plbl">Turn Order</div>
+    <div class="ttrack" id="ttrack">
+      <div class="ttrack-row">
+        <div class="tslot">
+          <div class="tpos">1st</div>
+          <div class="tplayer-badge" style="background:rgba(0,114,178,.28);border-left-color:#0072B2">P1</div>
+        </div>
+        <div class="tslot">
+          <div class="tpos">2nd</div>
+          <div class="tplayer-badge" style="background:rgba(213,94,0,.28);border-left-color:#D55E00">P2</div>
+        </div>
+        <div class="tslot">
+          <div class="tpos">3rd</div>
+          <div class="tplayer-badge" style="background:rgba(148,103,189,.28);border-left-color:#9467BD">P3</div>
+        </div>
+        <div class="tslot empty"><div class="tpos">4th</div></div>
+        <div class="tslot empty"><div class="tpos">5th</div></div>
+      </div>
+      <div class="ttrack-row">
+        <div class="tslot empty"></div>
+        <div class="tslot">
+          <div class="tcube-bot" style="background:#BBBBBB" title="Scuttle Surveyors"></div>
+        </div>
+        <div class="tslot">
+          <div class="tplayer-badge" style="background:rgba(213,94,0,.28);border-left-color:#D55E00">P2</div>
+        </div>
+        <div class="tslot empty"></div>
+        <div class="tslot empty"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="aside-sec">
+    <div class="plbl">Active Box</div>
+    <div class="abox" id="abox">
+      <div class="acube" style="background:#56B4E9" title="Hovering Highways"></div>
+      <div class="acube" style="background:#191919;border:1px solid #888" title="Whooping Workzone"></div>
+    </div>
+  </div>
+
+  <div id="log">
+    <div class="plbl" style="margin-bottom:5px">Log</div>
+    <div class="logentry">Game started with 3 players</div>
+    <div class="logentry">P2 picked Hovering Highways share</div>
+    <div class="logentry">P3 picked Muddy Machinery share</div>
+    <div class="logentry">P1 picked Hovering Highways share</div>
+    <div class="logentry">P1 bid $8 · P2 bid $6 · P3 bid $4</div>
+    <div class="logentry">P1 bought Hovering share for $8</div>
+    <div class="logentry">P2 bought Scuttle share for $3</div>
+    <div class="logentry">P3 bought Muddy share for $2</div>
+    <div class="logentry">Road Building Phase (Round 2)</div>
+    <div class="logentry hi">P1 to pick a company</div>
+  </div>
+
+</aside>
+
+<!-- ── Footer ── -->
+<footer id="status">P1 · Build Roads Phase · Round 2 of 6</footer>
+
+<div class="tooltip" id="tt"></div>
+<div class="preview-badge">Layout Preview — not committed</div>
+
+<script>
+"use strict"
+
+const MAP_ROWS = [
+  { offset:7, count:4,  city:[],    river:[2],   mountain:[],    desert:[] },
+  { offset:7, count:4,  city:[0],   river:[2],   mountain:[],    desert:[] },
+  { offset:5, count:6,  city:[],    river:[3],   mountain:[],    desert:[5] },
+  { offset:5, count:6,  city:[],    river:[3],   mountain:[],    desert:[5] },
+  { offset:4, count:7,  city:[0],   river:[2,3], mountain:[],    desert:[5,6] },
+  { offset:3, count:8,  city:[],    river:[3],   mountain:[],    desert:[6,7] },
+  { offset:2, count:9,  city:[],    river:[3],   mountain:[],    desert:[6,7,8] },
+  { offset:2, count:9,  city:[],    river:[2,3], mountain:[],    desert:[6,7,8] },
+  { offset:1, count:10, city:[],    river:[2],   mountain:[6],   desert:[7,8,9] },
+  { offset:1, count:10, city:[3,9], river:[2],   mountain:[6],   desert:[7,8] },
+  { offset:0, count:11, city:[],    river:[2],   mountain:[5,6], desert:[8,9,10] },
+  { offset:1, count:10, city:[0],   river:[1],   mountain:[5],   desert:[7,8,9] },
+]
+
+const HEX_SIZE = 26
+const HEX_W    = Math.sqrt(3) * HEX_SIZE
+const HEX_H    = 2 * HEX_SIZE
+const SKIP     = 5  // 3-player game
+
+const TFILL = { plain:"#2a2820", river:"#192e3e", mountain:"#312e28", desert:"#362e18", city:"#3a3845" }
+const TICONS = { mountain:"▲", river:"≋", desert:"·" }
+const TICOL  = { mountain:"#6a5f54", river:"#3e7898", desert:"#746c3a" }
+const CO_COLORS = ["#56B4E9","#CC79A7","#BBBBBB","#191919","#E69F00","#A8F1A4"]
+const PL_COLORS = ["#0072B2","#D55E00","#9467BD"]
+
+function get_terrain(r, c) {
+  const rd = MAP_ROWS[r]
+  if (rd.city.includes(c))     return "city"
+  if (rd.river.includes(c))    return "river"
+  if (rd.mountain.includes(c)) return "mountain"
+  if (rd.desert.includes(c))   return "desert"
+  return "plain"
+}
+
+function hex_center(r, c) {
+  const rd   = MAP_ROWS[r]
+  const max_r = MAP_ROWS.length - SKIP
+  const dr   = (max_r - 1) - r
+  const gc   = c + rd.offset
+  const x    = HEX_W * (gc + (r % 2 === 1 ? -0.5 : 0)) + HEX_W * 0.5
+  const y    = HEX_H * 0.75 * dr + HEX_SIZE
+  return [x, y]
+}
+
+function hex_pts(cx, cy, s) {
+  const pts = []
+  for (let i = 0; i < 6; i++) {
+    const a = Math.PI / 180 * (60 * i - 30)
+    pts.push(`${(cx + s * Math.cos(a)).toFixed(1)},${(cy + s * Math.sin(a)).toFixed(1)}`)
+  }
+  return pts.join(" ")
+}
+
+const mock_roads = { "4_2":[[0]], "5_3":[[0,3]], "6_4":[[3]], "7_5":[[4]], "8_3":[[1]], "9_4":[[1,4]] }
+const mock_discs = { "3_1": 0, "6_7": 1, "10_8": 2 }
+
+const svg   = document.getElementById("map")
+const ns    = "http://www.w3.org/2000/svg"
+const max_r = MAP_ROWS.length - SKIP
+const max_gc = Math.max(...MAP_ROWS.slice(0, max_r).map(rd => rd.offset + rd.count - 1))
+
+svg.setAttribute("width",  HEX_W * (max_gc + 1.5) + 10)
+svg.setAttribute("height", HEX_H * 0.75 * (max_r - 1) + HEX_H + 10)
+svg.style.display = "block"
+
+for (let r = 0; r < max_r; r++) {
+  const rd = MAP_ROWS[r]
+  for (let c = 0; c < rd.count; c++) {
+    const terrain = get_terrain(r, c)
+    const [cx, cy] = hex_center(r, c)
+    const hex_id  = `${r}_${c}`
+    const g = document.createElementNS(ns, "g")
+
+    const poly = document.createElementNS(ns, "polygon")
+    poly.setAttribute("points", hex_pts(cx, cy, HEX_SIZE - 1))
+    poly.setAttribute("fill", TFILL[terrain])
+    poly.setAttribute("stroke", "#444")
+    poly.setAttribute("stroke-width", "0.5")
+    g.appendChild(poly)
+
+    if (terrain === "city") {
+      const b1 = document.createElementNS(ns, "rect")
+      b1.setAttribute("x", (cx-13.1).toFixed(1)); b1.setAttribute("y", (cy-12.6).toFixed(1))
+      b1.setAttribute("width", "12.6"); b1.setAttribute("height", "25.2"); b1.setAttribute("fill", "#aeacc3")
+      g.appendChild(b1)
+      const b2 = document.createElementNS(ns, "rect")
+      b2.setAttribute("x", (cx-1.4).toFixed(1)); b2.setAttribute("y", (cy-5.4).toFixed(1))
+      b2.setAttribute("width", "14.4"); b2.setAttribute("height", "18"); b2.setAttribute("fill", "#aeacc3")
+      g.appendChild(b2)
+    } else if (TICONS[terrain]) {
+      const t = document.createElementNS(ns, "text")
+      t.setAttribute("x", cx); t.setAttribute("y", cy + 4)
+      t.setAttribute("text-anchor", "middle"); t.setAttribute("font-size", "11")
+      t.setAttribute("fill", TICOL[terrain]); t.setAttribute("pointer-events", "none")
+      t.textContent = TICONS[terrain]
+      g.appendChild(t)
+    }
+
+    if (mock_roads[hex_id]) {
+      const roads = mock_roads[hex_id][0]
+      const S = 12
+      if (roads.length === 1) {
+        const rect = document.createElementNS(ns, "rect")
+        rect.setAttribute("x", (cx - S/2).toFixed(1)); rect.setAttribute("y", (cy - S/2).toFixed(1))
+        rect.setAttribute("width", S); rect.setAttribute("height", S)
+        rect.setAttribute("fill", CO_COLORS[roads[0]] || "#888")
+        g.appendChild(rect)
+      } else {
+        roads.forEach((ci, i) => {
+          const rect = document.createElementNS(ns, "rect")
+          rect.setAttribute("x", (cx - S + i * (S + 1)).toFixed(1))
+          rect.setAttribute("y", (cy - S/2).toFixed(1))
+          rect.setAttribute("width", S); rect.setAttribute("height", S)
+          rect.setAttribute("fill", CO_COLORS[ci] || "#888")
+          g.appendChild(rect)
+        })
+      }
+    }
+
+    if (mock_discs[hex_id] != null) {
+      const disc = document.createElementNS(ns, "circle")
+      disc.setAttribute("cx", cx); disc.setAttribute("cy", cy); disc.setAttribute("r", "12")
+      disc.setAttribute("fill", PL_COLORS[mock_discs[hex_id]] || "#aaa")
+      disc.setAttribute("fill-opacity", "0.5")
+      disc.setAttribute("stroke", PL_COLORS[mock_discs[hex_id]] || "#aaa")
+      disc.setAttribute("stroke-width", "1")
+      g.appendChild(disc)
+    }
+
+    svg.appendChild(g)
+  }
+}
+</script>
+</body>
+</html>
