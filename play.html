@@ -29,45 +29,33 @@
   <div id="round-lbl" class="round-lbl"></div>
 </header>
 
-<aside>
-  <div id="roles"></div>
-  <div id="log"></div>
-</aside>
+<div class="lpanel">
+  <div class="psec">
+    <div class="plbl">Players</div>
+    <div id="pl-list"></div>
+  </div>
+  <div class="psec">
+    <div class="plbl">Companies</div>
+    <div id="co-list"></div>
+  </div>
+</div>
 
 <main data-min-zoom="0.5" data-max-zoom="2.0">
-
-  <div class="lpanel">
-    <div class="psec">
-      <div class="plbl">Companies</div>
-      <div id="co-list"></div>
-    </div>
-    <div class="psec">
-      <div class="plbl">Turn Order</div>
-      <div id="ttrack" class="ttrack"></div>
-    </div>
-    <div class="psec">
-      <div class="plbl">Active Box</div>
-      <div id="abox" class="abox"></div>
-    </div>
-  </div>
-
-  <div class="cpanel">
-    <svg id="map"></svg>
-  </div>
-
-  <div class="rpanel">
-    <div class="psec">
-      <div class="plbl">Players</div>
-      <div id="pl-list"></div>
-    </div>
-    <div class="actarea">
-      <div class="actlbl">Actions</div>
-      <div id="actmsg" class="actmsg"></div>
-      <div id="actbtns"></div>
-    </div>
-  </div>
-
+  <svg id="map"></svg>
 </main>
+
+<aside>
+  <div id="roles"></div>
+  <div class="psec">
+    <div class="plbl">Turn Order</div>
+    <div id="ttrack" class="ttrack"></div>
+  </div>
+  <div class="psec">
+    <div class="plbl">Active Box</div>
+    <div id="abox" class="abox"></div>
+  </div>
+  <div id="log"></div>
+</aside>
 
 <footer id="status"></footer>
 

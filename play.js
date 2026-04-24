@@ -439,8 +439,9 @@ function render_right() {
 // ── Actions panel ─────────────────────────────────────────────────
 
 function render_actions() {
-	const msg_el = document.getElementById("actmsg")
-	const btn_el = document.getElementById("actbtns")
+	const msg_el = document.getElementById("prompt")
+	const btn_el = document.getElementById("actions")
+	if (!msg_el || !btn_el) return
 	btn_el.innerHTML = ""
 
 	msg_el.textContent = view.prompt || ""
