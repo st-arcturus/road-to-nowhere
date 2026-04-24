@@ -2,8 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, user-scalable=no">
+<meta name="viewport" content="width=device-width, height=device-height, user-scalable=no, interactive-widget=resizes-content, viewport-fit=cover">
+<meta name="theme-color" content="#323232">
 <title>Road to Nowhere</title>
+<link rel="icon" href="favicon.svg">
 <link rel="stylesheet" href="/fonts/fonts.css">
 <link rel="stylesheet" href="/common/client.css">
 <link rel="stylesheet" href="play.css">
@@ -13,12 +15,26 @@
 <body>
 
 <header>
+  <div id="toolbar">
+    <details>
+      <summary><img src="/images/cog.svg">
+      <menu>
+        <li><a href="info/rules.html" target="_blank">Rules</a>
+        <li class="separator">
+      </menu>
+    </details>
+  </div>
   <div class="title">ROAD TO NOWHERE</div>
   <div id="phase-badge" class="phase-badge">—</div>
   <div id="round-lbl" class="round-lbl"></div>
 </header>
 
-<div class="game-layout">
+<aside>
+  <div id="roles"></div>
+  <div id="log"></div>
+</aside>
+
+<main data-min-zoom="0.5" data-max-zoom="2.0">
 
   <div class="lpanel">
     <div class="psec">
@@ -32,10 +48,6 @@
     <div class="psec">
       <div class="plbl">Active Box</div>
       <div id="abox" class="abox"></div>
-    </div>
-    <div class="psec logarea">
-      <div class="plbl">Log</div>
-      <div id="log"></div>
     </div>
   </div>
 
@@ -55,7 +67,9 @@
     </div>
   </div>
 
-</div>
+</main>
+
+<footer id="status"></footer>
 
 <div class="tooltip" id="tt"></div>
 
