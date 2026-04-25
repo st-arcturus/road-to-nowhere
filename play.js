@@ -383,7 +383,7 @@ function render_left() {
 	// Log
 	const log = document.getElementById("log")
 	log.innerHTML = ""
-	;(view.log || []).slice(-30).forEach((entry, i, arr) => {
+	;(Array.isArray(view.log) ? view.log : []).slice(-30).forEach((entry, i, arr) => {
 		const d = document.createElement("div")
 		d.className   = "logentry" + (i === arr.length - 1 ? " hi" : "")
 		d.textContent = entry

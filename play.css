@@ -25,10 +25,9 @@ body {
   display: grid;
   grid-template-areas:
     "header header header"
-    "lpanel main   aside"
-    "lpanel main   footer";
+    "lpanel main   aside";
   grid-template-columns: 196px 1fr 210px;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto 1fr;
 }
 
 /* ── Header ───────────────────────────────────────────────────── */
@@ -107,12 +106,17 @@ main {
   min-height: 0;
 }
 
-/* ── Footer (replay buttons — scoped to aside column) ────────── */
+/* ── Footer (replay buttons — pinned under the aside) ────────── */
+/* client.css forces footer to position:fixed full-width; override  */
+/* left/right/width to pin it to the aside column instead.          */
 
 footer#status {
-  grid-area: footer !important;
-  position: static !important;
-  width: auto !important;
+  position: fixed !important;
+  bottom: 0 !important;
+  right: 0 !important;
+  left: auto !important;
+  width: 210px !important;
+  z-index: 20;
 }
 
 /* ── Right aside (RTT-required) ───────────────────────────────── */
@@ -135,7 +139,7 @@ aside {
 #log {
   flex: 1;
   overflow-y: auto;
-  padding: 8px 11px;
+  padding: 8px 11px 44px;
   min-height: 0;
   scrollbar-gutter: stable;
 }
