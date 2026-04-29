@@ -1,3 +1,22 @@
+/* Road to Nowhere — extends the RTT framework layout.
+ *
+ * Framework grid (client.css):
+ *   body:     2 cols (1fr | auto), 3 rows (auto | 1fr | auto)
+ *   header:   col 1/3, row 1
+ *   main:     col 1,   row 2/4
+ *   aside:    col 2,   row 2 (212px wide)
+ *   #replay_panel: col 2, row 3 (sits under aside)
+ *   footer:   position:fixed, bottom-left
+ *
+ * We add a left column for player+company info. New grid:
+ *   col 1: 196px lpanel
+ *   col 2: 1fr   main (map)
+ *   col 3: auto  aside (212px)
+ *
+ * Header spans 1/4. main → col 2. aside → col 3.
+ * #replay_panel → col 3 row 3 (still under the aside).
+ */
+
 :root {
   --bg:      #323232;
   --bg2:     #3c3c3c;
@@ -13,141 +32,99 @@
   --font-b: 'DM Sans', sans-serif;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+/* ── Body grid: extend framework's 2-col grid to 3 cols ───────── */
 
 body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font-b);
-  font-size: 13px;
-  height: 100vh;
-  overflow: hidden;
-  display: grid;
-  grid-template-areas:
-    "header header header"
-    "lpanel main   aside";
-  grid-template-columns: 196px 1fr 210px;
-  grid-template-rows: auto 1fr;
+  grid-template-columns: 196px minmax(0, 1fr) auto !important;
 }
 
-/* ── Header ───────────────────────────────────────────────────── */
-
-header {
-  grid-area: header;
-  display: flex !important;
-  flex-wrap: wrap !important;
-  align-items: center;
-  gap: 6px 12px;
-  padding: 7px 14px;
-  background: #e8e8e8 !important;
-  border-bottom: 1px solid #ccc !important;
-}
-
-.phase-badge {
-  font-family: var(--font-m);
-  font-size: 11px;
-  color: #333;
-  white-space: nowrap;
-}
-
-.round-lbl {
-  font-family: var(--font-m);
-  font-size: 11px;
-  color: #333;
-  white-space: nowrap;
-}
-
-/* Framework injects these into the header; #prompt sits inline on the top row */
-#prompt {
-  flex: 1 !important;
-  width: auto !important;
-  font-family: var(--font-m);
-  font-size: 11px;
-  color: #333 !important;
-  line-height: 1.4;
-}
-
-#actions {
-  order: 1 !important;
-  flex-basis: 100%;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 5px;
-  padding-bottom: 3px;
-}
+header { grid-column: 1 / 4 !important; }
+main   { grid-column: 2 !important; grid-row: 2 / 4 !important; }
+aside  { grid-column: 3 !important; grid-row: 2 !important; }
+#replay_panel { grid-column: 3 !important; grid-row: 3 !important; }
 
 /* ── Left panel ───────────────────────────────────────────────── */
 
 .lpanel {
-  grid-area: lpanel;
+  grid-column: 1;
+  grid-row: 2 / 4;
   background: var(--bg2);
-  border-right: 1px solid var(--border);
+  border-right: 1px solid black;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   min-height: 0;
+  color: var(--text);
+  font-family: var(--font-b);
+  font-size: 13px;
 }
 
-/* ── Map ──────────────────────────────────────────────────────── */
+/* ── Header — keep our round/phase labels inside #toolbar ─────── */
+
+.round-lbl,
+.phase-badge {
+  font-family: var(--font-m);
+  font-size: 11px;
+  color: #333;
+  align-self: center;
+  padding: 0 4px;
+  white-space: nowrap;
+}
+
+/* ── Main / map area ──────────────────────────────────────────── */
 
 main {
-  grid-area: main;
-  overflow: auto;
   display: flex;
   align-items: flex-start;
   justify-content: center;
   padding: 10px;
-  min-height: 0;
+  background: var(--bg);
 }
 
-/* ── Footer (replay buttons — pinned under the aside) ────────── */
-/* client.css forces footer to position:fixed full-width; override  */
-/* left/right/width to pin it to the aside column instead.          */
+#map { display: block; }
 
-footer#status {
-  position: fixed !important;
-  bottom: 0 !important;
-  right: 0 !important;
-  left: auto !important;
-  width: 210px !important;
-  z-index: 20;
-}
-
-/* ── Right aside (RTT-required) ───────────────────────────────── */
+/* ── Aside — populate with our turn order / active box / log ──── */
+/* Framework already styles aside (white bg, 212px, grid layout    */
+/* with #roles/turn_info/log slots). We add our own sections.      */
 
 aside {
-  grid-area: aside;
-  background: var(--bg2);
-  border-left: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  min-height: 0;
+  display: flex !important;
+  flex-direction: column !important;
+  grid-template-rows: none !important;
 }
 
-#roles {
+aside .psec {
+  padding: 9px 11px;
+  border-bottom: 1px solid #888;
   flex-shrink: 0;
-  border-bottom: 1px solid var(--border);
+  font-family: var(--font-b);
+  font-size: 13px;
+  color: #333;
 }
 
-#log {
-  flex: 1;
-  overflow-y: auto;
-  padding: 8px 11px 44px;
+aside .plbl {
+  font-family: var(--font-m);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: .15em;
+  color: #777;
+  margin-bottom: 5px;
+}
+
+aside #log {
+  flex: 1 1 auto;
   min-height: 0;
-  scrollbar-gutter: stable;
 }
 
-/* ── Panel sections ───────────────────────────────────────────── */
+/* ── Panel section labels (in lpanel) ─────────────────────────── */
 
-.psec {
+.lpanel .psec {
   padding: 9px 11px;
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
 }
 
-.plbl {
+.lpanel .plbl {
   font-family: var(--font-m);
   font-size: 9px;
   text-transform: uppercase;
@@ -168,29 +145,23 @@ aside {
 .co-card:last-child { border-bottom: none; }
 .co-card.inactive   { opacity: .3; }
 
-.co-dot  { width: 10px; height: 10px; border-radius: 0; flex-shrink: 0; }
+.co-dot  { width: 10px; height: 10px; flex-shrink: 0; }
 .co-nm   { font-size: 11px; font-weight: 500; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-.co-stats    { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; }
-.co-primary  { display: flex; gap: 6px; align-items: baseline; }
-.co-val      { font-family: var(--font-m); font-size: 11px; color: var(--accent); font-weight: 500; }
-.co-treas    { font-family: var(--font-m); font-size: 11px; color: #8fb3c8; }
-.co-claimval { font-family: var(--font-m); font-size: 9px;  color: #b08060; }
+.co-stats     { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; }
+.co-primary   { display: flex; gap: 6px; align-items: baseline; }
+.co-val       { font-family: var(--font-m); font-size: 11px; color: var(--accent); font-weight: 500; }
+.co-treas     { font-family: var(--font-m); font-size: 11px; color: #8fb3c8; }
+.co-claimval  { font-family: var(--font-m); font-size: 9px;  color: #b08060; }
 .co-secondary { display: flex; gap: 6px; font-family: var(--font-m); font-size: 9px; color: var(--muted); }
 
 .co-claims-row { display: flex; gap: 3px; flex-wrap: wrap; min-height: 0; margin-top: 3px; }
 
 .claim-counter {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 4px;
+  display: flex; align-items: center; justify-content: center;
+  min-width: 18px; height: 18px; padding: 0 4px;
   border-radius: 50%;
-  font-family: var(--font-m);
-  font-size: 10px;
-  font-weight: 500;
+  font-family: var(--font-m); font-size: 10px; font-weight: 500;
   color: #0a0a08;
 }
 
@@ -200,30 +171,29 @@ aside {
 .ttrack-row  { display: flex; gap: 3px; }
 
 .tslot {
-  flex: 1;
-  min-width: 0;
-  border: 1px solid var(--border);
+  flex: 1; min-width: 0;
+  border: 1px solid #888;
   border-radius: 2px;
   padding: 2px 3px;
   text-align: center;
 }
-.tslot.empty { border-color: var(--bg3); opacity: .4; }
+.tslot.empty { border-color: #ccc; opacity: .4; }
 
-.tpos          { font-family: var(--font-m); font-size: 7px; color: var(--muted); margin-bottom: 1px; }
+.tpos          { font-family: var(--font-m); font-size: 7px; color: #777; margin-bottom: 1px; }
 .tplayer-badge { font-size: 9px; border-radius: 2px; padding: 1px 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-left: 2px solid transparent; }
-.tcube-bot     { width: 100%; height: 10px; border-radius: 0; margin-top: 2px; }
+.tcube-bot     { width: 100%; height: 10px; margin-top: 2px; }
 
 /* ── Active box ───────────────────────────────────────────────── */
 
-.abox  { display: flex; gap: 3px; flex-wrap: wrap; min-height: 18px; border: 1px solid var(--border); border-radius: 3px; padding: 3px; margin-top: 4px; }
-.acube { width: 13px; height: 13px; border-radius: 0; }
+.abox  { display: flex; gap: 3px; flex-wrap: wrap; min-height: 18px; border: 1px solid #888; border-radius: 3px; padding: 3px; margin-top: 4px; }
+.acube { width: 13px; height: 13px; }
 
-/* ── Log ──────────────────────────────────────────────────────── */
+/* ── Log entries ──────────────────────────────────────────────── */
 
-.logentry { font-family: var(--font-m); font-size: 9px; line-height: 1.6; color: var(--muted); border-bottom: 1px solid var(--bg3); padding: 1px 0; }
-.logentry.hi { color: var(--text); }
+.logentry { font-family: var(--font-m); font-size: 11px; line-height: 1.5; color: #333; padding: 2px 8px; }
+.logentry.hi { font-weight: 500; }
 
-/* ── Player cards ─────────────────────────────────────────────── */
+/* ── Player cards (in lpanel) ─────────────────────────────────── */
 
 .plcard { padding: 5px 0; border-bottom: 1px solid var(--bg3); }
 .plcard:last-child { border-bottom: none; }
@@ -241,53 +211,40 @@ aside {
 .pips { display: flex; gap: 3px; flex-wrap: wrap; margin-left: 20px; }
 
 .pip-counter {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 4px;
-  border-radius: 0;
-  font-family: var(--font-m);
-  font-size: 10px;
-  font-weight: 500;
+  display: flex; align-items: center; justify-content: center;
+  min-width: 18px; height: 18px; padding: 0 4px;
+  font-family: var(--font-m); font-size: 10px; font-weight: 500;
   color: #0a0a08;
 }
 
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
 
-/* ── Action buttons (in header via #actions) ──────────────────── */
+/* ── Action buttons ──────────────────────────────────────────── */
+/* Use framework-default <button> styling; just add a color dot   */
+/* span and a small grid wrapper for choice lists.                */
 
-.btn { display: inline-flex; align-items: center; padding: 7px 10px; margin-bottom: 0; background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: var(--font-b); font-size: 11px; cursor: pointer; text-align: left; transition: background .1s, border-color .1s; }
-.btn:hover   { background: var(--bg3); border-color: var(--accent); color: var(--accent); }
-.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--bg); font-weight: 500; }
-.btn.primary:hover { background: #d4b558; color: var(--bg); }
-.btn.danger  { border-color: #6b3030; color: #c06060; }
-.btn.danger:hover  { background: #2a1818; border-color: #c06060; color: #e08080; }
-.btn:disabled { opacity: .35; cursor: default; pointer-events: none; }
+header #actions {
+  flex-direction: row !important;
+  justify-content: flex-start !important;
+}
 
-/* ── Bid widget ───────────────────────────────────────────────── */
+#actions .btn-dot {
+  display: inline-block;
+  width: 10px; height: 10px;
+  margin-right: 6px;
+  vertical-align: middle;
+}
 
-.bid-widget { display: flex; flex-direction: column; gap: 6px; margin-bottom: 4px; }
-.bid-row    { display: flex; align-items: center; gap: 6px; }
+/* Bid widget — a self-contained compound element inside #actions */
 
-.bid-counter { display: flex; align-items: center; gap: 4px; background: var(--surface); border: 1px solid var(--border); border-radius: 2px; padding: 3px 6px; }
-.bid-counter button { background: none; border: none; color: var(--accent); font-size: 16px; cursor: pointer; padding: 0 3px; line-height: 1; }
-.bid-counter button:hover    { color: #d4b558; }
-.bid-counter button:disabled { opacity: .3; cursor: default; }
-.bid-val  { font-family: var(--font-m); font-size: 14px; color: var(--text); min-width: 32px; text-align: center; }
-.bid-hint { font-family: var(--font-m); font-size: 9px; color: var(--muted); }
+.bid-widget   { display: flex; align-items: center; gap: 6px; }
+.bid-counter  { display: inline-flex; align-items: center; gap: 4px; background: gainsboro; border: 2px solid; border-color: white darkgray darkgray white; outline: 1px solid black; padding: 0 4px; }
+.bid-counter button { padding: 0 4px; outline: none; border: none; background: none; line-height: 22px; font-size: 16px; }
+.bid-val      { font-family: var(--font-m); font-size: 14px; min-width: 32px; text-align: center; }
+.bid-hint     { font-family: var(--font-m); font-size: 11px; color: #555; padding: 0 6px; }
+.maphint      { font-family: var(--font-m); font-size: 11px; color: #555; padding: 0 6px; }
 
-/* ── Buy / Draft grids ────────────────────────────────────────── */
-
-.buy-grid, .draft-grid { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 4px; }
-
-.buy-btn, .draft-btn { display: inline-flex; align-items: center; gap: 7px; padding: 6px 9px; border-radius: 0; }
-.buy-dot, .draft-dot { width: 10px; height: 10px; border-radius: 0; flex-shrink: 0; }
-
-.maphint { font-size: 9px; color: var(--muted); font-family: var(--font-m); }
-
-/* ── Tooltip ──────────────────────────────────────────────────── */
+/* ── Tooltip (over the map) ───────────────────────────────────── */
 
 .tooltip {
   position: fixed;
@@ -303,28 +260,27 @@ aside {
   border-radius: 2px;
 }
 
-/* ── Score card ───────────────────────────────────────────────── */
+/* ── Score card (end-game modal overlay) ──────────────────────── */
 
 .scorecard {
   position: fixed;
-  bottom: 20px;
-  right: 206px;
+  bottom: 40px;
+  right: 232px;
   background: var(--bg2);
   border: 1px solid var(--accent);
   min-width: 300px;
   z-index: 100;
   box-shadow: 0 4px 24px rgba(0,0,0,.5);
+  color: var(--text);
+  font-family: var(--font-b);
 }
 
 .scorecard-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  display: flex; align-items: center; justify-content: space-between;
   padding: 8px 14px;
   background: var(--surface);
   border-bottom: 1px solid var(--accent);
-  cursor: move;
-  user-select: none;
+  cursor: move; user-select: none;
 }
 
 .scoretitle { font-family: var(--font-d); font-size: 22px; letter-spacing: .1em; color: var(--accent); }
@@ -339,3 +295,14 @@ aside {
 .scorerow { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border); font-family: var(--font-m); font-size: 12px; }
 .scorerow.winner { font-size: 14px; color: var(--accent); }
 .scoredet { font-size: 9px; color: var(--muted); padding: 1px 0 5px; font-family: var(--font-m); }
+
+/* ── Responsive: collapse left panel on narrow screens ────────── */
+
+@media (max-width: 800px) {
+  body { grid-template-columns: minmax(0, 1fr) min-content !important; }
+  header { grid-column: 1 / 3 !important; }
+  main   { grid-column: 1 !important; grid-row: 2 !important; }
+  aside  { grid-column: 2 !important; grid-row: 2 / 4 !important; }
+  #replay_panel { grid-column: 1 !important; grid-row: 3 !important; }
+  .lpanel { display: none !important; }
+}

@@ -457,8 +457,7 @@ function render_actions() {
 	if (view.actions.pick_share) {
 		view.actions.pick_share.forEach(ci => {
 			const btn = document.createElement("button")
-			btn.className = "btn primary"
-			btn.innerHTML = `<span style="display:inline-block;width:10px;height:10px;background:${COMPANY_DEFS[ci].color};margin-right:6px;vertical-align:middle"></span>${view.companies[ci].name}`
+			btn.innerHTML = `<span class="btn-dot" style="background:${COMPANY_DEFS[ci].color}"></span>${view.companies[ci].name}`
 			btn.onclick = () => send_action("pick_share", ci)
 			btn_el.appendChild(btn)
 		})
@@ -476,9 +475,8 @@ function render_actions() {
 		hint.textContent = `Winning bid: $${view.bid.current_bid} · Your cash: $${max_bid}`
 		btn_el.appendChild(hint)
 
-		const widget  = document.createElement("div");  widget.className = "bid-widget"
-		const row     = document.createElement("div");  row.className    = "bid-row"
-		const counter = document.createElement("div");  counter.className = "bid-counter"
+		const widget  = document.createElement("div"); widget.className = "bid-widget"
+		const counter = document.createElement("div"); counter.className = "bid-counter"
 
 		const btn_minus = document.createElement("button"); btn_minus.textContent = "−"
 		btn_minus.disabled = bid_amount <= min_bid
@@ -493,19 +491,16 @@ function render_actions() {
 		counter.appendChild(btn_minus); counter.appendChild(val_span); counter.appendChild(btn_plus)
 
 		const bid_btn = document.createElement("button")
-		bid_btn.className   = "btn primary"
-		bid_btn.style.flex  = "1"
-		bid_btn.style.marginBottom = "0"
 		bid_btn.textContent = `Bid $${bid_amount}`
 		bid_btn.disabled    = bid_amount > max_bid || bid_amount <= view.bid.current_bid
 		bid_btn.onclick     = () => { send_action("raise", bid_amount) }
 
-		row.appendChild(counter); row.appendChild(bid_btn); widget.appendChild(row)
-
 		const pass_btn = document.createElement("button")
-		pass_btn.className   = "btn danger"
 		pass_btn.textContent = "Pass"
 		pass_btn.onclick     = () => send_action("pass", 0)
+
+		widget.appendChild(counter)
+		widget.appendChild(bid_btn)
 		widget.appendChild(pass_btn)
 
 		btn_el.appendChild(widget)
@@ -521,26 +516,22 @@ function render_actions() {
 		hint.textContent = `Bid $${bid_amt} → pay $${cost}${is_1st ? " (1st, full)" : " (half, rounded up)"}`
 		btn_el.appendChild(hint)
 
-		const grid = document.createElement("div"); grid.className = "buy-grid"
 		view.actions.buy.forEach(ci => {
-			const btn = document.createElement("button"); btn.className = "btn buy-btn primary"
-			btn.innerHTML = `<div class="buy-dot" style="background:${COMPANY_DEFS[ci].color}"></div>${view.companies[ci].name}`
+			const btn = document.createElement("button")
+			btn.innerHTML = `<span class="btn-dot" style="background:${COMPANY_DEFS[ci].color}"></span>${view.companies[ci].name}`
 			btn.onclick = () => send_action("buy", ci)
-			grid.appendChild(btn)
+			btn_el.appendChild(btn)
 		})
-		btn_el.appendChild(grid)
 	}
 
 	// Build roads — draft
 	if (view.actions.pick_company) {
-		const grid = document.createElement("div"); grid.className = "draft-grid"
 		view.actions.pick_company.forEach(ci => {
-			const btn = document.createElement("button"); btn.className = "btn draft-btn primary"
-			btn.innerHTML = `<div class="draft-dot" style="background:${COMPANY_DEFS[ci].color}"></div>${view.companies[ci].name}`
+			const btn = document.createElement("button")
+			btn.innerHTML = `<span class="btn-dot" style="background:${COMPANY_DEFS[ci].color}"></span>${view.companies[ci].name}`
 			btn.onclick = () => send_action("pick_company", ci)
-			grid.appendChild(btn)
+			btn_el.appendChild(btn)
 		})
-		btn_el.appendChild(grid)
 	}
 
 	// Build roads — building
@@ -550,7 +541,7 @@ function render_actions() {
 		btn_el.appendChild(hint)
 	}
 	if (view.actions.pass_build) {
-		const btn = document.createElement("button"); btn.className = "btn danger"
+		const btn = document.createElement("button")
 		btn.textContent = "Done Building (no legal moves)"
 		btn.onclick = () => send_action("pass_build", 0)
 		btn_el.appendChild(btn)
