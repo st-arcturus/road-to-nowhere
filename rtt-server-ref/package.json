@@ -1,0 +1,24 @@
+{
+	"name": "rally-the-troops",
+	"version": "0.0.1",
+	"description": "Rally the Troops!",
+	"dependencies": {
+		"better-sqlite3": "^12.5.0",
+		"bufferutil": "^4.0.9",
+		"dotenv": "^16.5.0",
+		"express": "^5.1.0",
+		"marked": "^15.0.11",
+		"nodemailer": "^7.0.12",
+		"nodemon": "^3.1.10",
+		"pug": "^3.0.3",
+		"utf-8-validate": "^6.0.5",
+		"ws": "^8.18.1"
+	},
+	"devDependencies": {
+		"eslint": "^9.25.1"
+	},
+	"exports": {
+		"./tools/cabinet": "./tools/cabinet.js",
+		"./tools/oklab": "./tools/oklab.js"
+	}
+}

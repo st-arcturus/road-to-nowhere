@@ -1,0 +1,66 @@
+//- vim:ts=4:sw=4:
+doctype html
+html
+	head
+		include head
+		title Contacts
+		style.
+			td a.red { text-decoration: none; color: var(--color-red); margin-left: 8px; }
+			td a.blue { text-decoration: none; color: var(--color-black); margin-left: 8px; }
+			td a.blue:hover { color: var(--color-blue); }
+			@media (max-width: 500px) {
+				th:last-child { display: none }
+				td:last-child { display: none }
+			}
+	body
+		include header
+		article
+
+			h1 Friends &amp; Enemies
+
+			table.wide.striped
+				thead
+					tr
+						th Friends
+						th Last seen
+						th
+						th
+				tbody
+					each who in friends
+						tr
+							td
+								a.black(href="/user/"+who.name)= who.name
+							td= human_date(who.atime)
+							td: i= who.note
+							td.r
+								a.blue(href="/contacts/note/"+who.name) !{ICON_NOTE}
+								a.red(href="/contacts/remove/"+who.name) !{ICON_X}
+					else
+						tr
+							td Nobody
+
+			if enemies.length > 0
+				p
+
+				table.wide.striped
+					thead
+						tr
+							th Blacklist
+							th
+							th
+					tbody
+						each who in enemies
+							tr
+								td
+									a.black(href="/user/"+who.name)= who.name
+								td: i= who.note
+								td.r
+									a.blue(href="/contacts/note/"+who.name) !{ICON_NOTE}
+									a.red(href="/contacts/remove/"+who.name) !{ICON_X}
+						else
+							tr
+								td Nobody
+
+			p
+				form(method="get" action="/contacts/search")
+					input(type="text" name="q" size=40 placeholder="Find user..." required)

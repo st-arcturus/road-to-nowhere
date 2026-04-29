@@ -1,0 +1,63 @@
+//- vim:ts=4:sw=4:
+doctype html
+html
+	head
+		include head
+		title Game Statistics
+		style.
+			table { margin-bottom: 30px; }
+			td:not(:first-child) { text-align: right; }
+			th:not(:first-child) { text-align: right; }
+			td:not(:first-child) { width: 50px; }
+	body
+		include header
+		article
+			h1 Game Statistics
+
+			table.half.striped
+				thead
+					tr
+						th(colspan=2) Top #{top_active.length} - games in progress
+				tbody
+					each row in top_active
+						tr
+							td= TITLE_NAME[row.title_id]
+							td= row.n
+
+			table.half.striped
+				thead
+					tr
+						th(colspan=2) Top #{top_recent.length} - last 28 days
+				tbody
+					each row in top_recent
+						tr
+							td= TITLE_NAME[row.title_id]
+							td= row.n
+
+			table.half.striped
+				thead
+					tr
+						th(colspan=2) Top #{top_finished.length} - all time
+				tbody
+					each row in top_finished
+						tr
+							td= TITLE_NAME[row.title_id]
+							td= row.n
+
+			- function p(t,r) { return r > 0 ? Math.round(r*100/t) + "%" : "" }
+			each row in stats
+				table.half.striped
+					thead
+						tr
+							th
+								a.black(href="/"+row.title_id)= row.title_name
+								unless row.scenario === "Standard"
+									|  &#x2013; #{row.scenario}
+							th= row.total
+					tbody
+						- for (let i=0; i<row.result_role.length; ++i)
+							- let role = row.result_role[i]
+							- let count = row.result_count[i]
+							tr
+								td= role
+								td= p(row.total,count)

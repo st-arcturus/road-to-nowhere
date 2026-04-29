@@ -1,0 +1,42 @@
+//- vim:ts=4:sw=4:
+doctype html
+html
+	head
+		include head
+		title Signup
+		+altcha_script()
+	body
+		include header
+		article
+			h1 Signup
+			if flash
+				p.error= flash
+
+			if user
+				p You're already logged in!
+			else
+				form(method="post")
+					p You need to sign up for a free account to play games on #{SITE_NAME_P}
+					p
+						label Name:
+							br
+							input(type="text" name="username" required)
+							br
+							i How you will be known to other players.
+							br
+							i You can change your user name at any time.
+					p
+						label Mail:
+							br
+							input(type="email" name="mail" required)
+							br
+							i Your mail address is only used for game notifications and password recovery.
+							br
+							i It will not be visible to other players.
+					p
+						label Password:
+							br
+							input(type="password" name="password" required)
+					+altcha_widget()
+					p
+						button(type="submit") Create account

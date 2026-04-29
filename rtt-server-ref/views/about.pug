@@ -1,0 +1,56 @@
+//- vim:ts=4:sw=4:
+doctype html
+html
+	head
+		include head
+		title= SITE_NAME
+	body
+		include header
+		article
+			h1= SITE_NAME
+
+			p.
+				Here you can play board games online with other players.
+				You can invite your friends, compete in tournaments, or look in the public room to see whether someone wants to play.
+				Your opponents don't have to be online, but if they are you can play live.
+
+			p.
+				Registration and use is free, and there are no ads.
+
+			p!= process.env.SITE_INVITE
+
+			h2 About
+
+			ul
+				li <a href="/docs/tips.md">Tips &amp; Tricks</a>
+				li <a href="/docs/time-control.md">Time control</a>
+				li <a href="/docs/tournaments.md">Tournaments</a>
+				li <a href="/docs/index.md">Developer documentation</a>
+
+			p.
+				The source code is available on #[a(href="https://git.rally-the-troops.com/") git.rally-the-troops.com].
+
+			h2 Imprint
+
+			p !{SITE_IMPRINT}
+
+			h2 Privacy policy
+
+			p When you create an account we collect the following personal information:
+
+			ul
+				li E-mail addresses in order to send password reset emails and notifications.
+				li IP addresses to prevent malicious behavior.
+				li Your messages and forum posts.
+				li Your game activity.
+
+			p Your personal data will be removed if you delete your account.
+
+			h2 Licensing
+
+			p All games are used with consent from their respective rights holders.
+
+			p Icons are sourced from #[a(href="https://game-icons.net") game-icons.net] by Delapouite, Lorc, and others under the #[a(href="https://creativecommons.org/licenses/by/3.0/") CC BY 3.0] license.
+
+			p Other images and graphics are sourced from #[a( href="https://commons.wikimedia.org/wiki/Main_Page") Wikimedia Commons].
+

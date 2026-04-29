@@ -1,0 +1,41 @@
+#!/bin/bash
+if [ -n "$1" ]
+then
+	USER=$(sqlite3 db "select user_id from users where name='$1'")
+	echo ACCOUNT
+	sqlite3 -line db "select * from users where user_id=$USER"
+	sqlite3 -line db "select unread, waiting_games, waiting_chats from user_dynamic_view where user_id=$USER"
+	echo
+
+	echo WEBHOOK
+	sqlite3 -line db "select url, format, prefix, error from webhooks where user_id=$USER"
+	echo
+
+	echo ABOUT
+	sqlite3 db "select about from user_about where user_id=$USER" | fmt
+	echo
+
+	echo LOGINS
+	sqlite3 -tabs db "select ctime, ip, 'first' from user_first_seen where user_id=$USER"
+	sqlite3 -tabs db "select atime, ip, 'last' from user_last_seen where user_id=$USER"
+	sqlite3 -tabs db "select datetime(expires-28), ip, 'cookie' from logins where user_id=$USER order by expires"
+	echo
+
+	echo TIMEOUT
+	sqlite3 -table db "select game_id, time, title_id, notice from user_timeout left join games using(game_id) where user_id=$USER"
+	echo
+
+	echo THEIR CONTACTS
+	sqlite3 -table db "select name, relation, note from contact_view where me=$USER"
+	echo
+	echo OTHER CONTACTS
+	sqlite3 -table db "select name, relation, note from contacts left join users on me=user_id where you=$USER"
+	echo
+
+	echo MODERATION
+	sqlite3 -table db "select action, why, time from user_moderation where user_id=$USER"
+	echo
+
+else
+	usage: rtt-user NAME
+fi

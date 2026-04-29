@@ -1,0 +1,8 @@
+#!/bin/bash
+for SVG in "$@"
+do
+	echo "$SVG"
+	PNG="${SVG/svg/png}"
+	inkscape -o /tmp/render.png -d 768 "$SVG"
+	convert -colorspace RGB -resize 25% -colorspace sRGB /tmp/render.png "$PNG"
+done

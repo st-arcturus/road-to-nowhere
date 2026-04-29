@@ -1,0 +1,35 @@
+//- vim:ts=4:sw=4:
+doctype html
+html
+	head
+		include head
+		title Tournament statistics
+		style.
+			td:nth-child(n+2) { text-align: right; width: 0; white-space: nowrap }
+			tbody td:nth-child(2),
+			tbody td:nth-child(3),
+			tbody td:nth-child(4),
+			tbody td:nth-child(5) { border-left: 1px solid #0005 }
+	body
+		include header
+		article
+			h1 Tournament statistics
+
+			table.wide.striped
+				thead
+					td Seed
+					td unique players
+					td active
+					td finished
+					td(colspan=3) duration (min/avg/max)
+				tbody
+					each seed in seeds
+						tr
+							td
+								a.black(href="/tm/seed/" + seed.seed_name)= seed.seed_name
+							td= seed.players
+							td= seed.active
+							td= seed.finished
+							td= seed.min_duration
+							td= seed.avg_duration
+							td= seed.max_duration

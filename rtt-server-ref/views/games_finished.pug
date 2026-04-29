@@ -1,0 +1,21 @@
+//- vim:ts=4:sw=4:
+doctype html
+html
+	head
+		include head
+		if user && user.user_id === who.user_id
+			title Your finished games
+		else
+			title #{who.name}&rsquo;s finished games
+	body
+		include header
+		article.wide
+			if user && user.user_id === who.user_id
+				h1 Your finished games
+			else
+				h1 #{who.name}&rsquo;s finished games
+
+			if games.length > 0
+				+gamelist(games)
+			else
+				p Nothing here.

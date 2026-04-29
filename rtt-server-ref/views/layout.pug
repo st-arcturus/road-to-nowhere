@@ -1,0 +1,15 @@
+//- vim:ts=4:sw=4:
+doctype html
+html
+	head
+		include head
+		block head
+			if title
+				title= title
+			else
+				title= SITE_NAME
+	body
+		include header
+		article
+			block body
+				h1= title

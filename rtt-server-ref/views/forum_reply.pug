@@ -1,0 +1,43 @@
+//- vim:ts=4:sw=4:
+extends layout
+
+mixin forumquote(row)
+	if row.is_hidden
+		p.box(id=row.post_id) This post has been removed by a moderator.
+	else
+		.post
+			.head
+				.from: b: a.black(href="/user/"+row.author_name)= row.author_name
+				.time= human_date(row.ctime)
+					if row.edited
+						|
+						| (edited #{human_date(row.mtime)})
+			.body!= row.body
+
+block head
+	title= thread.subject
+
+block body
+	h1= thread.subject
+
+	if first.post_id === post.post_id
+		+forumquote(post)
+	else
+		+forumquote(first)
+		p ...
+		+forumquote(post)
+
+	form(method="post" action="/forum/reply/"+thread.thread_id)
+		if first.post_id !== post.post_id
+			input(type="hidden" name="in_reply_to" value=post.post_id)
+		p Reply:
+			br
+			textarea(
+				name="body"
+				rows=15
+				cols=80
+				maxlength=32000
+				required
+			)
+		p
+			button(type="submit") Submit

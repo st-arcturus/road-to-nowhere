@@ -1,0 +1,67 @@
+//- vim:ts=4:sw=4:
+doctype html
+html
+	head
+		include head
+		title Profile
+	body
+		include header
+		article
+			h1 Profile
+
+			p Welcome, <a class="black" href="/user/#{user.name}">#{user.name}</a>!
+
+			if who.about
+				p.box= who.about
+
+			p Member since #{human_date(who.ctime)}.
+
+			+userstats(who, move_time, timeouts, ratings, tm_banned)
+
+			h3 Notifications
+
+			p Your mail address is #{user.mail}
+
+			if ENABLE_MAIL
+				if !mail.is_verified
+					p &#x26a0; <a href="/account/mail/verify">Verify your mail address!</a>
+					p You must verify your mail address before you can enable notifications.
+				else
+					if !mail.notify
+						p <a href="/account/mail/subscribe">Enable mail notifications</a>
+				if mail.notify
+					p <a href="/account/mail/unsubscribe">Disable mail notifications</a>
+			else
+				p.error Mail notifications are disabled on this server.
+
+			if ENABLE_WEBHOOKS
+				if !webhook
+					p <a href="/account/webhook">Configure webhook</a>
+				else if webhook.error
+					dl
+						dt <a href="/account/webhook">Configure webhook</a>
+						dd.error ERROR: #{webhook.error}
+				else
+					dl
+						dt <a href="/account/webhook">Configure webhook</a>
+						dd= new URL(webhook.url).hostname
+			else
+				p.error Webhook notifications are disabled on this server.
+
+			h3 Account
+
+			p
+				| <a href="/account/password/change">Change password</a>
+				br
+				| <a href="/account/mail/change">Change mail address</a>
+				br
+				| <a href="/account/change-name">Change user name</a>
+				br
+				| <a href="/account/change-about">Change profile text</a>
+
+			//- p <a href="/account/delete">Delete account</a>
+
+			hr
+			form(action="/logout" method="post")
+				p
+					button(type="submit") Logout

@@ -1,0 +1,19 @@
+#!/bin/bash
+
+sqlite3 db <<EOF
+
+begin;
+
+update
+	user_vacation
+set
+	vacation = vacation + 1
+where
+	vacation < 5
+	and
+	user_id in (select user_id from user_last_seen where julianday() - julianday(atime) <= 28)
+;
+
+commit;
+
+EOF

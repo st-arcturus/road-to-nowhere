@@ -1,0 +1,19 @@
+#!/bin/bash
+
+export TITLE=$1
+shift
+
+if [ ! -f ./public/$TITLE/rules.js ]
+then
+	echo usage: rtt-fuzz TITLE
+	exit 1
+fi
+
+if [ -z $(npm ls -p jsfuzz) ]
+then
+	echo Installing "jsfuzz" package.
+	npm install -s --no-save jsfuzz
+fi
+
+mkdir -p fuzzer/corpus-$TITLE
+npx jsfuzz tools/fuzz.js fuzzer/corpus-$TITLE --exact-artifact-path=/dev/null | tee fuzzer/log-$TITLE.txt

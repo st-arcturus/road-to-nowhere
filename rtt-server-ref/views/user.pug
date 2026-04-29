@@ -1,0 +1,87 @@
+//- vim:ts=4:sw=4:
+- let open_games = games.filter(game => game.status === 0 && !game.is_match)
+- let future_games = games.filter(game => game.status === 0 && game.is_match)
+- let active_games = games.filter(game => game.status === 1 && game.is_opposed)
+- let solo_games = games.filter(game => game.status === 1 && !game.is_opposed)
+- let finished_games = games.filter(game => game.status === 2)
+doctype html
+html
+	head
+		include head
+		title= who.name
+		style.
+			p.box.friend { background-color: honeydew; }
+			p.box.enemy { background-color: mistyrose; }
+			a.r { display: block; float: right; }
+	body
+		include header
+		article
+			h1= who.name
+
+			if who.about
+				p.box= who.about
+
+			p Member since #{human_date(who.ctime)}.
+			p Last seen #{human_date(who.atime)}.
+
+			if user && (who.user_id !== user.user_id)
+				if contact
+					p
+						a(href="/message/send/"+who.name) Send message
+						br
+						if contact.relation > 0
+							a(href="/contacts/remove/"+who.name) Remove from friends
+						if contact.relation < 0
+							a(href="/contacts/remove/"+who.name) Remove from blacklist
+
+					if contact.note
+						h3 Note:
+						if contact.relation > 0
+							p.box.friend
+								| #{contact.note}
+								a.black.r(href="/contacts/note/"+who.name) &#x270f;
+						else
+							p.box.enemy
+								| #{contact.note}
+								a.black.r(href="/contacts/note/"+who.name) &#x270f;
+					else
+						p
+							a(href="/contacts/note/"+who.name) Add note
+				else
+					a(href="/contacts/add-friend/"+who.name) Add to friends
+					br
+					a(href="/contacts/add-enemy/"+who.name) Add to blacklist
+
+			+userstats(who, move_time, timeouts, ratings, tm_banned)
+
+			+tourlist(seeds, active_pools, finished_pools)
+
+			if open_games.length > 0
+				h2 Invitations
+				+gamelist(open_games)
+
+			if active_games.length > 0
+				h2 Active
+				+gamelist(active_games)
+
+			if solo_games.length > 0
+				h2 Solo
+				+gamelist(solo_games)
+
+			if future_games.length > 0
+				h2 Future
+				+gamelist(future_games)
+
+			if finished_games.length > 0
+				h2 Recently finished
+				+gamelist(finished_games)
+
+			p <a href="/games/finished/#{who.name}">All #{who.name}'s finished games</a>
+			if ENABLE_TOURNAMENTS
+				p <a href="/tm/finished/#{who.name}">All #{who.name}'s finished tournaments</a>
+
+			if user && user.is_moderator
+				if who.is_banned
+					p <a href="/admin/unban-user/#{who.name}">UNBAN USER</a>
+				else
+					p <a href="/admin/ban-user/#{who.name}">BAN USER</a>

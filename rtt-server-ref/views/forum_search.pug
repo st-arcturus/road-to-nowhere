@@ -1,0 +1,26 @@
+//- vim:ts=4:sw=4:
+extends layout
+
+block head
+	title Forum Search Results
+
+block body
+	h1 Forum Search Results
+
+	table.wide.striped
+		thead
+			tr
+				th Author
+				th Thread
+				th Snippet
+		tobdy
+			each row in results
+				tr
+					td: a.black(href="/user/"+row.author)= row.author
+					td: a.black(href="/forum/thread/"+row.thread_id+"#"+row.post_id)= row.subject
+					td= row.snippet
+
+	if user
+		p
+			form(method="get" action="/forum/search")
+				input(type="text" name="q" size=40 maxlength=80 placeholder="Search..." required)

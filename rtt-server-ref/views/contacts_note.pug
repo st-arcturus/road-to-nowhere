@@ -1,0 +1,25 @@
+//- vim:ts=4:sw=4:
+doctype html
+html
+	head
+		include head
+		title #{who.name}
+		style.
+			input { width: min(45rem,100%) }
+	body
+		include header
+		article
+			h1 #{who.name}
+			form(method="post")
+				p Add note:
+					br
+					input(
+						type="text"
+						name="note"
+						size=80
+						maxlength=80
+						value=contact.note
+						autofocus
+					)
+				p
+					button(type="submit") Submit

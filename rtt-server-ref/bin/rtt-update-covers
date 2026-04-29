@@ -1,0 +1,53 @@
+#!/bin/bash
+
+if command -v convert && command -v pngtopnm && command -v cjpeg
+then
+	echo "Generating cover images and thumbnails!"
+else
+	echo error: cannot find imagemagick, netpbm, and/or cjpeg
+	exit 1
+fi
+
+for F in public/*/cover.jpg public/*/cover.png
+do
+	echo processing $F
+	B=$(echo $F | sed s/.jpg// | sed s/.png//)
+	D=$(dirname $F)
+
+	if [ $F -nt $D/thumbnail.png ]
+	then
+
+	PORTRAIT=$(convert $F -format '%[fx:w<h]' info:)
+	SQUARE=$(convert $F -format '%[fx:w==h]' info:)
+
+	SIZE_1X=170x200
+	SIZE_2X=340x400
+	SIZE_TH=120x144
+
+	if test $PORTRAIT = 1
+	then
+		echo - portrait
+		SIZE_1X=150x200!
+		SIZE_2X=300x400!
+		SIZE_TH=108x144!
+	fi
+
+	if test $SQUARE = 1
+	then
+		echo - square
+		SIZE_1X=170x170!
+		SIZE_2X=340x340!
+		SIZE_TH=120x120!
+	fi
+
+	convert -colorspace RGB -resize $SIZE_TH $F -colorspace sRGB $D/thumbnail.png
+	convert -colorspace RGB -resize $SIZE_1X -colorspace sRGB $F $B.1x.png
+	convert -colorspace RGB -resize $SIZE_2X $F -colorspace sRGB $B.2x.png
+
+	fi
+
+	pngtopnm $D/thumbnail.png | cjpeg -progressive -optimize -sample 1x1 -quality 95 > $D/thumbnail.jpg
+	pngtopnm $B.1x.png | cjpeg -progressive -optimize -sample 1x1 -quality 95 > $B.1x.jpg
+	pngtopnm $B.2x.png | cjpeg -progressive -optimize -sample 1x1 -quality 95 > $B.2x.jpg
+
+done

@@ -1,0 +1,306 @@
+//- vim:ts=4:sw=4:
+
+meta(name="viewport" content="width=device-width,initial-scale=1")
+meta(name="theme-color" content="#444")
+link(rel="icon" type="image/svg+xml" href="/favicon.svg")
+link(rel="stylesheet" href="/fonts/fonts.css")
+link(rel="stylesheet" href="/style.css")
+if SITE_THEME
+	link(rel="stylesheet" href="/themes/"+SITE_THEME)
+
+mixin altcha_script()
+	if ALTCHA
+		script(async defer type="module" src="/altcha.min.js")
+
+mixin altcha_widget()
+	if ALTCHA
+		altcha-widget(challengeurl="/altcha-challenge" hidelogo hidefooter auto="onsubmit" style="--altcha-border-radius:0")
+
+mixin social(title,description,game)
+	meta(property="og:title" content=title)
+	meta(property="og:type" content="website")
+	if game
+		meta(property="og:image" content=SITE_URL+"/"+game+"/cover.2x.jpg")
+	else
+		if SITE_ICON
+			meta(property="og:image" content=SITE_URL+"/images/"+SITE_ICON)
+		else
+			meta(property="og:image" content=SITE_URL+"/images/rally-the-troops.png")
+	meta(property="og:description" content=description)
+
+mixin gamecover(title_id)
+	a(href="/"+title_id)
+		img(src=`/${title_id}/cover.1x.jpg` srcset=`/${title_id}/cover.2x.jpg 2x`)
+
+mixin gamelist(list,hide_title=0)
+	div.game_list
+		each item in list
+			div
+				-
+					let className = "game_item"
+					let pace_icon = ""
+					let pace_text = ""
+					let chat_icon = ""
+					if (item.your_turn || item.is_unseen) className += " your_turn"
+					if (item.status === 0 && item.join_count === 0) className += " open replacement"
+					else if (item.status === 0 && item.join_count !== item.player_count) className += " open"
+					else if (item.status === 0 && item.join_count === item.player_count) className += " ready"
+					else if (item.status === 1 && item.join_count !== item.player_count) className += " replacement"
+					else if (item.status === 1 && item.join_count === item.player_count) className += " active"
+					else if (item.status === 2) className += " finished"
+					else if (item.status === 3) className += " archived"
+					if (item.is_unread) { chat_icon = ICON_UNREAD; className += " unread" }
+					if (item.is_private) pace_icon += ICON_PRIVATE
+					if (item.is_match)
+						pace_icon += ICON_MATCH
+					else if (item.pace > 0)
+						pace_icon += PACE_ICON[item.pace], pace_text = PACE_TEXT[item.pace]
+
+				div(class=className)
+					div.game_head
+						if item.scenario.length <= 2
+							div
+								| !{pace_icon} <a href="/join/#{item.game_id}">##{item.game_id} &#x2013; #{item.title_name} (#{item.scenario})</a> !{chat_icon}
+						else
+							div
+								| !{pace_icon} <a href="/join/#{item.game_id}">##{item.game_id} &#x2013; #{item.title_name}</a> !{chat_icon}
+
+						case item.status
+							when 0
+								if item.is_match
+									a(class="command" href="/join/"+item.game_id) Wait
+								else
+									a(class="command" href="/join/"+item.game_id) Join
+							when 1
+								if !item.is_ready
+									a(class="command" href="/join/"+item.game_id) Join
+								else if item.is_yours
+									if item.your_role
+										a(class="command" href=`/${item.title_id}/play.html?game=${item.game_id}&role=${encodeURIComponent(item.your_role)}`) Play
+									else
+										a(class="command" href="/join/"+item.game_id) Play
+								else
+									a(class="command" href=`/${item.title_id}/play.html?game=${item.game_id}`) Watch
+							when 2
+								if item.is_yours
+									if item.your_role
+										a(class="command" href=`/${item.title_id}/play.html?game=${item.game_id}&role=${encodeURIComponent(item.your_role)}`) Review
+									else
+										a(class="command" href="/join/"+item.game_id) Review
+								else
+									a(class="command" href=`/${item.title_id}/play.html?game=${item.game_id}`) Review
+							when 3
+								if ENABLE_ARCHIVE
+									if item.is_yours
+										if item.your_role
+											a(class="command" href=`/${item.title_id}/play.html?game=${item.game_id}&role=${encodeURIComponent(item.your_role)}`) Archived
+										else
+											a(class="command" href="/join/"+item.game_id) Archived
+									else
+										a(class="command" href=`/${item.title_id}/play.html?game=${item.game_id}&role=Observer`) Archived
+								else
+									| Archived
+
+					div.game_main
+						div.game_info
+							if item.is_match
+								i
+									a(href="/tm/pool/"+item.seed.pool_name)= item.seed.pool_name
+									if item.status < 2 && item.seed.seed_notice
+										br
+										b= item.seed.seed_notice
+							else if item.notice
+								i= item.notice
+							else
+								i= pace_text
+							unless item.is_match
+								if item.scenario !== "Standard" && item.scenario !== "Historical" && item.scenario.length > 2
+									div Scenario: #{item.scenario}
+								unless item.human_options === "None"
+									div Options: #{item.human_options}
+							if item.player_names
+								div Players: !{item.player_names}
+							else
+								div Players: <span class="error">Nobody</span>
+							case item.status
+								when 0
+									div Created: #{human_date(item.ctime)}
+								when 1
+									div Moves: #{item.moves}
+									div Last move: #{human_date(item.mtime)}
+									if item.your_turn
+										if item.time_left <= 0
+											div Time left: none.
+										else if item.time_left <= 0.125
+											div Time left: #{ item.time_left * 24 | 0 } hours
+										else if item.time_left <= 3
+											div Time left: #{ item.time_left * 24 | 0 } hours
+										else
+											div Time left: #{ item.time_left | 0 } days
+								when 2
+									div Moves: #{item.moves}
+									div Finished: #{human_date(item.mtime)}
+									div Result: !{item.result}
+								when 3
+									div Moves: #{item.moves}
+									div Finished: #{human_date(item.mtime)}
+									div Result: !{item.result}
+						unless hide_title
+							a(href=`/${item.title_id}`)
+								img(src=`/${item.title_id}/thumbnail.jpg`)
+
+mixin seedlist_stat(list, title)
+	if list && list.length > 0
+		table.seeds.stats.wide.striped
+			if title
+				thead
+					tr
+						th= title
+						td L3
+						td L2
+						td L1
+						td Q3
+						td Q2
+						td Q1
+						td= TM_ICON_QUEUE
+			tbody
+				each seed in list
+					tr
+						td
+							a(href="/tm/seed/" + seed.seed_name)= seed.seed_name
+
+						td #{seed.n3}
+						td #{seed.n2}
+						td #{seed.n1}
+
+						if seed.is_open || seed.q1 || seed.q2 || seed.q3
+							if seed.t3
+								td #{seed.q3} #{TM_ICON_TICKET}
+							else if seed.level_count >= 3
+								td #{seed.q3|0}
+							else
+								td
+							if seed.t2
+								td #{seed.q2} #{TM_ICON_TICKET}
+							else if seed.level_count >= 2
+								td #{seed.q2|0}
+							else
+								td
+							if seed.t1
+								td #{seed.q1} #{TM_ICON_TICKET}
+							else
+								td #{seed.q1|0}
+							td= seed.pool_size
+						else
+							td.n(colspan=3)
+								i closed
+							td
+
+mixin seedlist(list, title)
+	if list && list.length > 0
+		table.seeds.wide.striped
+			if title
+				thead
+					tr
+						th= title
+						td Q3
+						td Q2
+						td Q1
+						td= TM_ICON_QUEUE
+			tbody
+				each seed in list
+					tr
+						td
+							a(href="/tm/seed/" + seed.seed_name)= seed.seed_name
+						if seed.is_open || seed.q1 || seed.q2 || seed.q3
+							if seed.t3
+								td #{seed.q3} #{TM_ICON_TICKET}
+							else if seed.level_count >= 3
+								td #{seed.q3|0}
+							else
+								td
+							if seed.t2
+								td #{seed.q2} #{TM_ICON_TICKET}
+							else if seed.level_count >= 2
+								td #{seed.q2|0}
+							else
+								td
+							if seed.t1
+								td #{seed.q1} #{TM_ICON_TICKET}
+							else
+								td #{seed.q1|0}
+							td= seed.pool_size
+						else
+							td.n(colspan=3)
+								i closed
+							td
+
+mixin poollist(list, title, icon)
+	if list && list.length > 0
+		table.wide.pools.striped
+			if title
+				thead
+					tr
+						th!= title
+						td
+						td.n!= icon
+			tbody
+				each pool in list
+					tr
+						td
+							a(href="/tm/pool/" + pool.pool_name)= pool.pool_name.replaceAll(".", ".\u200b")
+						if pool.is_finished
+							if pool.status
+								td!= pool.status.split(",").map(p => `<a class="black" href="/user/${p}">${p}</a>`).join(", ")
+							else
+								td Nobody
+							td.n= human_date(pool.finish_date)
+						else
+							td.n= pool.status
+							td.n= human_date(pool.start_date)
+
+mixin tourlist(seeds, pools, fin)
+		if (seeds && seeds.length > 0) || (pools && pools.length > 0) || (fin && fin.length > 0)
+			h2 Tournaments
+			+seedlist(seeds, "Registrations")
+			+poollist(pools, "Active", TM_ICON_ACTIVE)
+			+poollist(fin, "Finished", TM_ICON_FINISHED)
+
+mixin userstats(who, move_time, timeouts, ratings, tm_banned)
+		if (move_time.mean !== null)
+			h3 Response time
+			div Average move time: #{format_minutes(move_time.mean)}
+			if (move_time.q2 !== null)
+				div Median move time: #{format_minutes(move_time.q2)}
+			if (move_time.q1 !== null && move_time.q2 !== null)
+				div Middle half of move times: #{format_minutes(move_time.q1)} to #{format_minutes(move_time.q3)}
+
+		if who.vacation || timeouts.timeout_total || tm_banned
+			h3 Timeouts
+		if who.vacation
+			div Vacation days remaining: #{who.vacation}
+		if timeouts.timeout_total
+			div Total number of timeouts: #{timeouts.timeout_total}
+			div Games completed since last timeout: #{timeouts.games_since_timeout}
+		if tm_banned
+			div Banned from playing in tournaments since #{human_date(tm_banned.time)}.
+
+		if ratings.length > 0
+			h3 Most played games
+			table
+				thead
+					tr
+						th Title
+						th Total
+						th Last
+						if user.is_moderator
+							th Elo
+				tbody
+					each row in ratings
+						tr
+							td
+								a.black(href="/" + row.title_id)= row.title_name
+							td.r= row.count
+							td.r= row.last
+							if user.is_moderator
+								td.r= row.rating

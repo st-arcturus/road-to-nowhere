@@ -1,0 +1,30 @@
+#!/bin/bash
+
+sqlite3 db <<EOF
+
+.mode column
+
+create temporary table zombies as 
+	select user_id, name, mail, ctime, atime, julianday(atime)-julianday(ctime) as age
+	from users
+	left join user_first_seen using(user_id)
+	left join user_last_seen using(user_id)
+	where
+		user_id not in ( select distinct user_id from players )
+		and ctime < datetime('now', '-3 months')
+		and ( age < 1 or age is null )
+	order by user_id
+	limit 40
+;
+
+begin immediate;
+
+select count(1) from zombies;
+
+select user_id, ctime, name, mail from zombies;
+
+delete from users where user_id in (select user_id from zombies);
+
+commit;
+
+EOF

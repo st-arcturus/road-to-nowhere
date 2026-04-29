@@ -1,0 +1,58 @@
+//- vim:ts=4:sw=4:
+extends layout
+
+block head
+	title Forum
+	style.
+		@media (max-width: 400px) {
+			td:nth-child(2) { display: none }
+			th:nth-child(2) { display: none }
+		}
+		tr.removed { background-color: pink !important }
+
+block body
+	h1 Forum
+
+	table.wide.striped
+		thead
+			tr
+				th Subject
+				th.n
+				th.n
+		tbody
+			each row in threads
+				if !row.is_hidden || user.is_moderator
+					tr(class=(row.is_hidden?"removed":row.is_locked?"locked":!row.is_read?"unread":""))
+						td
+							if row.is_read
+								a.black(href="/forum/thread/"+row.thread_id)
+									div= row.subject
+							else
+								a.black(href="/forum/thread/"+row.thread_id)
+									div
+										b= "\xbb " + row.subject
+						td.r= row.count
+						td.w= human_date(row.mtime)
+		tfoot
+			tr
+				td(colspan=4)
+					if current_page > 1
+						| #[a.black(href="/forum/page/"+(current_page-1)) &#x2190;]
+						|
+					- for (let p=1; p<=page_count && p<=20; ++p)
+						if p === current_page
+							| (#{p})
+							|
+						else
+							| #[a.black(href="/forum/page/"+p)= p]
+							|
+					if current_page < page_count
+						| #[a.black(href="/forum/page/"+(current_page+1)) &#x2192;]
+
+	p
+		form(method="get" action="/forum/search")
+			input(type="text" name="q" size=40 maxlength=80 placeholder="Search..." required)
+
+	if !user.is_muted
+		p
+			a(href="/forum/post") New thread

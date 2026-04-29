@@ -1,0 +1,19 @@
+# Live database files
+.env
+db
+db-shm
+db-wal
+archive.db
+archive.db-shm
+archive.db-wal
+
+# Development clutter
+node_modules
+package-lock.json
+tags
+cookies.txt
+
+# Fuzzer output
+coverage
+fuzzer
+.nyc_output

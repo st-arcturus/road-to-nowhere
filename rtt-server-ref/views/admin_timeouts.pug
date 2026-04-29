@@ -1,0 +1,29 @@
+//- vim:ts=4:sw=4:
+doctype html
+html
+	head
+		include head
+		title ADMIN: Timeouts
+	body
+		include header
+		article
+
+			h1 ADMIN: Timeouts
+
+			table.wide.striped
+				thead
+					tr
+						th Game
+						th Notice
+						th Offender
+						th.r Time
+				tbody
+					each item in timeouts
+						tr
+							td
+								a(href="/join/"+item.game_id)= "#" + item.game_id
+							td= item.notice || "-"
+							td
+								a(href="/user/"+item.name)= item.name
+							td.r= item.time
+

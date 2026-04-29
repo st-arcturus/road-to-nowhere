@@ -1,0 +1,19 @@
+#!/bin/bash
+
+export TITLE=$1
+shift
+
+if [ ! -f ./public/$TITLE/rules.js ]
+then
+	echo usage: rtt-fuzz-jazzer TITLE
+	exit 1
+fi
+
+if [ -z $(npm ls -p @jazzer.js/core) ]
+then
+	echo Installing jazzer.js
+	npm install --no-save @jazzer.js/core
+fi
+
+mkdir -p fuzzer/corpus-$TITLE
+npx jazzer tools/fuzz.js --sync fuzzer/corpus-$TITLE -- -exact_artifact_path=/dev/null | tee fuzzer/log-$TITLE.txt
