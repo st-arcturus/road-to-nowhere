@@ -176,10 +176,27 @@ aside #log {
 .abox  { display: flex; gap: 3px; flex-wrap: wrap; min-height: 18px; border: 1px solid #888; border-radius: 3px; padding: 3px; margin-top: 4px; }
 .acube { width: 13px; height: 13px; }
 
-/* ── Log entries ──────────────────────────────────────────────── */
+/* ── Log entries (pax-pamir style) ───────────────────────────── */
 
-.logentry { font-family: var(--font-m); font-size: 11px; line-height: 1.5; color: #333; padding: 2px 8px; }
-.logentry.hi { font-weight: 500; }
+#log div { padding-left: 20px; text-indent: -12px; }
+
+#log .log-phase {
+  font-style: italic;
+  text-align: right;
+  text-indent: 0;
+  padding: 3px 8px;
+  background: #e8e8e8;
+  color: #555;
+}
+
+#log .log-section {
+  font-style: italic;
+  text-align: center;
+  text-indent: 0;
+  padding: 4px 8px;
+  background: #ddd;
+  font-weight: 600;
+}
 
 /* ── Player cards (in lpanel) ─────────────────────────────────── */
 

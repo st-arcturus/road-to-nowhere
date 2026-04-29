@@ -380,16 +380,22 @@ function render_left() {
 		})
 	}
 
-	// Log
-	const log = document.getElementById("log")
-	log.innerHTML = ""
-	;(Array.isArray(view.log) ? view.log : []).slice(-30).forEach((entry, i, arr) => {
-		const d = document.createElement("div")
-		d.className   = "logentry" + (i === arr.length - 1 ? " hi" : "")
-		d.textContent = entry
-		log.appendChild(d)
-	})
-	log.scrollTop = log.scrollHeight
+}
+
+// ── Log (RTT framework calls this per entry) ──────────────────────
+
+function on_log(text) {
+	const p = document.createElement("div")
+	if (text.startsWith("===")) {
+		p.className = "log-section"
+		p.textContent = text.replace(/^=+\s*|\s*=+$/g, "")
+	} else if (text.startsWith("---")) {
+		p.className = "log-phase"
+		p.textContent = text.replace(/^-+\s*|\s*-+$/g, "")
+	} else {
+		p.textContent = text
+	}
+	return p
 }
 
 // ── Right panel ───────────────────────────────────────────────────
