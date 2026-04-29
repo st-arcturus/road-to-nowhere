@@ -513,6 +513,7 @@ function do_build_roads(player, action, arg) {
 		const ci = arg
 		if (!game.active_box.includes(ci)) throw new Error("Company not available")
 		game.active_box.splice(game.active_box.indexOf(ci), 1)
+		add_log(`=co=${game.companies[ci].key}`)
 		add_log(`P${player + 1} activates ${game.companies[ci].name}.`)
 		check_inactive(ci)
 		if (!game.companies[ci].active) { advance_draft(); return }
