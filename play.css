@@ -197,6 +197,14 @@ aside #log {
   font-weight: 600;
 }
 
+#log .log-company {
+  font-weight: 600;
+  font-size: 11px;
+  text-indent: 0;
+  padding: 2px 8px;
+  margin-top: 3px;
+}
+
 /* ── Role cards in left panel ─────────────────────────────────── */
 /* Framework creates .role elements; we override size and add our  */
 /* .role_pips row for position, shares, and claims.                */

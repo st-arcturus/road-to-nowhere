@@ -393,6 +393,14 @@ function on_log(text) {
 	} else if (text.startsWith("---")) {
 		p.className = "log-phase"
 		p.textContent = text.replace(/^-+\s*|\s*-+$/g, "")
+	} else if (text.startsWith("=co=")) {
+		const def = COMPANY_DEFS.find(c => c.key === text.slice(4))
+		p.className = "log-company"
+		p.textContent = def ? def.name : text.slice(4)
+		if (def) {
+			p.style.backgroundColor = def.color
+			p.style.color = def.light ? "#111" : "#f0f0f0"
+		}
 	} else {
 		p.textContent = text
 	}
