@@ -15,12 +15,13 @@ const ROAD_TRACK_START = 25
 
 const PLAYER_COLORS = [ "#0072B2", "#D55E00", "#9467BD", "#DC267F", "#44AA99" ]
 
-function player_bg(i) {
+// Light pastel tint for player backgrounds on the white left panel
+function player_bg_light(i) {
 	const c = PLAYER_COLORS[i] || "#888"
 	const r = parseInt(c.slice(1,3), 16)
 	const g = parseInt(c.slice(3,5), 16)
 	const b = parseInt(c.slice(5,7), 16)
-	return `rgb(${Math.round(r*.35+60*.65)},${Math.round(g*.35+60*.65)},${Math.round(b*.35+60*.65)})`
+	return `rgb(${Math.round(r*.15+245*.85)},${Math.round(g*.15+245*.85)},${Math.round(b*.15+245*.85)})`
 }
 
 // Map rows — needed client-side for terrain lookup and hex geometry
@@ -122,7 +123,7 @@ function on_update() {
 
 	render_map(skip)
 	render_left()
-	render_right()
+	render_players()
 
 	if (view.final_scores) render_scores()
 }
@@ -323,8 +324,8 @@ function render_left() {
 	function make_player_badge(pi) {
 		const span = document.createElement("div")
 		span.className = "tplayer-badge"
-		span.style.background     = player_bg(pi)
-		span.style.borderLeftColor = PLAYER_COLORS[pi] || "#888"
+		span.style.background = PLAYER_COLORS[pi] || "#888"
+		span.style.color = "#fff"
 		span.textContent = `P${pi + 1}`
 		span.title = `Player ${pi + 1}`
 		return span
@@ -398,36 +399,38 @@ function on_log(text) {
 	return p
 }
 
-// ── Right panel ───────────────────────────────────────────────────
+// ── Player info (merged with RTT #roles) ─────────────────────────
+// The framework creates #role_P1, #role_P2 etc. inside #roles.
+// We populate .role_stat with cash/bid, and append a .role_pips row
+// for disc position, shares, and claims. The framework handles the
+// active/present classes and the username link in .role_user.
 
-function render_right() {
-	const pl = document.getElementById("pl-list")
-	pl.innerHTML = ""
+function render_players() {
+	view.players.forEach((p, i) => {
+		const role_el = document.getElementById(`role_P${i + 1}`)
+		if (!role_el) return
 
-	const sorted = view.players
-		.map((p, i) => ({ ...p, i }))
-		.sort((a, b) => (a.disc_on_track || 99) - (b.disc_on_track || 99))
+		role_el.style.backgroundColor = player_bg_light(i)
 
-	for (const p of sorted) {
-		const is_active = p.i === view.active_player
-		const d = document.createElement("div")
-		d.className = "plcard"
-		d.style.backgroundColor = player_bg(p.i)
-		d.innerHTML = `
-			<div class="plhdr">
-				<div class="plpos">${p.disc_on_track ? p.disc_on_track + "." : "—"}</div>
-				${is_active ? '<div class="pldot"></div>' : ""}
-				<div class="plnm" style="border-left:2px solid ${PLAYER_COLORS[p.i] || "#888"};padding:1px 5px;">P${p.i + 1}</div>
-				<div class="plcash">$${p.cash}</div>
-				${p.last_bid ? `<div class="pl-bid" title="Last bid">bid $${p.last_bid}</div>` : ""}
-			</div>
-			<div class="pl-meta">
-				<span class="pl-claims" title="Claim discs remaining">${p.claims_left}/10 claims</span>
-			</div>
-			<div class="pips" id="pips-${p.i}"></div>`
-		pl.appendChild(d)
+		const stat = role_el.querySelector(".role_stat")
+		if (stat) {
+			stat.innerHTML = `<span class="rstat-cash">$${p.cash}</span>` +
+				(p.last_bid ? `<br><span class="rstat-bid">bid $${p.last_bid}</span>` : "")
+		}
 
-		const pips_el = document.getElementById(`pips-${p.i}`)
+		let pips_el = role_el.querySelector(".role_pips")
+		if (!pips_el) {
+			pips_el = document.createElement("div")
+			pips_el.className = "role_pips"
+			role_el.appendChild(pips_el)
+		}
+		pips_el.innerHTML = ""
+
+		const pos = document.createElement("span")
+		pos.className = "rstat-pos"
+		pos.textContent = p.disc_on_track ? `${p.disc_on_track}.` : "—"
+		pips_el.appendChild(pos)
+
 		const share_counts = {}
 		p.shares.forEach(ci => { share_counts[ci] = (share_counts[ci] || 0) + 1 })
 		Object.entries(share_counts).forEach(([ci, count]) => {
@@ -440,7 +443,12 @@ function render_right() {
 			pip.textContent      = count
 			pips_el.appendChild(pip)
 		})
-	}
+
+		const claims = document.createElement("span")
+		claims.className = "rstat-claims"
+		claims.textContent = `${p.claims_left} cl`
+		pips_el.appendChild(claims)
+	})
 
 	render_actions()
 }

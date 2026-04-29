@@ -43,18 +43,18 @@ main   { grid-column: 2 !important; grid-row: 2 / 4 !important; }
 aside  { grid-column: 3 !important; grid-row: 2 !important; }
 #replay_panel { grid-column: 3 !important; grid-row: 3 !important; }
 
-/* ── Left panel ───────────────────────────────────────────────── */
+/* ── Left panel — white, matching the framework's aside ──────── */
 
 .lpanel {
   grid-column: 1;
   grid-row: 2 / 4;
-  background: var(--bg2);
+  background: white;
   border-right: 1px solid black;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   min-height: 0;
-  color: var(--text);
+  color: black;
   font-family: var(--font-b);
   font-size: 13px;
 }
@@ -108,7 +108,7 @@ aside #log {
 
 .lpanel .psec {
   padding: 9px 11px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid #ddd;
   flex-shrink: 0;
 }
 
@@ -117,7 +117,7 @@ aside #log {
   font-size: 9px;
   text-transform: uppercase;
   letter-spacing: .15em;
-  color: var(--muted);
+  color: #777;
   margin-bottom: 5px;
 }
 
@@ -128,7 +128,7 @@ aside #log {
   align-items: center;
   gap: 5px;
   padding: 4px 0;
-  border-bottom: 1px solid var(--bg3);
+  border-bottom: 1px solid #eee;
 }
 .co-card:last-child { border-bottom: none; }
 .co-card.inactive   { opacity: .3; }
@@ -138,10 +138,10 @@ aside #log {
 
 .co-stats     { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; }
 .co-primary   { display: flex; gap: 6px; align-items: baseline; }
-.co-val       { font-family: var(--font-m); font-size: 11px; color: var(--accent); font-weight: 500; }
-.co-treas     { font-family: var(--font-m); font-size: 11px; color: #8fb3c8; }
-.co-claimval  { font-family: var(--font-m); font-size: 9px;  color: #b08060; }
-.co-secondary { display: flex; gap: 6px; font-family: var(--font-m); font-size: 9px; color: var(--muted); }
+.co-val       { font-family: var(--font-m); font-size: 11px; color: #8a6f1a; font-weight: 500; }
+.co-treas     { font-family: var(--font-m); font-size: 11px; color: #2a6080; }
+.co-claimval  { font-family: var(--font-m); font-size: 9px;  color: #7a5030; }
+.co-secondary { display: flex; gap: 6px; font-family: var(--font-m); font-size: 9px; color: #666; }
 
 .co-claims-row { display: flex; gap: 3px; flex-wrap: wrap; min-height: 0; margin-top: 3px; }
 
@@ -168,7 +168,7 @@ aside #log {
 .tslot.empty { border-color: #ccc; opacity: .4; }
 
 .tpos          { font-family: var(--font-m); font-size: 7px; color: #777; margin-bottom: 1px; }
-.tplayer-badge { font-size: 9px; border-radius: 2px; padding: 1px 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-left: 2px solid transparent; }
+.tplayer-badge { font-size: 9px; border-radius: 2px; padding: 1px 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .tcube-bot     { width: 100%; height: 10px; margin-top: 2px; }
 
 /* ── Active box ───────────────────────────────────────────────── */
@@ -198,22 +198,41 @@ aside #log {
   font-weight: 600;
 }
 
-/* ── Player cards (in lpanel) ─────────────────────────────────── */
+/* ── Role cards in left panel ─────────────────────────────────── */
+/* Framework creates .role elements; we override size and add our  */
+/* .role_pips row for position, shares, and claims.                */
 
-.plcard { padding: 5px 0; border-bottom: 1px solid var(--bg3); }
-.plcard:last-child { border-bottom: none; }
+.lpanel .role {
+  font-size: 13px;
+  border-bottom-color: #ddd;
+}
 
-.plhdr  { display: flex; align-items: center; gap: 4px; margin-bottom: 3px; }
-.plpos  { font-family: var(--font-m); font-size: 9px; color: var(--muted); width: 16px; }
-.pldot  { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse 1s infinite; flex-shrink: 0; }
-.plnm   { font-size: 11px; font-weight: 500; flex: 1; }
-.plcash { font-family: var(--font-m); font-size: 11px; color: var(--accent); }
-.pl-bid { font-family: var(--font-m); font-size: 9px; color: var(--muted); margin-left: auto; }
+.lpanel .role.active .role_name {
+  font-weight: 700;
+}
 
-.pl-meta   { display: flex; gap: 8px; margin-left: 20px; margin-bottom: 2px; }
-.pl-claims { font-family: var(--font-m); font-size: 9px; color: var(--muted); }
+.lpanel .role_stat {
+  font-family: var(--font-m);
+  font-size: 11px;
+  line-height: 1.4;
+}
 
-.pips { display: flex; gap: 3px; flex-wrap: wrap; margin-left: 20px; }
+.rstat-cash   { font-weight: 500; }
+.rstat-bid    { font-size: 9px; color: #888; }
+
+.role_pips {
+  grid-column: 1 / 3;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex-wrap: wrap;
+  padding: 2px 4px 5px;
+}
+
+.rstat-pos    { font-family: var(--font-m); font-size: 9px; color: #888; min-width: 14px; }
+.rstat-claims { font-family: var(--font-m); font-size: 9px; color: #888; margin-left: auto; }
+
+/* ── Share / claim pips ───────────────────────────────────────── */
 
 .pip-counter {
   display: flex; align-items: center; justify-content: center;
@@ -221,8 +240,6 @@ aside #log {
   font-family: var(--font-m); font-size: 10px; font-weight: 500;
   color: #0a0a08;
 }
-
-@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
 
 /* ── Action buttons ──────────────────────────────────────────── */
 /* Use framework-default <button> styling; just add a color dot   */
