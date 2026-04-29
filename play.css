@@ -59,18 +59,6 @@ aside  { grid-column: 3 !important; grid-row: 2 !important; }
   font-size: 13px;
 }
 
-/* ── Header — keep our round/phase labels inside #toolbar ─────── */
-
-.round-lbl,
-.phase-badge {
-  font-family: var(--font-m);
-  font-size: 11px;
-  color: #333;
-  align-self: center;
-  padding: 0 4px;
-  white-space: nowrap;
-}
-
 /* ── Main / map area ──────────────────────────────────────────── */
 
 main {

@@ -101,24 +101,24 @@ function on_init(scenario, options) {
 	// All dynamic state arrives through the view in on_update.
 }
 
+function get_phase_label() {
+	const br = view.build_roads
+	const labels = {
+		initial_share_pick: "Initial Shares",
+		bid:         "Bid for Turn Order",
+		buy_shares:  "Buy Shares",
+		build_roads: br?.state === "draft" ? "Build Roads — Draft" : "Build Roads — Building",
+		claim_land:  "Claim Land",
+		game_end:    "Game Over",
+	}
+	return labels[view.phase] || view.phase
+}
+
 function on_update() {
 	if (!view || !view.players || !view.players.length) return
 
 	const pc   = view.players.length
 	const skip = PLAYER_ROW_SKIP[pc] || 0
-	const br   = view.build_roads || { state: "draft", current_company: null, build_points_remaining: 0 }
-
-	const phase_labels = {
-		initial_share_pick: "Initial Shares",
-		bid:         "Bid for Turn Order",
-		buy_shares:  "Buy Shares",
-		build_roads: br.state === "draft" ? "Build Roads — Draft" : "Build Roads — Building",
-		claim_land:  "Claim Land",
-		game_end:    "Game Over",
-	}
-
-	document.getElementById("phase-badge").textContent = phase_labels[view.phase] || view.phase
-	document.getElementById("round-lbl").textContent   = `Round ${view.round}`
 
 	render_map(skip)
 	render_left()
@@ -447,7 +447,11 @@ function render_actions() {
 	if (!msg_el || !btn_el) return
 	btn_el.innerHTML = ""
 
-	msg_el.textContent = view.prompt || ""
+	const phase  = get_phase_label()
+	const prompt = view.prompt || ""
+	msg_el.textContent = prompt
+		? `Round ${view.round}: ${phase}: ${prompt}`
+		: `Round ${view.round}: ${phase}`
 
 	if (!view.actions) return
 
@@ -473,11 +477,6 @@ function render_actions() {
 		if (bid_amount < min_bid) bid_amount = min_bid
 		if (bid_amount > max_bid) bid_amount = max_bid
 
-		const hint = document.createElement("div")
-		hint.className   = "bid-hint"
-		hint.textContent = `Winning bid: $${view.bid.current_bid} · Your cash: $${max_bid}`
-		btn_el.appendChild(hint)
-
 		const widget  = document.createElement("div"); widget.className = "bid-widget"
 		const counter = document.createElement("div"); counter.className = "bid-counter"
 
@@ -496,11 +495,11 @@ function render_actions() {
 		const bid_btn = document.createElement("button")
 		bid_btn.textContent = `Bid $${bid_amount}`
 		bid_btn.disabled    = bid_amount > max_bid || bid_amount <= view.bid.current_bid
-		bid_btn.onclick     = () => { send_action("raise", bid_amount) }
+		bid_btn.onclick     = () => { if (view.actions) view.actions.raise = [bid_amount]; send_action("raise", bid_amount) }
 
 		const pass_btn = document.createElement("button")
 		pass_btn.textContent = "Pass"
-		pass_btn.onclick     = () => send_action("pass", 0)
+		pass_btn.onclick     = () => send_action("pass")
 
 		widget.appendChild(counter)
 		widget.appendChild(bid_btn)
