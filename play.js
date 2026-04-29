@@ -5,7 +5,7 @@
 const COMPANY_DEFS = [
 	{ key: "hovering", name: "Hovering Highways",   color: "#56B4E9", light: false },
 	{ key: "muddy",    name: "Muddy Machinery",      color: "#CC79A7", light: false },
-	{ key: "scuttle",  name: "Scuttle Surveyors",    color: "#BBBBBB", light: true  },
+	{ key: "scuttle",  name: "Scuttle Surveyors",    color: "#7D3C00", light: false },
 	{ key: "whooping", name: "Whooping Workzone",    color: "#191919", light: false },
 	{ key: "buzzing",  name: "Buzzing Blacktop",     color: "#E69F00", light: true  },
 	{ key: "coiled",   name: "Coiled Construction",  color: "#A8F1A4", light: true  },
@@ -283,8 +283,8 @@ function render_left() {
 		const shares_left = 7 - co.shares.length
 		const d = document.createElement("div")
 		d.className = "co-card" + (co.active ? "" : " inactive")
+		d.style.borderLeft = `3px solid ${COMPANY_DEFS[ci].color}`
 		d.innerHTML = `
-			<div class="co-dot" style="background:${COMPANY_DEFS[ci].color}"></div>
 			<div class="co-nm">${co.name.split(" ")[0]}</div>
 			<div class="co-stats">
 				<div class="co-primary">
