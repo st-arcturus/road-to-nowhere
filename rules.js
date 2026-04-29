@@ -635,6 +635,7 @@ exports.setup = function (seed, scenario, options) {
 		},
 		claim_land: { pending: [] },
 		log: [`Road to Nowhere — ${pc} players, ${cc} companies.`],
+		undo: [],
 		final_scores: null,
 	}
 
@@ -780,8 +781,10 @@ exports.view = function (state, current) {
 	}
 
 	else if (game.phase === "bid" && game.bid.active.includes(player)) {
+		const min_raise = game.bid.current_bid + 1
 		view.actions.pass = 1
-		view.actions.raise = 1
+		if (min_raise <= game.players[player].cash)
+			view.actions.raise = [min_raise]
 		view.prompt = "Raise the bid to claim 1st position, or pass."
 	}
 

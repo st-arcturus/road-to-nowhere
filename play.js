@@ -555,7 +555,7 @@ function render_actions() {
 	if (view.actions.pass_build) {
 		const btn = document.createElement("button")
 		btn.textContent = "Done Building (no legal moves)"
-		btn.onclick = () => send_action("pass_build", 0)
+		btn.onclick = () => send_action("pass_build")
 		btn_el.appendChild(btn)
 	}
 
