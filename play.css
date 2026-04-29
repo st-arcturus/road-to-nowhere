@@ -228,13 +228,6 @@ header #actions {
   justify-content: flex-start !important;
 }
 
-#actions .btn-dot {
-  display: inline-block;
-  width: 10px; height: 10px;
-  margin-right: 6px;
-  vertical-align: middle;
-}
-
 /* Bid widget — a self-contained compound element inside #actions */
 
 .bid-widget   { display: flex; align-items: center; gap: 6px; }

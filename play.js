@@ -406,11 +406,12 @@ function render_right() {
 		const is_active = p.i === view.active_player
 		const d = document.createElement("div")
 		d.className = "plcard"
+		d.style.backgroundColor = player_bg(p.i)
 		d.innerHTML = `
 			<div class="plhdr">
 				<div class="plpos">${p.disc_on_track ? p.disc_on_track + "." : "—"}</div>
 				${is_active ? '<div class="pldot"></div>' : ""}
-				<div class="plnm" style="background:${player_bg(p.i)};border-left:2px solid ${PLAYER_COLORS[p.i] || "#888"};padding:1px 5px;border-radius:2px;">P${p.i + 1}</div>
+				<div class="plnm" style="border-left:2px solid ${PLAYER_COLORS[p.i] || "#888"};padding:1px 5px;">P${p.i + 1}</div>
 				<div class="plcash">$${p.cash}</div>
 				${p.last_bid ? `<div class="pl-bid" title="Last bid">bid $${p.last_bid}</div>` : ""}
 			</div>
@@ -457,7 +458,9 @@ function render_actions() {
 	if (view.actions.pick_share) {
 		view.actions.pick_share.forEach(ci => {
 			const btn = document.createElement("button")
-			btn.innerHTML = `<span class="btn-dot" style="background:${COMPANY_DEFS[ci].color}"></span>${view.companies[ci].name}`
+			btn.textContent = view.companies[ci].name
+			btn.style.backgroundColor = COMPANY_DEFS[ci].color
+			btn.style.color = COMPANY_DEFS[ci].light ? "#111" : "#f0f0f0"
 			btn.onclick = () => send_action("pick_share", ci)
 			btn_el.appendChild(btn)
 		})
@@ -518,7 +521,9 @@ function render_actions() {
 
 		view.actions.buy.forEach(ci => {
 			const btn = document.createElement("button")
-			btn.innerHTML = `<span class="btn-dot" style="background:${COMPANY_DEFS[ci].color}"></span>${view.companies[ci].name}`
+			btn.textContent = view.companies[ci].name
+			btn.style.backgroundColor = COMPANY_DEFS[ci].color
+			btn.style.color = COMPANY_DEFS[ci].light ? "#111" : "#f0f0f0"
 			btn.onclick = () => send_action("buy", ci)
 			btn_el.appendChild(btn)
 		})
@@ -528,7 +533,9 @@ function render_actions() {
 	if (view.actions.pick_company) {
 		view.actions.pick_company.forEach(ci => {
 			const btn = document.createElement("button")
-			btn.innerHTML = `<span class="btn-dot" style="background:${COMPANY_DEFS[ci].color}"></span>${view.companies[ci].name}`
+			btn.textContent = view.companies[ci].name
+			btn.style.backgroundColor = COMPANY_DEFS[ci].color
+			btn.style.color = COMPANY_DEFS[ci].light ? "#111" : "#f0f0f0"
 			btn.onclick = () => send_action("pick_company", ci)
 			btn_el.appendChild(btn)
 		})
