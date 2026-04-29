@@ -460,19 +460,26 @@ function render_actions() {
 	const btn_el = document.getElementById("actions")
 	if (!msg_el || !btn_el) return
 	btn_el.innerHTML = ""
+	msg_el.innerHTML = ""
 
-	const phase  = get_phase_label()
 	const prompt = view.prompt || ""
-	msg_el.textContent = prompt
-		? `Round ${view.round}: ${phase}: ${prompt}`
-		: `Round ${view.round}: ${phase}`
+	if (prompt) msg_el.appendChild(document.createTextNode(prompt))
 
 	if (!view.actions) return
 
 	const br = view.build_roads
 	const ap = view.active_player
 
-	// Initial share pick
+	// Buy shares — append bid cost info directly into the prompt
+	if (view.actions.buy) {
+		const bid_amt = view.bid.bids?.[ap] || 0
+		const is_1st  = view.players[ap].disc_on_track === 1
+		const cost    = is_1st ? bid_amt : Math.ceil(bid_amt / 2)
+		const span = document.createElement("span")
+		span.className = "bid-hint"
+		span.textContent = (prompt ? " · " : "") + `Bid $${bid_amt} → pay $${cost}${is_1st ? " (1st, full)" : " (half, rounded up)"}`
+		msg_el.appendChild(span)
+	}
 	if (view.actions.pick_share) {
 		view.actions.pick_share.forEach(ci => {
 			const btn = document.createElement("button")
@@ -524,14 +531,6 @@ function render_actions() {
 
 	// Buy shares
 	if (view.actions.buy) {
-		const bid_amt = view.bid.bids?.[ap] || 0
-		const is_1st  = view.players[ap].disc_on_track === 1
-		const cost    = is_1st ? bid_amt : Math.ceil(bid_amt / 2)
-
-		const hint = document.createElement("div"); hint.className = "bid-hint"; hint.style.marginBottom = "6px"
-		hint.textContent = `Bid $${bid_amt} → pay $${cost}${is_1st ? " (1st, full)" : " (half, rounded up)"}`
-		btn_el.appendChild(hint)
-
 		view.actions.buy.forEach(ci => {
 			const btn = document.createElement("button")
 			btn.textContent = view.companies[ci].name

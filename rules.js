@@ -301,7 +301,7 @@ function start_bid() {
 	game.phase = "bid"
 	game.bid = { current_bid: 0, passed: [], active: [...order], bids: {} }
 	game.active_player = order[0]
-	add_log(`--- Round ${game.round}: Bid ---`)
+	add_log(`--- Round ${game.round}: Bid for Turn Order ---`)
 }
 
 function start_buy_shares() {
