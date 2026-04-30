@@ -283,7 +283,7 @@ function render_left() {
 		const shares_left = 7 - co.shares.length
 		const d = document.createElement("div")
 		d.className = "co-card" + (co.active ? "" : " inactive")
-		d.style.borderLeft = `3px solid ${COMPANY_DEFS[ci].color}`
+		d.style.borderLeft = `10px solid ${COMPANY_DEFS[ci].color}`
 		d.innerHTML = `
 			<div class="co-nm">${co.name.split(" ")[0]}</div>
 			<div class="co-stats">

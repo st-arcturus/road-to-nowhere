@@ -107,7 +107,7 @@ aside #log {
 /* ── Panel section labels (in lpanel) ─────────────────────────── */
 
 .lpanel .psec {
-  padding: 9px 11px;
+  padding: 0;
   border-bottom: 1px solid #ddd;
   flex-shrink: 0;
 }
@@ -118,7 +118,7 @@ aside #log {
   text-transform: uppercase;
   letter-spacing: .15em;
   color: #777;
-  margin-bottom: 5px;
+  padding: 9px 11px 5px;
 }
 
 /* ── Company cards ────────────────────────────────────────────── */
@@ -127,7 +127,7 @@ aside #log {
   display: flex;
   align-items: center;
   gap: 5px;
-  padding: 4px 0 4px 6px;
+  padding: 4px 8px 4px 6px;
   border-bottom: 1px solid #eee;
 }
 .co-card:last-child { border-bottom: none; }
