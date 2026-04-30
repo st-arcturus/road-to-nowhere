@@ -21,7 +21,7 @@ function player_bg_light(i) {
 	const r = parseInt(c.slice(1,3), 16)
 	const g = parseInt(c.slice(3,5), 16)
 	const b = parseInt(c.slice(5,7), 16)
-	return `rgb(${Math.round(r*.15+245*.85)},${Math.round(g*.15+245*.85)},${Math.round(b*.15+245*.85)})`
+	return `rgb(${Math.round(r*.5+255*.5)},${Math.round(g*.5+255*.5)},${Math.round(b*.5+255*.5)})`
 }
 
 // Map rows — needed client-side for terrain lookup and hex geometry
@@ -488,6 +488,16 @@ function render_actions() {
 		span.textContent = (prompt ? " · " : "") + `Bid $${bid_amt} → pay $${cost}${is_1st ? " (1st, full)" : " (half, rounded up)"}`
 		msg_el.appendChild(span)
 	}
+
+	// Build roads — append hex count to prompt
+	if (view.actions.build) {
+		const n = view.actions.build.length
+		const span = document.createElement("span")
+		span.className = "maphint"
+		span.textContent = (prompt ? " · " : "") + `${n} valid hex${n > 1 ? "es" : ""} highlighted — click to build`
+		msg_el.appendChild(span)
+	}
+
 	if (view.actions.pick_share) {
 		view.actions.pick_share.forEach(ci => {
 			const btn = document.createElement("button")
@@ -562,11 +572,6 @@ function render_actions() {
 	}
 
 	// Build roads — building
-	if (view.actions.build) {
-		const hint = document.createElement("div"); hint.className = "maphint"
-		hint.textContent = `${view.actions.build.length} valid hex${view.actions.build.length > 1 ? "es" : ""} highlighted — click map to build`
-		btn_el.appendChild(hint)
-	}
 	if (view.actions.pass_build) {
 		const btn = document.createElement("button")
 		btn.textContent = "Done Building (no legal moves)"
