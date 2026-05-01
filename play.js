@@ -53,7 +53,7 @@ const HEX_H = 2 * HEX_SIZE
 
 const TFILL = "#e8e8e8"
 
-const TICONS = { mountain: { g: "▲", sz: 17 }, river: { g: "≋", sz: 11 }, desert: { g: "★", sz: 17 } }
+const TICONS = { mountain: { g: "▲", sz: 20 }, river: { g: "≋", sz: 14 }, desert: { g: "★", sz: 20 } }
 
 // ── Map geometry ──────────────────────────────────────────────────
 
@@ -167,41 +167,6 @@ function render_map(skip) {
 			}
 			g.appendChild(poly)
 
-			// Terrain icon / city buildings
-			if (terrain === "city") {
-				const b1 = document.createElementNS(ns, "rect")
-				b1.setAttribute("x",      (cx - 13.1).toFixed(1))
-				b1.setAttribute("y",      (cy - 12.6).toFixed(1))
-				b1.setAttribute("width",  "12.6")
-				b1.setAttribute("height", "25.2")
-				b1.setAttribute("fill", TFILL)
-				b1.setAttribute("stroke", "#111")
-				b1.setAttribute("stroke-width", "1")
-				b1.setAttribute("pointer-events", "none")
-				g.appendChild(b1)
-				const b2 = document.createElementNS(ns, "rect")
-				b2.setAttribute("x",      (cx - 1.4).toFixed(1))
-				b2.setAttribute("y",      (cy - 5.4).toFixed(1))
-				b2.setAttribute("width",  "14.4")
-				b2.setAttribute("height", "18")
-				b2.setAttribute("fill", TFILL)
-				b2.setAttribute("stroke", "#111")
-				b2.setAttribute("stroke-width", "1")
-				b2.setAttribute("pointer-events", "none")
-				g.appendChild(b2)
-			} else if (TICONS[terrain]) {
-				const icon = TICONS[terrain]
-				const t = document.createElementNS(ns, "text")
-				t.setAttribute("x", cx); t.setAttribute("y", cy)
-				t.setAttribute("text-anchor", "middle")
-				t.setAttribute("dominant-baseline", "central")
-				t.setAttribute("font-size", icon.sz)
-				t.setAttribute("fill", "#111")
-				t.setAttribute("pointer-events", "none")
-				t.textContent = icon.g
-				g.appendChild(t)
-			}
-
 			// Road cubes
 			if (hs?.roads?.length) {
 				const n = hs.roads.length
@@ -237,11 +202,45 @@ function render_map(skip) {
 				const disc = document.createElementNS(ns, "circle")
 				disc.setAttribute("cx", cx); disc.setAttribute("cy", cy); disc.setAttribute("r", "13")
 				disc.setAttribute("fill", PLAYER_COLORS[hs.disc] || "#aaa")
-				disc.setAttribute("fill-opacity", "0.5")
 				disc.setAttribute("stroke", PLAYER_COLORS[hs.disc] || "#aaa")
 				disc.setAttribute("stroke-width", "1")
 				disc.setAttribute("pointer-events", "none")
 				g.appendChild(disc)
+			}
+
+			// Terrain icon / city buildings (rendered on top of claims)
+			if (terrain === "city") {
+				const b1 = document.createElementNS(ns, "rect")
+				b1.setAttribute("x",      (cx - 10.6).toFixed(1))
+				b1.setAttribute("y",      (cy - 12.6).toFixed(1))
+				b1.setAttribute("width",  "12.6")
+				b1.setAttribute("height", "25.2")
+				b1.setAttribute("fill", TFILL)
+				b1.setAttribute("stroke", "#3a3a3a")
+				b1.setAttribute("stroke-width", "1")
+				b1.setAttribute("pointer-events", "none")
+				g.appendChild(b1)
+				const b2 = document.createElementNS(ns, "rect")
+				b2.setAttribute("x",      (cx - 3.9).toFixed(1))
+				b2.setAttribute("y",      (cy - 5.4).toFixed(1))
+				b2.setAttribute("width",  "14.4")
+				b2.setAttribute("height", "18")
+				b2.setAttribute("fill", TFILL)
+				b2.setAttribute("stroke", "#3a3a3a")
+				b2.setAttribute("stroke-width", "1")
+				b2.setAttribute("pointer-events", "none")
+				g.appendChild(b2)
+			} else if (TICONS[terrain]) {
+				const icon = TICONS[terrain]
+				const t = document.createElementNS(ns, "text")
+				t.setAttribute("x", cx); t.setAttribute("y", cy)
+				t.setAttribute("text-anchor", "middle")
+				t.setAttribute("dominant-baseline", "central")
+				t.setAttribute("font-size", icon.sz)
+				t.setAttribute("fill", "#3a3a3a")
+				t.setAttribute("pointer-events", "none")
+				t.textContent = icon.g
+				g.appendChild(t)
 			}
 
 			// Highlight overlay
