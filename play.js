@@ -53,7 +53,7 @@ const HEX_H = 2 * HEX_SIZE
 
 const TFILL = "#e8e8e8"
 
-const TICONS = { mountain: { g: "▲", sz: 25 }, river: { g: "≋", sz: 25 }, desert: { g: "★", sz: 25 } }
+const TICONS = { mountain: { g: "▲", sz: 25 }, river: { g: "≋", sz: 25 }, desert: { g: "☀", sz: 25 } }
 
 // ── Map geometry ──────────────────────────────────────────────────
 
