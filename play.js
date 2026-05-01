@@ -51,13 +51,7 @@ const HEX_SIZE = 26
 const HEX_W = Math.sqrt(3) * HEX_SIZE
 const HEX_H = 2 * HEX_SIZE
 
-const TFILL = {
-	plain:    "#e8e8e8",
-	river:    "#dce8f0",
-	mountain: "#e0e0e0",
-	desert:   "#f0ebe0",
-	city:     "#d8d8e4",
-}
+const TFILL = "#e8e8e8"
 
 const TICONS = { mountain: "▲", river: "≋", desert: "·" }
 const TICOL  = { mountain: "#111", river: "#111", desert: "#111" }
@@ -155,7 +149,7 @@ function render_map(skip) {
 			// Hex fill
 			const poly = document.createElementNS(ns, "polygon")
 			poly.setAttribute("points", hex_corners(cx, cy, HEX_SIZE - 1))
-			poly.setAttribute("fill", TFILL[terrain])
+			poly.setAttribute("fill", TFILL)
 			if (buildable.has(hex_id)) {
 				poly.setAttribute("stroke", "#c8a84b"); poly.setAttribute("stroke-width", "2")
 			} else if (claimable.has(hex_id)) {
