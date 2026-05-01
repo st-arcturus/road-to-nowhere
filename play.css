@@ -291,6 +291,16 @@ header #actions {
 .scorerow.winner { font-size: 14px; color: var(--accent); }
 .scoredet { font-size: 9px; color: var(--muted); padding: 1px 0 5px; }
 
+/* ── Left panel toggle ────────────────────────────────────────── */
+
+body.lpanel-collapsed {
+  grid-template-columns: 0 minmax(0, 1fr) auto !important;
+}
+body.lpanel-collapsed .lpanel {
+  overflow: hidden;
+  border: none;
+}
+
 /* ── Responsive: collapse left panel on narrow screens ────────── */
 
 @media (max-width: 800px) {

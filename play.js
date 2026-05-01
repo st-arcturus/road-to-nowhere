@@ -91,8 +91,10 @@ let bid_amount = 1
 // ── RTT client callbacks ──────────────────────────────────────────
 
 function on_init(scenario, options) {
-	// scenario ("3P"/"4P"/"5P") and options are fixed at game creation.
-	// All dynamic state arrives through the view in on_update.
+	document.getElementById("lpanel-toggle")?.addEventListener("click", () => {
+		const collapsed = document.body.classList.toggle("lpanel-collapsed")
+		document.getElementById("lpanel-toggle").textContent = collapsed ? "▶" : "◀"
+	})
 }
 
 function get_phase_label() {
