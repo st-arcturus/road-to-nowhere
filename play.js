@@ -268,7 +268,7 @@ function on_hex_click(hex_id) {
 
 function show_tooltip(e, hex_id, terrain, hs) {
 	const tt    = document.getElementById("tt")
-	const parts = [terrain.toUpperCase()]
+	const parts = [terrain.charAt(0).toUpperCase() + terrain.slice(1)]
 	if (terrain === "mountain") parts.push("Cost: 2 BP")
 	if (terrain === "desert")   parts.push("Cost: $1/hex")
 	if (terrain === "river")    parts.push("No consecutive")
@@ -378,7 +378,7 @@ function render_left() {
 	const ab = document.getElementById("abox")
 	ab.innerHTML = ""
 	if (!view.active_box?.length) {
-		ab.innerHTML = '<span style="color:var(--muted);font-size:9px">empty</span>'
+		ab.innerHTML = '<span style="color:gray;font-size:11px">empty</span>'
 	} else {
 		view.active_box.forEach(ci => {
 			const cube = document.createElement("div")
