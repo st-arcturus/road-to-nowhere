@@ -161,13 +161,14 @@ function render_map(skip) {
 
 			// Terrain icon / city buildings
 			if (terrain === "city") {
-				const bld_col = "#888"
 				const b1 = document.createElementNS(ns, "rect")
 				b1.setAttribute("x",      (cx - 13.1).toFixed(1))
 				b1.setAttribute("y",      (cy - 12.6).toFixed(1))
 				b1.setAttribute("width",  "12.6")
 				b1.setAttribute("height", "25.2")
-				b1.setAttribute("fill", bld_col)
+				b1.setAttribute("fill", "none")
+				b1.setAttribute("stroke", "#111")
+				b1.setAttribute("stroke-width", "1")
 				b1.setAttribute("pointer-events", "none")
 				g.appendChild(b1)
 				const b2 = document.createElementNS(ns, "rect")
@@ -175,7 +176,9 @@ function render_map(skip) {
 				b2.setAttribute("y",      (cy - 5.4).toFixed(1))
 				b2.setAttribute("width",  "14.4")
 				b2.setAttribute("height", "18")
-				b2.setAttribute("fill", bld_col)
+				b2.setAttribute("fill", "none")
+				b2.setAttribute("stroke", "#111")
+				b2.setAttribute("stroke-width", "1")
 				b2.setAttribute("pointer-events", "none")
 				g.appendChild(b2)
 			} else if (TICONS[terrain]) {
