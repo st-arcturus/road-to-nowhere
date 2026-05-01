@@ -52,15 +52,15 @@ const HEX_W = Math.sqrt(3) * HEX_SIZE
 const HEX_H = 2 * HEX_SIZE
 
 const TFILL = {
-	plain:    "#2a2820",
-	river:    "#192e3e",
-	mountain: "#312e28",
-	desert:   "#362e18",
-	city:     "#3a3845",
+	plain:    "#e8e8e8",
+	river:    "#dce8f0",
+	mountain: "#e0e0e0",
+	desert:   "#f0ebe0",
+	city:     "#d8d8e4",
 }
 
 const TICONS = { mountain: "▲", river: "≋", desert: "·" }
-const TICOL  = { mountain: "#6a5f54", river: "#3e7898", desert: "#746c3a" }
+const TICOL  = { mountain: "#111", river: "#111", desert: "#111" }
 
 // ── Map geometry ──────────────────────────────────────────────────
 
@@ -161,13 +161,13 @@ function render_map(skip) {
 			} else if (claimable.has(hex_id)) {
 				poly.setAttribute("stroke", "#56B4E9"); poly.setAttribute("stroke-width", "1.8")
 			} else {
-				poly.setAttribute("stroke", "none"); poly.setAttribute("stroke-width", "0")
+				poly.setAttribute("stroke", "#3a3a3a"); poly.setAttribute("stroke-width", "0.8")
 			}
 			g.appendChild(poly)
 
 			// Terrain icon / city buildings
 			if (terrain === "city") {
-				const bld_col = "#aeacc3"
+				const bld_col = "#888"
 				const b1 = document.createElementNS(ns, "rect")
 				b1.setAttribute("x",      (cx - 13.1).toFixed(1))
 				b1.setAttribute("y",      (cy - 12.6).toFixed(1))
