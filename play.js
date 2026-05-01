@@ -53,8 +53,7 @@ const HEX_H = 2 * HEX_SIZE
 
 const TFILL = "#e8e8e8"
 
-const TICONS = { mountain: "▲", river: "≋", desert: "·" }
-const TICOL  = { mountain: "#111", river: "#111", desert: "#111" }
+const TICONS = { mountain: { g: "▲", sz: 17 }, river: { g: "≋", sz: 11 }, desert: { g: "★", sz: 17 } }
 
 // ── Map geometry ──────────────────────────────────────────────────
 
@@ -166,7 +165,7 @@ function render_map(skip) {
 				b1.setAttribute("y",      (cy - 12.6).toFixed(1))
 				b1.setAttribute("width",  "12.6")
 				b1.setAttribute("height", "25.2")
-				b1.setAttribute("fill", "none")
+				b1.setAttribute("fill", TFILL)
 				b1.setAttribute("stroke", "#111")
 				b1.setAttribute("stroke-width", "1")
 				b1.setAttribute("pointer-events", "none")
@@ -176,17 +175,21 @@ function render_map(skip) {
 				b2.setAttribute("y",      (cy - 5.4).toFixed(1))
 				b2.setAttribute("width",  "14.4")
 				b2.setAttribute("height", "18")
-				b2.setAttribute("fill", "none")
+				b2.setAttribute("fill", TFILL)
 				b2.setAttribute("stroke", "#111")
 				b2.setAttribute("stroke-width", "1")
 				b2.setAttribute("pointer-events", "none")
 				g.appendChild(b2)
 			} else if (TICONS[terrain]) {
+				const icon = TICONS[terrain]
 				const t = document.createElementNS(ns, "text")
-				t.setAttribute("x", cx); t.setAttribute("y", cy + 4)
-				t.setAttribute("text-anchor", "middle"); t.setAttribute("font-size", "11")
-				t.setAttribute("fill", TICOL[terrain]); t.setAttribute("pointer-events", "none")
-				t.textContent = TICONS[terrain]
+				t.setAttribute("x", cx); t.setAttribute("y", cy)
+				t.setAttribute("text-anchor", "middle")
+				t.setAttribute("dominant-baseline", "central")
+				t.setAttribute("font-size", icon.sz)
+				t.setAttribute("fill", "#111")
+				t.setAttribute("pointer-events", "none")
+				t.textContent = icon.g
 				g.appendChild(t)
 			}
 
