@@ -53,7 +53,7 @@ const HEX_H = 2 * HEX_SIZE
 
 const TFILL = "#e8e8e8"
 
-const TICONS = { mountain: { g: "▲", sz: 20 }, river: { g: "≋", sz: 14 }, desert: { g: "★", sz: 20 } }
+const TICONS = { mountain: { g: "▲", sz: 25 }, river: { g: "≋", sz: 25 }, desert: { g: "★", sz: 25 } }
 
 // ── Map geometry ──────────────────────────────────────────────────
 
@@ -167,37 +167,7 @@ function render_map(skip) {
 			}
 			g.appendChild(poly)
 
-			// Road cubes
-			if (hs?.roads?.length) {
-				const n = hs.roads.length
-				const S = 12
-				if (terrain === "city" && n > 1) {
-					const cols = 3, gap = 2
-					const rows = Math.ceil(n / cols)
-					const grid_w = cols * S + (cols - 1) * gap
-					const grid_h = rows * S + (rows - 1) * gap
-					const x0 = cx - grid_w / 2, y0 = cy - grid_h / 2
-					hs.roads.forEach((ci, i) => {
-						const col = i % cols, row = Math.floor(i / cols)
-						const rect = document.createElementNS(ns, "rect")
-						rect.setAttribute("x", (x0 + col * (S + gap)).toFixed(1))
-						rect.setAttribute("y", (y0 + row * (S + gap)).toFixed(1))
-						rect.setAttribute("width", S); rect.setAttribute("height", S)
-						rect.setAttribute("fill", COMPANY_DEFS[ci]?.color || "#888")
-						rect.setAttribute("pointer-events", "none")
-						g.appendChild(rect)
-					})
-				} else {
-					const rect = document.createElementNS(ns, "rect")
-					rect.setAttribute("x", (cx - S/2).toFixed(1)); rect.setAttribute("y", (cy - S/2).toFixed(1))
-					rect.setAttribute("width", S); rect.setAttribute("height", S)
-					rect.setAttribute("fill", COMPANY_DEFS[hs.roads[0]]?.color || "#888")
-					rect.setAttribute("pointer-events", "none")
-					g.appendChild(rect)
-				}
-			}
-
-			// Claim disc
+			// Claim disc (below terrain icon and cubes)
 			if (hs?.disc != null) {
 				const disc = document.createElementNS(ns, "circle")
 				disc.setAttribute("cx", cx); disc.setAttribute("cy", cy); disc.setAttribute("r", "13")
@@ -208,7 +178,7 @@ function render_map(skip) {
 				g.appendChild(disc)
 			}
 
-			// Terrain icon / city buildings (rendered on top of claims)
+			// Terrain icon / city buildings (above claims, below cubes)
 			if (terrain === "city") {
 				const b1 = document.createElementNS(ns, "rect")
 				b1.setAttribute("x",      (cx - 10.6).toFixed(1))
@@ -241,6 +211,36 @@ function render_map(skip) {
 				t.setAttribute("pointer-events", "none")
 				t.textContent = icon.g
 				g.appendChild(t)
+			}
+
+			// Road cubes (on top of terrain icon)
+			if (hs?.roads?.length) {
+				const n = hs.roads.length
+				const S = 12
+				if (terrain === "city" && n > 1) {
+					const cols = 3, gap = 2
+					const rows = Math.ceil(n / cols)
+					const grid_w = cols * S + (cols - 1) * gap
+					const grid_h = rows * S + (rows - 1) * gap
+					const x0 = cx - grid_w / 2, y0 = cy - grid_h / 2
+					hs.roads.forEach((ci, i) => {
+						const col = i % cols, row = Math.floor(i / cols)
+						const rect = document.createElementNS(ns, "rect")
+						rect.setAttribute("x", (x0 + col * (S + gap)).toFixed(1))
+						rect.setAttribute("y", (y0 + row * (S + gap)).toFixed(1))
+						rect.setAttribute("width", S); rect.setAttribute("height", S)
+						rect.setAttribute("fill", COMPANY_DEFS[ci]?.color || "#888")
+						rect.setAttribute("pointer-events", "none")
+						g.appendChild(rect)
+					})
+				} else {
+					const rect = document.createElementNS(ns, "rect")
+					rect.setAttribute("x", (cx - S/2).toFixed(1)); rect.setAttribute("y", (cy - S/2).toFixed(1))
+					rect.setAttribute("width", S); rect.setAttribute("height", S)
+					rect.setAttribute("fill", COMPANY_DEFS[hs.roads[0]]?.color || "#888")
+					rect.setAttribute("pointer-events", "none")
+					g.appendChild(rect)
+				}
 			}
 
 			// Highlight overlay
