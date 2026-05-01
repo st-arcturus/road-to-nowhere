@@ -135,6 +135,15 @@ function render_map(skip) {
 	const claimable = new Set((view.actions?.claim  || []))
 	const ns = "http://www.w3.org/2000/svg"
 
+	const build_ci    = view.build_roads?.current_company
+	const build_color = (build_ci != null ? COMPANY_DEFS[build_ci]?.color : null) || "#888"
+	const claim_color = PLAYER_COLORS[view.active_player] || "#888"
+
+	function hex_rgba(hex, a) {
+		const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16)
+		return `rgba(${r},${g},${b},${a})`
+	}
+
 	for (let r = 0; r < max_r; r++) {
 		const rd = MAP_ROWS[r]
 		for (let c = 0; c < rd.count; c++) {
@@ -150,9 +159,9 @@ function render_map(skip) {
 			poly.setAttribute("points", hex_corners(cx, cy, HEX_SIZE - 1))
 			poly.setAttribute("fill", TFILL)
 			if (buildable.has(hex_id)) {
-				poly.setAttribute("stroke", "#c8a84b"); poly.setAttribute("stroke-width", "2")
+				poly.setAttribute("stroke", build_color); poly.setAttribute("stroke-width", "2")
 			} else if (claimable.has(hex_id)) {
-				poly.setAttribute("stroke", "#56B4E9"); poly.setAttribute("stroke-width", "1.8")
+				poly.setAttribute("stroke", claim_color); poly.setAttribute("stroke-width", "1.8")
 			} else {
 				poly.setAttribute("stroke", "#3a3a3a"); poly.setAttribute("stroke-width", "0.8")
 			}
@@ -239,7 +248,7 @@ function render_map(skip) {
 			if (buildable.has(hex_id) || claimable.has(hex_id)) {
 				const ring = document.createElementNS(ns, "polygon")
 				ring.setAttribute("points", hex_corners(cx, cy, HEX_SIZE - 3))
-				ring.setAttribute("fill", buildable.has(hex_id) ? "rgba(200,168,75,0.12)" : "rgba(86,180,233,0.12)")
+				ring.setAttribute("fill", hex_rgba(buildable.has(hex_id) ? build_color : claim_color, 0.12))
 				ring.setAttribute("pointer-events", "none")
 				g.appendChild(ring)
 			}
