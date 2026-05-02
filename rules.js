@@ -76,6 +76,49 @@ function shuffle(arr) {
 	}
 }
 
+// ── Undo ──────────────────────────────────────────────────────────
+
+function deep_copy(o) {
+	if (typeof o !== "object" || o === null) return o
+	if (Array.isArray(o)) return o.map(deep_copy)
+	const r = {}
+	for (let k in o) r[k] = deep_copy(o[k])
+	return r
+}
+
+function push_undo() {
+	let copy = {}
+	for (let k in game) {
+		let v = game[k]
+		if (k === "undo") continue
+		else if (k === "log") v = v.length
+		else if (typeof v === "object" && v !== null) v = deep_copy(v)
+		copy[k] = v
+	}
+	game.undo.push(copy)
+}
+
+function pop_undo() {
+	let save_log = game.log
+	let save_undo = game.undo
+	game = save_undo.pop()
+	save_log.length = game.log
+	game.log = save_log
+	game.undo = save_undo
+}
+
+function clear_undo() {
+	game.undo = []
+}
+
+// Clears the undo stack whenever the active player changes, so players
+// can only undo their own actions within their current turn.
+function set_active_player(p) {
+	if (game.active_player !== p)
+		clear_undo()
+	game.active_player = p
+}
+
 // ── Role / index utilities ────────────────────────────────────────
 
 function role_to_idx(role) {
@@ -291,6 +334,7 @@ function add_log(msg) {
 // ── Phase transitions ─────────────────────────────────────────────
 
 function start_bid() {
+	clear_undo()
 	game.active_box = active_company_indices()
 	const order = turn_order()
 	for (const s of game.turn_track) {
@@ -305,6 +349,7 @@ function start_bid() {
 }
 
 function start_buy_shares() {
+	clear_undo()
 	game.active_box = active_company_indices()
 	for (const s of game.turn_track) { s.bottom_player = null; s.cube = null }
 	game.phase = "buy_shares"
@@ -318,6 +363,7 @@ function start_buy_shares() {
 }
 
 function start_build_roads() {
+	clear_undo()
 	game.active_box = active_company_indices()
 	for (const s of game.turn_track) { s.bottom_player = null; s.cube = null }
 	game.phase = "build_roads"
@@ -333,7 +379,7 @@ function start_build_roads() {
 		roads_built: 0,
 	}
 	if (!game.active_box.length || !order.length) { start_claim_land(); return }
-	game.active_player = order[0]
+	set_active_player(order[0])
 }
 
 function advance_draft() {
@@ -349,7 +395,7 @@ function advance_draft() {
 		return
 	}
 	if (!game.active_box.length) { start_claim_land(); return }
-	game.active_player = br.draft_queue[0]
+	set_active_player(br.draft_queue[0])
 }
 
 function next_builder() {
@@ -363,8 +409,8 @@ function next_builder() {
 	br.current_builder = br.build_queue.shift()
 	const bp = game.players[br.current_builder].shares.filter(s => s === ci).length
 	br.build_points_remaining = bp
-	game.active_player = br.current_builder
 	add_log(`${game.companies[ci].name}: P${br.current_builder + 1} (${bp} BP).`)
+	set_active_player(br.current_builder)
 }
 
 function has_valid_claim(player) {
@@ -382,10 +428,11 @@ function claim_advance() {
 		add_log(`P${p + 1} auto-skipped (${reason}).`)
 	}
 	if (!game.claim_land.pending.length) { end_round(); return }
-	game.active_player = game.claim_land.pending[0]
+	set_active_player(game.claim_land.pending[0])
 }
 
 function start_claim_land() {
+	clear_undo()
 	// 7-share shutdown
 	for (let ci = 0; ci < game.companies.length; ci++) {
 		const co = game.companies[ci]
@@ -422,6 +469,7 @@ function do_initial_pick(player, action, arg) {
 	const ci = arg
 	if (!game.active_box.includes(ci)) throw new Error("Company not available")
 	if (game.players[player].shares.includes(ci)) throw new Error("Must pick a different company from your first")
+	push_undo()
 	game.active_box.splice(game.active_box.indexOf(ci), 1)
 	game.players[player].shares.push(ci)
 	game.companies[ci].shares.push(player)
@@ -429,8 +477,9 @@ function do_initial_pick(player, action, arg) {
 	if (slot) slot.cube = ci
 	add_log(`P${player + 1} picks ${game.companies[ci].name}.`)
 	if (game.initial_share_pick_queue.length > 0) {
-		game.active_player = game.initial_share_pick_queue.shift()
-		add_log(`P${game.active_player + 1}: pick your second share.`)
+		const next = game.initial_share_pick_queue.shift()
+		add_log(`P${next + 1}: pick your second share.`)
+		set_active_player(next)
 	} else {
 		add_log("All shares dealt!")
 		start_bid()
@@ -439,6 +488,7 @@ function do_initial_pick(player, action, arg) {
 
 function do_bid(player, action, arg) {
 	if (!game.bid.active.includes(player)) throw new Error("Not in bid")
+	push_undo()
 	if (action === "pass") {
 		game.bid.active.splice(game.bid.active.indexOf(player), 1)
 		game.bid.passed.push(player)
@@ -460,7 +510,7 @@ function do_bid(player, action, arg) {
 			start_buy_shares()
 			return
 		}
-		game.active_player = game.bid.active[0]
+		set_active_player(game.bid.active[0])
 	} else if (action === "raise") {
 		if (player !== game.bid.active[0]) throw new Error("Not your turn to raise")
 		const amount = arg
@@ -473,7 +523,7 @@ function do_bid(player, action, arg) {
 		add_log(`P${player + 1} bids $${amount}.`)
 		game.bid.active.splice(game.bid.active.indexOf(player), 1)
 		game.bid.active.push(player)
-		game.active_player = game.bid.active[0]
+		set_active_player(game.bid.active[0])
 	} else {
 		throw new Error("Unknown bid action: " + action)
 	}
@@ -488,6 +538,7 @@ function do_buy(player, action, arg) {
 	const bid_amt = game.bid.bids[player] || 0
 	const cost = game.players[player].disc_on_track === 1 ? bid_amt : Math.ceil(bid_amt / 2)
 	if (game.players[player].cash < cost) throw new Error("Not enough cash")
+	push_undo()
 	game.players[player].cash -= cost
 	game.companies[ci].treasury += cost
 	game.players[player].shares.push(ci)
@@ -501,7 +552,7 @@ function do_buy(player, action, arg) {
 		start_build_roads()
 		return
 	}
-	game.active_player = game.buy_shares.pending[0]
+	set_active_player(game.buy_shares.pending[0])
 }
 
 function do_build_roads(player, action, arg) {
@@ -510,6 +561,7 @@ function do_build_roads(player, action, arg) {
 	if (br.state === "draft") {
 		if (player !== br.draft_queue[0]) throw new Error("Not your turn to pick")
 		if (action !== "pick_company") throw new Error("Must pick a company")
+		push_undo()
 		const ci = arg
 		if (!game.active_box.includes(ci)) throw new Error("Company not available")
 		game.active_box.splice(game.active_box.indexOf(ci), 1)
@@ -534,6 +586,7 @@ function do_build_roads(player, action, arg) {
 	}
 	// Building sub-phase
 	if (player !== br.current_builder) throw new Error("Not your turn to build")
+	push_undo()
 	const ci = br.current_company
 	const co = game.companies[ci]
 	if (action === "pass_build") {
@@ -587,6 +640,7 @@ function do_claim(player, action, arg) {
 	if (hs.disc !== null)             throw new Error("Already claimed")
 	if (hs.roads.length > 0)          throw new Error("Hex has a road")
 	if (game.players[player].claims_left <= 0) throw new Error("No claims left")
+	push_undo()
 	hs.disc = player
 	game.players[player].claims_left--
 	game.claim_land.pending.shift()
@@ -703,6 +757,13 @@ exports.setup = function (seed, scenario, options) {
 exports.action = function (state, current, action, arg) {
 	load_game(state)
 	const player = role_to_idx(current)
+
+	if (action === "undo") {
+		if (!game.undo || !game.undo.length) throw new Error("Nothing to undo")
+		if (game.active_player !== player) throw new Error("Not your turn to undo")
+		pop_undo()
+		return save_game()
+	}
 
 	switch (game.phase) {
 	case "initial_share_pick": do_initial_pick(player, action, arg); break
@@ -822,6 +883,8 @@ exports.view = function (state, current) {
 		if (claimable.length) view.actions.claim = claimable
 		view.prompt = "Click any highlighted hex to place your claim disc."
 	}
+
+	view.actions.undo = (game.undo && game.undo.length > 0) ? 1 : 0
 
 	return view
 }
