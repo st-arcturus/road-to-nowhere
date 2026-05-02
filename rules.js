@@ -411,6 +411,24 @@ function next_builder() {
 	br.build_points_remaining = bp
 	add_log(`${game.companies[ci].name}: P${br.current_builder + 1} (${bp} BP).`)
 	set_active_player(br.current_builder)
+	if (!has_any_build(ci, bp)) game.waiting_end_turn = true
+}
+
+function advance_bid() {
+	if (game.bid.active.length === 0) {
+		start_buy_shares()
+	} else {
+		set_active_player(game.bid.active[0])
+	}
+}
+
+function advance_buy() {
+	if (!game.buy_shares.pending.length || !game.active_box.length) {
+		for (const p of game.buy_shares.pending) game.players[p].last_bid = null
+		start_build_roads()
+	} else {
+		set_active_player(game.buy_shares.pending[0])
+	}
 }
 
 function has_valid_claim(player) {
@@ -507,10 +525,8 @@ function do_bid(player, action, arg) {
 			game.bid.active = []
 			for (const s of game.turn_track) s.bottom_player = null
 			add_log(`P${w + 1} wins 1st at $${game.bid.current_bid}.`)
-			start_buy_shares()
-			return
 		}
-		set_active_player(game.bid.active[0])
+		game.waiting_end_turn = true
 	} else if (action === "raise") {
 		if (player !== game.bid.active[0]) throw new Error("Not your turn to raise")
 		const amount = arg
@@ -523,7 +539,7 @@ function do_bid(player, action, arg) {
 		add_log(`P${player + 1} bids $${amount}.`)
 		game.bid.active.splice(game.bid.active.indexOf(player), 1)
 		game.bid.active.push(player)
-		set_active_player(game.bid.active[0])
+		game.waiting_end_turn = true
 	} else {
 		throw new Error("Unknown bid action: " + action)
 	}
@@ -547,12 +563,7 @@ function do_buy(player, action, arg) {
 	game.buy_shares.pending.shift()
 	game.players[player].last_bid = null
 	add_log(`P${player + 1} buys ${game.companies[ci].name} for $${cost}.`)
-	if (!game.buy_shares.pending.length || !game.active_box.length) {
-		for (const p of game.buy_shares.pending) game.players[p].last_bid = null
-		start_build_roads()
-		return
-	}
-	set_active_player(game.buy_shares.pending[0])
+	game.waiting_end_turn = true
 }
 
 function do_build_roads(player, action, arg) {
@@ -589,13 +600,6 @@ function do_build_roads(player, action, arg) {
 	push_undo()
 	const ci = br.current_company
 	const co = game.companies[ci]
-	if (action === "pass_build") {
-		if (has_any_build(ci, br.build_points_remaining))
-			throw new Error("Must build — legal moves exist")
-		add_log(`P${player + 1} done building.`)
-		next_builder()
-		return
-	}
 	if (action === "build") {
 		const hex_id = arg
 		const hs = game.hex_state[hex_id]
@@ -622,7 +626,7 @@ function do_build_roads(player, action, arg) {
 		check_all_inactive()
 		if (!co.active) { advance_draft(); return }
 		if (br.build_points_remaining === 0 || !has_any_build(ci, br.build_points_remaining)) {
-			next_builder()
+			game.waiting_end_turn = true
 			return
 		}
 		return
@@ -645,7 +649,7 @@ function do_claim(player, action, arg) {
 	game.players[player].claims_left--
 	game.claim_land.pending.shift()
 	add_log(`P${player + 1} claims ${hex_id}.`)
-	claim_advance()
+	game.waiting_end_turn = true
 }
 
 // ── exports.static_view ───────────────────────────────────────────
@@ -691,6 +695,7 @@ exports.setup = function (seed, scenario, options) {
 		claim_land: { pending: [] },
 		log: [`Road to Nowhere — ${pc} players, ${cc} companies.`],
 		undo: [],
+		waiting_end_turn: false,
 		final_scores: null,
 	}
 
@@ -765,6 +770,21 @@ exports.action = function (state, current, action, arg) {
 		return save_game()
 	}
 
+	if (action === "end_turn") {
+		if (!game.waiting_end_turn) throw new Error("No turn to end")
+		if (game.active_player !== player) throw new Error("Not your turn")
+		game.waiting_end_turn = false
+		clear_undo()
+		switch (game.phase) {
+		case "bid":         advance_bid();   break
+		case "buy_shares":  advance_buy();   break
+		case "build_roads": next_builder();  break
+		case "claim_land":  claim_advance(); break
+		default: throw new Error(`end_turn not valid in phase: ${game.phase}`)
+		}
+		return save_game()
+	}
+
 	switch (game.phase) {
 	case "initial_share_pick": do_initial_pick(player, action, arg); break
 	case "bid":                do_bid(player, action, arg);          break
@@ -833,6 +853,17 @@ exports.view = function (state, current) {
 		return view
 	}
 
+	if (game.waiting_end_turn) {
+		const has_undo = game.undo && game.undo.length > 0
+		let prompt = "Your actions are complete."
+		if (game.phase === "build_roads" && game.build_roads.state === "building"
+				&& game.build_roads.build_points_remaining > 0)
+			prompt = `No legal moves — ${game.build_roads.build_points_remaining} BP unused.`
+		view.actions = { end_turn: 1, undo: has_undo ? 1 : 0 }
+		view.prompt = prompt
+		return view
+	}
+
 	view.actions = {}
 
 	if (game.phase === "initial_share_pick") {
@@ -869,8 +900,6 @@ exports.view = function (state, current) {
 				})
 				if (buildable.length) view.actions.build = buildable
 			}
-			if (!has_any_build(ci, br.build_points_remaining))
-				view.actions.pass_build = 1
 			view.prompt = `Building ${game.companies[br.current_company]?.name || ""}. ${br.build_points_remaining} BP left.`
 		}
 	}

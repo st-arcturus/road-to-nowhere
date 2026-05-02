@@ -581,11 +581,11 @@ function render_actions() {
 		})
 	}
 
-	// Build roads — building
-	if (view.actions.pass_build) {
+	// End turn confirmation
+	if (view.actions.end_turn) {
 		const btn = document.createElement("button")
-		btn.textContent = "Done Building (no legal moves)"
-		btn.onclick = () => send_action("pass_build")
+		btn.textContent = "End Turn"
+		btn.onclick = () => send_action("end_turn")
 		btn_el.appendChild(btn)
 	}
 
