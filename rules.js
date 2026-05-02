@@ -473,6 +473,17 @@ function start_claim_land() {
 	claim_advance()
 }
 
+function advance_initial_pick() {
+	if (game.initial_share_pick_queue.length > 0) {
+		const next = game.initial_share_pick_queue.shift()
+		add_log(`P${next + 1}: pick your second share.`)
+		set_active_player(next)
+	} else {
+		add_log("All shares dealt!")
+		start_bid()
+	}
+}
+
 function end_round() {
 	game.round++
 	add_log(`=== Round ${game.round} ===`)
@@ -494,14 +505,7 @@ function do_initial_pick(player, action, arg) {
 	const slot = game.turn_track.find(s => s.player === player)
 	if (slot) slot.cube = ci
 	add_log(`P${player + 1} picks ${game.companies[ci].name}.`)
-	if (game.initial_share_pick_queue.length > 0) {
-		const next = game.initial_share_pick_queue.shift()
-		add_log(`P${next + 1}: pick your second share.`)
-		set_active_player(next)
-	} else {
-		add_log("All shares dealt!")
-		start_bid()
-	}
+	game.waiting_end_turn = true
 }
 
 function do_bid(player, action, arg) {
@@ -776,10 +780,11 @@ exports.action = function (state, current, action, arg) {
 		game.waiting_end_turn = false
 		clear_undo()
 		switch (game.phase) {
-		case "bid":         advance_bid();   break
-		case "buy_shares":  advance_buy();   break
-		case "build_roads": next_builder();  break
-		case "claim_land":  claim_advance(); break
+		case "initial_share_pick": advance_initial_pick(); break
+		case "bid":                advance_bid();          break
+		case "buy_shares":         advance_buy();          break
+		case "build_roads":        next_builder();         break
+		case "claim_land":         claim_advance();        break
 		default: throw new Error(`end_turn not valid in phase: ${game.phase}`)
 		}
 		return save_game()
