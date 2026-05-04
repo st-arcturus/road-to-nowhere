@@ -331,8 +331,8 @@ function render_left() {
 		span.className = "tplayer-badge"
 		span.style.background = PLAYER_COLORS[pi] || "#888"
 		span.style.color = PLAYER_LIGHT[pi] ? "#111" : "#f0f0f0"
-		span.textContent = `P${pi + 1}`
-		span.title = `Player ${pi + 1}`
+		span.textContent = PLAYER_NAMES[pi]?.[0] ?? "?"
+		span.title = PLAYER_NAMES[pi] ?? `Player ${pi + 1}`
 		return span
 	}
 
