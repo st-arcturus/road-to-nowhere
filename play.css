@@ -199,11 +199,10 @@ aside #log {
 }
 
 .lpanel .role_stat {
-  font-size: 12px;
   line-height: 1.4;
 }
 
-.rstat-cash   { font-weight: 500; }
+.rstat-cash   { }
 .rstat-bid    { font-size: 11px; opacity: 0.75; }
 
 .role_pips {

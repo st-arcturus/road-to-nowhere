@@ -38,11 +38,13 @@ const MAP = {
 
 // ── Scenarios & Roles ─────────────────────────────────────────────
 
+const ROLE_NAMES = ["Blue", "Purple", "Magenta", "Orange", "Yellow"]
+
 exports.scenarios = [ "3P", "4P", "5P" ]
 
 exports.roles = function (scenario) {
 	const n = { "3P": 3, "4P": 4, "5P": 5 }[scenario]
-	return Array.from({ length: n }, (_, i) => `P${i + 1}`)
+	return ROLE_NAMES.slice(0, n)
 }
 
 // ── Module-level game variable ────────────────────────────────────
@@ -54,9 +56,7 @@ function load_game(state) {
 }
 
 function save_game() {
-	// RTT reads state.active as the current player's role string ("P1"…"P5")
-	// and treats "None" as game-over. Keep it in sync on every save.
-	game.active = game.phase === "game_end" ? "None" : "P" + (game.active_player + 1)
+	game.active = game.phase === "game_end" ? "None" : ROLE_NAMES[game.active_player]
 	return game
 }
 
@@ -122,7 +122,9 @@ function set_active_player(p) {
 // ── Role / index utilities ────────────────────────────────────────
 
 function role_to_idx(role) {
-	return parseInt(role.slice(1)) - 1
+	const idx = ROLE_NAMES.indexOf(role)
+	if (idx === -1) throw new Error("Unknown role: " + role)
+	return idx
 }
 
 // ── Map helpers ───────────────────────────────────────────────────
@@ -323,7 +325,7 @@ function compute_scores() {
 	})
 	game.final_scores = scores
 	game.result = "P" + (scores[0].player + 1)
-	for (const s of scores) add_log(`P${s.player + 1}: $${s.total}`)
+	for (const s of scores) add_log(`${ROLE_NAMES[s.player]}: $${s.total}`)
 }
 
 function add_log(msg) {
@@ -409,7 +411,7 @@ function next_builder() {
 	br.current_builder = br.build_queue.shift()
 	const bp = game.players[br.current_builder].shares.filter(s => s === ci).length
 	br.build_points_remaining = bp
-	add_log(`${game.companies[ci].name}: P${br.current_builder + 1} (${bp} BP).`)
+	add_log(`${game.companies[ci].name}: ${ROLE_NAMES[br.current_builder]} (${bp} BP).`)
 	set_active_player(br.current_builder)
 	if (!has_any_build(ci, bp)) game.waiting_end_turn = true
 }
@@ -443,7 +445,7 @@ function claim_advance() {
 		if (has_valid_claim(p)) break
 		game.claim_land.pending.shift()
 		const reason = game.players[p].claims_left <= 0 ? "no claims remaining" : "no valid hexes"
-		add_log(`P${p + 1} auto-skipped (${reason}).`)
+		add_log(`${ROLE_NAMES[p]} auto-skipped (${reason}).`)
 	}
 	if (!game.claim_land.pending.length) { end_round(); return }
 	set_active_player(game.claim_land.pending[0])
@@ -476,7 +478,7 @@ function start_claim_land() {
 function advance_initial_pick() {
 	if (game.initial_share_pick_queue.length > 0) {
 		const next = game.initial_share_pick_queue.shift()
-		add_log(`P${next + 1}: pick your second share.`)
+		add_log(`${ROLE_NAMES[next]}: pick your second share.`)
 		set_active_player(next)
 	} else {
 		add_log("All shares dealt!")
@@ -504,7 +506,7 @@ function do_initial_pick(player, action, arg) {
 	game.companies[ci].shares.push(player)
 	const slot = game.turn_track.find(s => s.player === player)
 	if (slot) slot.cube = ci
-	add_log(`P${player + 1} picks ${game.companies[ci].name}.`)
+	add_log(`${ROLE_NAMES[player]} picks ${game.companies[ci].name}.`)
 	game.waiting_end_turn = true
 }
 
@@ -520,7 +522,7 @@ function do_bid(player, action, arg) {
 			game.players[player].disc_on_track = slot_idx + 1
 		}
 		for (const s of game.turn_track) if (s.bottom_player === player) s.bottom_player = null
-		add_log(`P${player + 1} passes.`)
+		add_log(`${ROLE_NAMES[player]} passes.`)
 		if (game.bid.active.length === 1) {
 			const w = game.bid.active[0]
 			game.turn_track[0].player = w
@@ -528,7 +530,7 @@ function do_bid(player, action, arg) {
 			game.bid.bids[w] = game.bid.current_bid
 			game.bid.active = []
 			for (const s of game.turn_track) s.bottom_player = null
-			add_log(`P${w + 1} wins 1st at $${game.bid.current_bid}.`)
+			add_log(`${ROLE_NAMES[w]} wins 1st at $${game.bid.current_bid}.`)
 		}
 		game.waiting_end_turn = true
 	} else if (action === "raise") {
@@ -540,7 +542,7 @@ function do_bid(player, action, arg) {
 		game.bid.current_bid = amount
 		game.bid.bids[player] = amount
 		game.players[player].last_bid = amount
-		add_log(`P${player + 1} bids $${amount}.`)
+		add_log(`${ROLE_NAMES[player]} bids $${amount}.`)
 		game.bid.active.splice(game.bid.active.indexOf(player), 1)
 		game.bid.active.push(player)
 		game.waiting_end_turn = true
@@ -566,7 +568,7 @@ function do_buy(player, action, arg) {
 	game.active_box.splice(game.active_box.indexOf(ci), 1)
 	game.buy_shares.pending.shift()
 	game.players[player].last_bid = null
-	add_log(`P${player + 1} buys ${game.companies[ci].name} for $${cost}.`)
+	add_log(`${ROLE_NAMES[player]} buys ${game.companies[ci].name} for $${cost}.`)
 	game.waiting_end_turn = true
 }
 
@@ -581,7 +583,7 @@ function do_build_roads(player, action, arg) {
 		if (!game.active_box.includes(ci)) throw new Error("Company not available")
 		game.active_box.splice(game.active_box.indexOf(ci), 1)
 		add_log(`=co=${game.companies[ci].key}`)
-		add_log(`P${player + 1} activates ${game.companies[ci].name}.`)
+		add_log(`${ROLE_NAMES[player]} activates ${game.companies[ci].name}.`)
 		check_inactive(ci)
 		if (!game.companies[ci].active) { advance_draft(); return }
 		const order = turn_order()
@@ -622,11 +624,11 @@ function do_build_roads(player, action, arg) {
 		if (hs.disc !== null) {
 			co.claims.push(hex_id)
 			co.claim_owners.push(hs.disc)
-			add_log(`${co.name} builds on P${hs.disc + 1}'s claim!`)
+			add_log(`${co.name} builds on ${ROLE_NAMES[hs.disc]}'s claim!`)
 			hs.disc = null
 		}
 		br.roads_built++
-		add_log(`P${player + 1} builds ${co.name} at ${hex_id} (${hs.terrain}).`)
+		add_log(`${ROLE_NAMES[player]} builds ${co.name} at ${hex_id} (${hs.terrain}).`)
 		check_all_inactive()
 		if (!co.active) { advance_draft(); return }
 		if (br.build_points_remaining === 0 || !has_any_build(ci, br.build_points_remaining)) {
@@ -652,7 +654,7 @@ function do_claim(player, action, arg) {
 	hs.disc = player
 	game.players[player].claims_left--
 	game.claim_land.pending.shift()
-	add_log(`P${player + 1} claims ${hex_id}.`)
+	add_log(`${ROLE_NAMES[player]} claims ${hex_id}.`)
 	game.waiting_end_turn = true
 }
 
@@ -756,7 +758,7 @@ exports.setup = function (seed, scenario, options) {
 	game.active_player = rev_order[0]
 	game.initial_share_pick_queue = rev_order.slice(1)
 
-	add_log(`P${rev_order[0] + 1}: pick your second share.`)
+	add_log(`${ROLE_NAMES[rev_order[0]]}: pick your second share.`)
 
 	return save_game()
 }
@@ -854,7 +856,7 @@ exports.view = function (state, current) {
 	}
 
 	if (!is_active) {
-		view.prompt = `Waiting for P${game.active_player + 1}\u2026`
+		view.prompt = `Waiting for ${ROLE_NAMES[game.active_player]}\u2026`
 		return view
 	}
 

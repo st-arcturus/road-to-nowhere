@@ -3,11 +3,11 @@
 // ── Display constants ─────────────────────────────────────────────
 
 const COMPANY_DEFS = [
-	{ key: "hovering", name: "Hovering Highways",  color: "#332288", light: true  },
+	{ key: "hovering", name: "Hovering Highways",  color: "#332288", light: false },
 	{ key: "muddy",    name: "Muddy Machinery",     color: "#44AA99", light: true  },
 	{ key: "scuttle",  name: "Scuttle Surveyors",   color: "#88CCEE", light: true  },
 	{ key: "whooping", name: "Whooping Workzone",   color: "#DDCC77", light: true  },
-	{ key: "buzzing",  name: "Buzzing Blacktop",    color: "#CC6677", light: false },
+	{ key: "buzzing",  name: "Buzzing Blacktop",    color: "#CC6677", light: true  },
 	{ key: "coiled",   name: "Coiled Construction", color: "#882255", light: false },
 ]
 
@@ -15,6 +15,7 @@ const ROAD_TRACK_START = 25
 
 const PLAYER_COLORS = [ "#648FFF", "#785EF0", "#DC267F", "#FE6100", "#FFB000" ]
 const PLAYER_LIGHT  = [ false,     false,     false,     true,      true     ]
+const PLAYER_NAMES  = [ "Blue",    "Purple",  "Magenta", "Orange",  "Yellow" ]
 
 // Map rows — needed client-side for terrain lookup and hex geometry
 const MAP_ROWS = [
@@ -419,11 +420,16 @@ function on_log(text) {
 
 function render_players() {
 	view.players.forEach((p, i) => {
-		const role_el = document.getElementById(`role_P${i + 1}`)
+		const role_el = document.getElementById(`role_${PLAYER_NAMES[i]}`)
 		if (!role_el) return
 
 		role_el.style.backgroundColor = PLAYER_COLORS[i] || "#888"
 		role_el.style.color = PLAYER_LIGHT[i] ? "#111" : "#f0f0f0"
+
+		const name_el = role_el.querySelector(".role_name")
+		if (name_el) name_el.textContent = p.disc_on_track
+			? `${PLAYER_NAMES[i]} (P${p.disc_on_track})`
+			: PLAYER_NAMES[i]
 
 		const stat = role_el.querySelector(".role_stat")
 		if (stat) {
@@ -438,11 +444,6 @@ function render_players() {
 			role_el.appendChild(pips_el)
 		}
 		pips_el.innerHTML = ""
-
-		const pos = document.createElement("span")
-		pos.className = "rstat-pos"
-		pos.textContent = p.disc_on_track ? `${p.disc_on_track}.` : "—"
-		pips_el.appendChild(pos)
 
 		const share_counts = {}
 		p.shares.forEach(ci => { share_counts[ci] = (share_counts[ci] || 0) + 1 })
