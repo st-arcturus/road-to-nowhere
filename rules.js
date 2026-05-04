@@ -727,6 +727,7 @@ exports.setup = function (seed, scenario, options) {
 			cash: starting_cash,
 			shares: [],
 			disc_on_track: null,
+			initial_order: null,
 			last_bid: null,
 			claims_left: 10,
 		})
@@ -737,6 +738,7 @@ exports.setup = function (seed, scenario, options) {
 	for (let i = 0; i < pc; i++) {
 		game.turn_track.push({ player: init_order[i], cube: null, bottom_player: null })
 		game.players[init_order[i]].disc_on_track = i + 1
+		game.players[init_order[i]].initial_order = i + 1
 	}
 
 	// Deal one first share per player (direct assignment, not through active_box)

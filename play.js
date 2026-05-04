@@ -14,7 +14,7 @@ const COMPANY_DEFS = [
 const ROAD_TRACK_START = 25
 
 const PLAYER_COLORS = [ "#648FFF", "#785EF0", "#DC267F", "#FE6100", "#FFB000" ]
-const PLAYER_LIGHT  = [ false,     false,     false,     true,      true     ]
+const PLAYER_LIGHT  = [ true,      true,      true,      true,      true     ]
 const PLAYER_NAMES  = [ "Blue",    "Purple",  "Magenta", "Orange",  "Yellow" ]
 
 // Map rows — needed client-side for terrain lookup and hex geometry
@@ -425,6 +425,7 @@ function render_players() {
 
 		role_el.style.backgroundColor = PLAYER_COLORS[i] || "#888"
 		role_el.style.color = PLAYER_LIGHT[i] ? "#111" : "#f0f0f0"
+		role_el.style.order = p.initial_order || (i + 1)
 
 		const name_el = role_el.querySelector(".role_name")
 		if (name_el) name_el.textContent = p.disc_on_track

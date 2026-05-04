@@ -190,6 +190,11 @@ aside #log {
 
 /* ── Role cards in left panel ─────────────────────────────────── */
 
+.lpanel #roles {
+  display: flex;
+  flex-direction: column;
+}
+
 .lpanel .role {
   border-bottom-color: #ddd;
 }
