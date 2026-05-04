@@ -3,26 +3,19 @@
 // ── Display constants ─────────────────────────────────────────────
 
 const COMPANY_DEFS = [
-	{ key: "hovering", name: "Hovering Highways",   color: "#56B4E9", light: false },
-	{ key: "muddy",    name: "Muddy Machinery",      color: "#CC79A7", light: false },
-	{ key: "scuttle",  name: "Scuttle Surveyors",    color: "#7D3C00", light: false },
-	{ key: "whooping", name: "Whooping Workzone",    color: "#191919", light: false },
-	{ key: "buzzing",  name: "Buzzing Blacktop",     color: "#E69F00", light: true  },
-	{ key: "coiled",   name: "Coiled Construction",  color: "#A8F1A4", light: true  },
+	{ key: "hovering", name: "Hovering Highways",  color: "#332288", light: false },
+	{ key: "muddy",    name: "Muddy Machinery",     color: "#44AA99", light: true  },
+	{ key: "scuttle",  name: "Scuttle Surveyors",   color: "#88CCEE", light: true  },
+	{ key: "whooping", name: "Whooping Workzone",   color: "#DDCC77", light: true  },
+	{ key: "buzzing",  name: "Buzzing Blacktop",    color: "#CC6677", light: true  },
+	{ key: "coiled",   name: "Coiled Construction", color: "#882255", light: false },
 ]
 
 const ROAD_TRACK_START = 25
 
-const PLAYER_COLORS = [ "#0072B2", "#D55E00", "#9467BD", "#DC267F", "#44AA99" ]
-
-// Light pastel tint for player backgrounds on the white left panel
-function player_bg_light(i) {
-	const c = PLAYER_COLORS[i] || "#888"
-	const r = parseInt(c.slice(1,3), 16)
-	const g = parseInt(c.slice(3,5), 16)
-	const b = parseInt(c.slice(5,7), 16)
-	return `rgb(${Math.round(r*.15+245*.85)},${Math.round(g*.15+245*.85)},${Math.round(b*.15+245*.85)})`
-}
+const PLAYER_COLORS = [ "#648FFF", "#785EF0", "#DC267F", "#FE6100", "#FFB000" ]
+const PLAYER_LIGHT  = [ true,      true,      true,      true,      true     ]
+const PLAYER_NAMES  = [ "Blue",    "Purple",  "Magenta", "Orange",  "Yellow" ]
 
 // Map rows — needed client-side for terrain lookup and hex geometry
 const MAP_ROWS = [
@@ -51,16 +44,9 @@ const HEX_SIZE = 26
 const HEX_W = Math.sqrt(3) * HEX_SIZE
 const HEX_H = 2 * HEX_SIZE
 
-const TFILL = {
-	plain:    "#2a2820",
-	river:    "#192e3e",
-	mountain: "#312e28",
-	desert:   "#362e18",
-	city:     "#3a3845",
-}
+const TFILL = "#e8e8e8"
 
-const TICONS = { mountain: "▲", river: "≋", desert: "·" }
-const TICOL  = { mountain: "#6a5f54", river: "#3e7898", desert: "#746c3a" }
+const TICONS = { mountain: { g: "▲", sz: 25 }, river: { g: "≋", sz: 25 }, desert: { g: "☀", sz: 25 } }
 
 // ── Map geometry ──────────────────────────────────────────────────
 
@@ -98,8 +84,10 @@ let bid_amount = 1
 // ── RTT client callbacks ──────────────────────────────────────────
 
 function on_init(scenario, options) {
-	// scenario ("3P"/"4P"/"5P") and options are fixed at game creation.
-	// All dynamic state arrives through the view in on_update.
+	document.getElementById("lpanel-toggle")?.addEventListener("click", () => {
+		const collapsed = document.body.classList.toggle("lpanel-collapsed")
+		document.getElementById("lpanel-toggle").textContent = collapsed ? "▶" : "◀"
+	})
 }
 
 function get_phase_label() {
@@ -142,6 +130,15 @@ function render_map(skip) {
 	const claimable = new Set((view.actions?.claim  || []))
 	const ns = "http://www.w3.org/2000/svg"
 
+	const build_ci    = view.build_roads?.current_company
+	const build_color = (build_ci != null ? COMPANY_DEFS[build_ci]?.color : null) || "#888"
+	const claim_color = PLAYER_COLORS[view.active_player] || "#888"
+
+	function hex_rgba(hex, a) {
+		const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16)
+		return `rgba(${r},${g},${b},${a})`
+	}
+
 	for (let r = 0; r < max_r; r++) {
 		const rd = MAP_ROWS[r]
 		for (let c = 0; c < rd.count; c++) {
@@ -155,45 +152,63 @@ function render_map(skip) {
 			// Hex fill
 			const poly = document.createElementNS(ns, "polygon")
 			poly.setAttribute("points", hex_corners(cx, cy, HEX_SIZE - 1))
-			poly.setAttribute("fill", TFILL[terrain])
+			poly.setAttribute("fill", TFILL)
 			if (buildable.has(hex_id)) {
-				poly.setAttribute("stroke", "#c8a84b"); poly.setAttribute("stroke-width", "2")
+				poly.setAttribute("stroke", build_color); poly.setAttribute("stroke-width", "2")
 			} else if (claimable.has(hex_id)) {
-				poly.setAttribute("stroke", "#56B4E9"); poly.setAttribute("stroke-width", "1.8")
+				poly.setAttribute("stroke", claim_color); poly.setAttribute("stroke-width", "1.8")
 			} else {
-				poly.setAttribute("stroke", "none"); poly.setAttribute("stroke-width", "0")
+				poly.setAttribute("stroke", "#3a3a3a"); poly.setAttribute("stroke-width", "0.8")
 			}
 			g.appendChild(poly)
 
-			// Terrain icon / city buildings
+			// Claim disc (below terrain icon and cubes)
+			if (hs?.disc != null) {
+				const disc = document.createElementNS(ns, "circle")
+				disc.setAttribute("cx", cx); disc.setAttribute("cy", cy); disc.setAttribute("r", "13")
+				disc.setAttribute("fill", PLAYER_COLORS[hs.disc] || "#aaa")
+				disc.setAttribute("stroke", PLAYER_COLORS[hs.disc] || "#aaa")
+				disc.setAttribute("stroke-width", "1")
+				disc.setAttribute("pointer-events", "none")
+				g.appendChild(disc)
+			}
+
+			// Terrain icon / city buildings (above claims, below cubes)
 			if (terrain === "city") {
-				const bld_col = "#aeacc3"
 				const b1 = document.createElementNS(ns, "rect")
-				b1.setAttribute("x",      (cx - 13.1).toFixed(1))
+				b1.setAttribute("x",      (cx - 10.6).toFixed(1))
 				b1.setAttribute("y",      (cy - 12.6).toFixed(1))
 				b1.setAttribute("width",  "12.6")
 				b1.setAttribute("height", "25.2")
-				b1.setAttribute("fill", bld_col)
+				b1.setAttribute("fill", TFILL)
+				b1.setAttribute("stroke", "#3a3a3a")
+				b1.setAttribute("stroke-width", "1")
 				b1.setAttribute("pointer-events", "none")
 				g.appendChild(b1)
 				const b2 = document.createElementNS(ns, "rect")
-				b2.setAttribute("x",      (cx - 1.4).toFixed(1))
+				b2.setAttribute("x",      (cx - 3.9).toFixed(1))
 				b2.setAttribute("y",      (cy - 5.4).toFixed(1))
 				b2.setAttribute("width",  "14.4")
 				b2.setAttribute("height", "18")
-				b2.setAttribute("fill", bld_col)
+				b2.setAttribute("fill", TFILL)
+				b2.setAttribute("stroke", "#3a3a3a")
+				b2.setAttribute("stroke-width", "1")
 				b2.setAttribute("pointer-events", "none")
 				g.appendChild(b2)
 			} else if (TICONS[terrain]) {
+				const icon = TICONS[terrain]
 				const t = document.createElementNS(ns, "text")
-				t.setAttribute("x", cx); t.setAttribute("y", cy + 4)
-				t.setAttribute("text-anchor", "middle"); t.setAttribute("font-size", "11")
-				t.setAttribute("fill", TICOL[terrain]); t.setAttribute("pointer-events", "none")
-				t.textContent = TICONS[terrain]
+				t.setAttribute("x", cx); t.setAttribute("y", cy)
+				t.setAttribute("text-anchor", "middle")
+				t.setAttribute("dominant-baseline", "central")
+				t.setAttribute("font-size", icon.sz)
+				t.setAttribute("fill", "#3a3a3a")
+				t.setAttribute("pointer-events", "none")
+				t.textContent = icon.g
 				g.appendChild(t)
 			}
 
-			// Road cubes
+			// Road cubes (on top of terrain icon)
 			if (hs?.roads?.length) {
 				const n = hs.roads.length
 				const S = 12
@@ -223,23 +238,11 @@ function render_map(skip) {
 				}
 			}
 
-			// Claim disc
-			if (hs?.disc != null) {
-				const disc = document.createElementNS(ns, "circle")
-				disc.setAttribute("cx", cx); disc.setAttribute("cy", cy); disc.setAttribute("r", "13")
-				disc.setAttribute("fill", PLAYER_COLORS[hs.disc] || "#aaa")
-				disc.setAttribute("fill-opacity", "0.5")
-				disc.setAttribute("stroke", PLAYER_COLORS[hs.disc] || "#aaa")
-				disc.setAttribute("stroke-width", "1")
-				disc.setAttribute("pointer-events", "none")
-				g.appendChild(disc)
-			}
-
 			// Highlight overlay
 			if (buildable.has(hex_id) || claimable.has(hex_id)) {
 				const ring = document.createElementNS(ns, "polygon")
 				ring.setAttribute("points", hex_corners(cx, cy, HEX_SIZE - 3))
-				ring.setAttribute("fill", buildable.has(hex_id) ? "rgba(200,168,75,0.12)" : "rgba(86,180,233,0.12)")
+				ring.setAttribute("fill", hex_rgba(buildable.has(hex_id) ? build_color : claim_color, 0.12))
 				ring.setAttribute("pointer-events", "none")
 				g.appendChild(ring)
 			}
@@ -260,7 +263,7 @@ function on_hex_click(hex_id) {
 
 function show_tooltip(e, hex_id, terrain, hs) {
 	const tt    = document.getElementById("tt")
-	const parts = [terrain.toUpperCase()]
+	const parts = [terrain.charAt(0).toUpperCase() + terrain.slice(1)]
 	if (terrain === "mountain") parts.push("Cost: 2 BP")
 	if (terrain === "desert")   parts.push("Cost: $1/hex")
 	if (terrain === "river")    parts.push("No consecutive")
@@ -282,8 +285,10 @@ function render_left() {
 		const sv          = Math.ceil((ROAD_TRACK_START - co.road_track) / 2)
 		const shares_left = 7 - co.shares.length
 		const d = document.createElement("div")
+		const def = COMPANY_DEFS[ci]
 		d.className = "co-card" + (co.active ? "" : " inactive")
-		d.style.borderLeft = `3px solid ${COMPANY_DEFS[ci].color}`
+		d.style.backgroundColor = def.color
+		d.style.color = def.light ? "#111" : "#f0f0f0"
 		d.innerHTML = `
 			<div class="co-nm">${co.name.split(" ")[0]}</div>
 			<div class="co-stats">
@@ -308,7 +313,7 @@ function render_left() {
 				const pip = document.createElement("div")
 				pip.className = "claim-counter"
 				pip.style.background = PLAYER_COLORS[owner] || "#aaa"
-				pip.style.color = "#f0f0f0"
+				pip.style.color = PLAYER_LIGHT[owner] ? "#111" : "#f0f0f0"
 				pip.title = `Player ${+owner + 1}`
 				pip.textContent = count
 				row.appendChild(pip)
@@ -325,7 +330,7 @@ function render_left() {
 		const span = document.createElement("div")
 		span.className = "tplayer-badge"
 		span.style.background = PLAYER_COLORS[pi] || "#888"
-		span.style.color = "#fff"
+		span.style.color = PLAYER_LIGHT[pi] ? "#111" : "#f0f0f0"
 		span.textContent = `P${pi + 1}`
 		span.title = `Player ${pi + 1}`
 		return span
@@ -370,7 +375,7 @@ function render_left() {
 	const ab = document.getElementById("abox")
 	ab.innerHTML = ""
 	if (!view.active_box?.length) {
-		ab.innerHTML = '<span style="color:var(--muted);font-size:9px">empty</span>'
+		ab.innerHTML = '<span style="color:gray;font-size:11px">empty</span>'
 	} else {
 		view.active_box.forEach(ci => {
 			const cube = document.createElement("div")
@@ -415,10 +420,17 @@ function on_log(text) {
 
 function render_players() {
 	view.players.forEach((p, i) => {
-		const role_el = document.getElementById(`role_P${i + 1}`)
+		const role_el = document.getElementById(`role_${PLAYER_NAMES[i]}`)
 		if (!role_el) return
 
-		role_el.style.backgroundColor = player_bg_light(i)
+		role_el.style.backgroundColor = PLAYER_COLORS[i] || "#888"
+		role_el.style.color = PLAYER_LIGHT[i] ? "#111" : "#f0f0f0"
+		role_el.style.order = p.initial_order || (i + 1)
+
+		const name_el = role_el.querySelector(".role_name")
+		if (name_el) name_el.textContent = p.disc_on_track
+			? `${PLAYER_NAMES[i]} (P${p.disc_on_track})`
+			: PLAYER_NAMES[i]
 
 		const stat = role_el.querySelector(".role_stat")
 		if (stat) {
@@ -433,11 +445,6 @@ function render_players() {
 			role_el.appendChild(pips_el)
 		}
 		pips_el.innerHTML = ""
-
-		const pos = document.createElement("span")
-		pos.className = "rstat-pos"
-		pos.textContent = p.disc_on_track ? `${p.disc_on_track}.` : "—"
-		pips_el.appendChild(pos)
 
 		const share_counts = {}
 		p.shares.forEach(ci => { share_counts[ci] = (share_counts[ci] || 0) + 1 })
@@ -488,6 +495,16 @@ function render_actions() {
 		span.textContent = (prompt ? " · " : "") + `Bid $${bid_amt} → pay $${cost}${is_1st ? " (1st, full)" : " (half, rounded up)"}`
 		msg_el.appendChild(span)
 	}
+
+	// Build roads — append hex count to prompt
+	if (view.actions.build) {
+		const n = view.actions.build.length
+		const span = document.createElement("span")
+		span.className = "maphint"
+		span.textContent = (prompt ? " · " : "") + `${n} valid hex${n > 1 ? "es" : ""} highlighted — click to build`
+		msg_el.appendChild(span)
+	}
+
 	if (view.actions.pick_share) {
 		view.actions.pick_share.forEach(ci => {
 			const btn = document.createElement("button")
@@ -561,16 +578,11 @@ function render_actions() {
 		})
 	}
 
-	// Build roads — building
-	if (view.actions.build) {
-		const hint = document.createElement("div"); hint.className = "maphint"
-		hint.textContent = `${view.actions.build.length} valid hex${view.actions.build.length > 1 ? "es" : ""} highlighted — click map to build`
-		btn_el.appendChild(hint)
-	}
-	if (view.actions.pass_build) {
+	// End turn confirmation
+	if (view.actions.end_turn) {
 		const btn = document.createElement("button")
-		btn.textContent = "Done Building (no legal moves)"
-		btn.onclick = () => send_action("pass_build")
+		btn.textContent = "End Turn"
+		btn.onclick = () => send_action("end_turn")
 		btn_el.appendChild(btn)
 	}
 
