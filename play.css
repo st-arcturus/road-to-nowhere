@@ -111,8 +111,8 @@ aside #log {
   display: flex;
   align-items: center;
   gap: 5px;
-  padding: 4px 8px 4px 6px;
-  border-bottom: 1px solid #eee;
+  padding: 4px 8px;
+  border-bottom: 1px solid rgba(0,0,0,0.15);
 }
 .co-card:last-child { border-bottom: none; }
 .co-card.inactive   { opacity: .3; }
@@ -122,9 +122,9 @@ aside #log {
 .co-stats     { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; }
 .co-primary   { display: flex; gap: 6px; align-items: baseline; }
 .co-val       { font-weight: 500; }
-.co-treas     { color: gray; }
-.co-claimval  { font-size: 11px; color: gray; }
-.co-secondary { display: flex; gap: 6px; font-size: 11px; color: gray; }
+.co-treas     { opacity: 0.75; }
+.co-claimval  { font-size: 11px; opacity: 0.75; }
+.co-secondary { display: flex; gap: 6px; font-size: 11px; opacity: 0.75; }
 
 .co-claims-row { display: flex; gap: 3px; flex-wrap: wrap; min-height: 0; margin-top: 3px; }
 

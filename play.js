@@ -3,12 +3,12 @@
 // ── Display constants ─────────────────────────────────────────────
 
 const COMPANY_DEFS = [
-	{ key: "hovering", name: "Hovering Highways",   color: "#56B4E9", light: false },
-	{ key: "muddy",    name: "Muddy Machinery",      color: "#CC79A7", light: false },
-	{ key: "scuttle",  name: "Scuttle Surveyors",    color: "#7D3C00", light: false },
-	{ key: "whooping", name: "Whooping Workzone",    color: "#191919", light: false },
-	{ key: "buzzing",  name: "Buzzing Blacktop",     color: "#E69F00", light: true  },
-	{ key: "coiled",   name: "Coiled Construction",  color: "#A8F1A4", light: true  },
+	{ key: "hovering", name: "Hovering Highways",  color: "#332288", light: false },
+	{ key: "muddy",    name: "Muddy Machinery",     color: "#44AA99", light: false },
+	{ key: "scuttle",  name: "Scuttle Surveyors",   color: "#88CCEE", light: true  },
+	{ key: "whooping", name: "Whooping Workzone",   color: "#DDCC77", light: true  },
+	{ key: "buzzing",  name: "Buzzing Blacktop",    color: "#CC6677", light: false },
+	{ key: "coiled",   name: "Coiled Construction", color: "#882255", light: false },
 ]
 
 const ROAD_TRACK_START = 25
@@ -284,8 +284,10 @@ function render_left() {
 		const sv          = Math.ceil((ROAD_TRACK_START - co.road_track) / 2)
 		const shares_left = 7 - co.shares.length
 		const d = document.createElement("div")
+		const def = COMPANY_DEFS[ci]
 		d.className = "co-card" + (co.active ? "" : " inactive")
-		d.style.borderLeft = `10px solid ${COMPANY_DEFS[ci].color}`
+		d.style.backgroundColor = def.color
+		d.style.color = def.light ? "#111" : "#f0f0f0"
 		d.innerHTML = `
 			<div class="co-nm">${co.name.split(" ")[0]}</div>
 			<div class="co-stats">
