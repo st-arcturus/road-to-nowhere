@@ -13,16 +13,8 @@ const COMPANY_DEFS = [
 
 const ROAD_TRACK_START = 25
 
-const PLAYER_COLORS = [ "#0072B2", "#D55E00", "#9467BD", "#DC267F", "#44AA99" ]
-
-// Light pastel tint for player backgrounds on the white left panel
-function player_bg_light(i) {
-	const c = PLAYER_COLORS[i] || "#888"
-	const r = parseInt(c.slice(1,3), 16)
-	const g = parseInt(c.slice(3,5), 16)
-	const b = parseInt(c.slice(5,7), 16)
-	return `rgb(${Math.round(r*.5+255*.5)},${Math.round(g*.5+255*.5)},${Math.round(b*.5+255*.5)})`
-}
+const PLAYER_COLORS = [ "#648FFF", "#785EF0", "#DC267F", "#FE6100", "#FFB000" ]
+const PLAYER_LIGHT  = [ false,     false,     false,     true,      true     ]
 
 // Map rows — needed client-side for terrain lookup and hex geometry
 const MAP_ROWS = [
@@ -318,7 +310,7 @@ function render_left() {
 				const pip = document.createElement("div")
 				pip.className = "claim-counter"
 				pip.style.background = PLAYER_COLORS[owner] || "#aaa"
-				pip.style.color = "#f0f0f0"
+				pip.style.color = PLAYER_LIGHT[owner] ? "#111" : "#f0f0f0"
 				pip.title = `Player ${+owner + 1}`
 				pip.textContent = count
 				row.appendChild(pip)
@@ -335,7 +327,7 @@ function render_left() {
 		const span = document.createElement("div")
 		span.className = "tplayer-badge"
 		span.style.background = PLAYER_COLORS[pi] || "#888"
-		span.style.color = "#fff"
+		span.style.color = PLAYER_LIGHT[pi] ? "#111" : "#f0f0f0"
 		span.textContent = `P${pi + 1}`
 		span.title = `Player ${pi + 1}`
 		return span
@@ -428,7 +420,8 @@ function render_players() {
 		const role_el = document.getElementById(`role_P${i + 1}`)
 		if (!role_el) return
 
-		role_el.style.backgroundColor = player_bg_light(i)
+		role_el.style.backgroundColor = PLAYER_COLORS[i] || "#888"
+		role_el.style.color = PLAYER_LIGHT[i] ? "#111" : "#f0f0f0"
 
 		const stat = role_el.querySelector(".role_stat")
 		if (stat) {
