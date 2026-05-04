@@ -810,7 +810,7 @@ exports.view = function (state, current) {
 	load_game(state)
 
 	// Observer or unexpected role — return a read-only snapshot
-	if (!current || typeof current !== "string" || !/^P\d+$/.test(current)) {
+	if (!current || !ROLE_NAMES.includes(current)) {
 		return {
 			prompt: null,
 			phase: game.phase,
