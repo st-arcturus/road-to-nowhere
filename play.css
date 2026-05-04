@@ -61,7 +61,7 @@ main {
   align-items: flex-start;
   justify-content: center;
   padding: 10px;
-  background: silver;
+  background: #3a3a3a;
 }
 
 #map { display: block; }
