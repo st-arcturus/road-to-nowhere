@@ -4,10 +4,10 @@
 
 const COMPANY_DEFS = [
 	{ key: "hovering", name: "Hovering Highways" },
-	{ key: "muddy",    name: "Dusty Digging" },
+	{ key: "dusty",    name: "Dusty Digging" },
 	{ key: "scuttle",  name: "Scuttle Surveyors" },
 	{ key: "whooping", name: "Whooping Workzone" },
-	{ key: "buzzing",  name: "Teeming Transit" },
+	{ key: "teeming",  name: "Teeming Transit" },
 	{ key: "coiled",   name: "Coiled Construction" },
 ]
 

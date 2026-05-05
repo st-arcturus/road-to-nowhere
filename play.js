@@ -4,10 +4,10 @@
 
 const COMPANY_DEFS = [
 	{ key: "hovering", name: "Hovering Highways",  color: "#332288", light: false },
-	{ key: "muddy",    name: "Dusty Digging",       color: "#44AA99", light: true  },
+	{ key: "dusty",    name: "Dusty Digging",       color: "#44AA99", light: true  },
 	{ key: "scuttle",  name: "Scuttle Surveyors",   color: "#88CCEE", light: true  },
 	{ key: "whooping", name: "Whooping Workzone",   color: "#DDCC77", light: true  },
-	{ key: "buzzing",  name: "Teeming Transit",     color: "#CC6677", light: true  },
+	{ key: "teeming",  name: "Teeming Transit",     color: "#CC6677", light: true  },
 	{ key: "coiled",   name: "Coiled Construction", color: "#882255", light: false },
 ]
 
@@ -435,7 +435,7 @@ function render_players() {
 		const stat = role_el.querySelector(".role_stat")
 		if (stat) {
 			stat.innerHTML = `<span class="rstat-cash">$${p.cash}</span>` +
-				(p.last_bid ? `<br><span class="rstat-bid">bid $${p.last_bid}</span>` : "")
+				(p.last_bid ? `<span class="rstat-bid"> (Bid: $${p.last_bid})</span>` : "")
 		}
 
 		let pips_el = role_el.querySelector(".role_pips")

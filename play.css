@@ -208,7 +208,7 @@ aside #log {
 }
 
 .rstat-cash   { }
-.rstat-bid    { font-size: 11px; opacity: 0.75; }
+.rstat-bid    { opacity: 0.75; }
 
 .role_pips {
   grid-column: 1 / 3;
