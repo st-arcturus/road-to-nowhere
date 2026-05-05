@@ -3,12 +3,12 @@
 // ── Display constants ─────────────────────────────────────────────
 
 const COMPANY_DEFS = [
-	{ key: "hovering", name: "Hovering Highways",  color: "#332288", light: false },
+	{ key: "hovering", name: "Hovering Highways",  color: "#999933", light: false },
 	{ key: "muddy",    name: "Muddy Machinery",     color: "#44AA99", light: true  },
 	{ key: "scuttle",  name: "Scuttle Surveyors",   color: "#88CCEE", light: true  },
 	{ key: "whooping", name: "Whooping Workzone",   color: "#DDCC77", light: true  },
 	{ key: "buzzing",  name: "Buzzing Blacktop",    color: "#CC6677", light: true  },
-	{ key: "coiled",   name: "Coiled Construction", color: "#882255", light: false },
+	{ key: "coiled",   name: "Coiled Construction", color: "#AA4499", light: false },
 ]
 
 const ROAD_TRACK_START = 25
