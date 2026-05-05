@@ -892,7 +892,10 @@ exports.view = function (state, current) {
 
 	else if (game.phase === "buy_shares" && game.buy_shares.pending[0] === player) {
 		if (game.active_box.length) view.actions.buy = [...game.active_box]
-		view.prompt = "Pick a share from the active box. Buying is mandatory."
+		const bid_amt = game.bid.bids?.[player] || 0
+		const is_1st  = game.players[player].disc_on_track === 1
+		const cost    = is_1st ? bid_amt : Math.ceil(bid_amt / 2)
+		view.prompt = `Pick a share from the active box. Bid $${bid_amt} must pay $${cost}.`
 	}
 
 	else if (game.phase === "build_roads") {

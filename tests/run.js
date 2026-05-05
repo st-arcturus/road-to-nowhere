@@ -201,6 +201,22 @@ test("undo exposed during bid phase actions", () => {
 	assert.notEqual(v.actions.undo, undefined, "undo should be in actions during bid phase")
 })
 
+test("buy_shares prompt includes 'Bid $x must pay $y'", () => {
+	let g = rules.setup(42, "3P", {})
+	g = play_initial_picks(g)
+	// Pass through bid phase
+	let safety = 30
+	while (g.phase === "bid" && safety-- > 0) {
+		const v = rules.view(g, g.active)
+		if (v.actions?.pass) g = take(g, g.active, "pass")
+		else if (v.actions?.end_turn) g = take(g, g.active, "end_turn")
+		else break
+	}
+	if (g.phase !== "buy_shares") return
+	const v = rules.view(g, g.active)
+	assert.match(v.prompt, /Bid \$\d+ must pay \$\d+/, `expected bid info in prompt; got: ${v.prompt}`)
+})
+
 test("undo enabled after a build action mid-turn", () => {
 	let g = rules.setup(42, "3P", {})
 	g = play_initial_picks(g)

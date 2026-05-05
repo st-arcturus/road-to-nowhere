@@ -525,18 +525,6 @@ function render_actions() {
 	if (!view.actions) return
 
 	const br = view.build_roads
-	const ap = view.active_player
-
-	// Buy shares — append bid cost info directly into the prompt
-	if (view.actions.buy) {
-		const bid_amt = view.bid.bids?.[ap] || 0
-		const is_1st  = view.players[ap].disc_on_track === 1
-		const cost    = is_1st ? bid_amt : Math.ceil(bid_amt / 2)
-		const span = document.createElement("span")
-		span.className = "bid-hint"
-		span.textContent = (prompt ? " · " : "") + `Bid $${bid_amt} → pay $${cost}${is_1st ? " (1st, full)" : " (half, rounded up)"}`
-		msg_el.appendChild(span)
-	}
 
 	// Build roads — append hex count to prompt
 	if (view.actions.build) {
@@ -561,7 +549,7 @@ function render_actions() {
 	// Bid phase
 	if (view.actions.pass || view.actions.raise) {
 		const min_bid = (view.bid.current_bid || 0) + 1
-		const max_bid = view.players[ap].cash
+		const max_bid = view.players[view.active_player].cash
 		if (bid_amount < min_bid) bid_amount = min_bid
 		if (bid_amount > max_bid) bid_amount = max_bid
 
