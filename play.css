@@ -45,7 +45,7 @@ aside  { grid-column: 3 !important; grid-row: 2 !important; }
 .lpanel {
   grid-column: 1;
   grid-row: 2 / 4;
-  background: white;
+  background: #e8e8e8;
   border-right: 1px solid black;
   overflow-y: auto;
   display: flex;
@@ -72,6 +72,7 @@ aside {
   display: flex !important;
   flex-direction: column !important;
   grid-template-rows: none !important;
+  background: #e8e8e8;
 }
 
 aside .psec {

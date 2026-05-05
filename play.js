@@ -435,7 +435,7 @@ function render_players() {
 		const stat = role_el.querySelector(".role_stat")
 		if (stat) {
 			stat.innerHTML = `<span class="rstat-cash">$${p.cash}</span>` +
-				(p.last_bid ? `<span class="rstat-bid"> (Bid: $${p.last_bid})</span>` : "")
+				(p.last_bid ? `<span class="rstat-bid"> (Bid $${p.last_bid})</span>` : "")
 		}
 
 		let pips_el = role_el.querySelector(".role_pips")
