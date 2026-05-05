@@ -581,13 +581,16 @@ function render_actions() {
 		})
 	}
 
-	// End turn + undo (shown together when waiting for end turn)
+	// End turn (shown when player's required actions are complete)
 	if (view.actions.end_turn) {
 		const btn = document.createElement("button")
 		btn.textContent = "End Turn"
 		btn.onclick = () => send_action("end_turn")
 		btn_el.appendChild(btn)
+	}
 
+	// Undo (shown throughout the player's turn; disabled when stack is empty)
+	if (view.actions.undo !== undefined) {
 		const undo_btn = document.createElement("button")
 		undo_btn.textContent = "Undo"
 		undo_btn.disabled = !view.actions.undo
