@@ -314,7 +314,7 @@ function render_left() {
 				pip.className = "claim-counter"
 				pip.style.background = PLAYER_COLORS[owner] || "#aaa"
 				pip.style.color = PLAYER_LIGHT[owner] ? "#111" : "#f0f0f0"
-				pip.title = `Player ${+owner + 1}`
+				pip.title = PLAYER_NAMES[+owner] ?? `Player ${+owner + 1}`
 				pip.textContent = count
 				row.appendChild(pip)
 			})
@@ -639,7 +639,7 @@ function render_scores() {
 	view.final_scores.forEach((s, i) => {
 		const d = document.createElement("div")
 		d.className = "scorerow" + (i === 0 ? " winner" : "")
-		d.innerHTML = `<span>P${s.player + 1}${i === 0 ? " ★" : ""}</span><span>$${s.total}</span>`
+		d.innerHTML = `<span>${PLAYER_NAMES[s.player] ?? `P${s.player + 1}`}${i === 0 ? " ★" : ""}</span><span>$${s.total}</span>`
 		rows.appendChild(d)
 		const det = document.createElement("div"); det.className = "scoredet"
 		det.textContent = `cash $${s.cash}  +  shares $${s.shares}  +  claims $${s.claims}`

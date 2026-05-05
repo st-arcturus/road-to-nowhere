@@ -324,7 +324,7 @@ function compute_scores() {
 		return built_on_count(a.player) - built_on_count(b.player)
 	})
 	game.final_scores = scores
-	game.result = "P" + (scores[0].player + 1)
+	game.result = ROLE_NAMES[scores[0].player]
 	for (const s of scores) add_log(`${ROLE_NAMES[s.player]}: $${s.total}`)
 }
 
