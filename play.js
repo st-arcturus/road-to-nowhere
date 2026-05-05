@@ -3,12 +3,12 @@
 // ── Display constants ─────────────────────────────────────────────
 
 const COMPANY_DEFS = [
-	{ key: "hovering", name: "Hovering Highways",  color: "#332288", light: false },
+	{ key: "hovering", name: "Hovering Highways",  color: "#999933", light: false },
 	{ key: "dusty",    name: "Dusty Digging",       color: "#44AA99", light: true  },
 	{ key: "scuttle",  name: "Scuttle Surveyors",   color: "#88CCEE", light: true  },
 	{ key: "whooping", name: "Whooping Workzone",   color: "#DDCC77", light: true  },
 	{ key: "teeming",  name: "Teeming Transit",     color: "#CC6677", light: true  },
-	{ key: "coiled",   name: "Coiled Construction", color: "#882255", light: false },
+	{ key: "coiled",   name: "Coiled Construction", color: "#AA4499", light: false },
 ]
 
 const ROAD_TRACK_START = 25
@@ -307,7 +307,7 @@ function show_tooltip(e, hex_id, terrain, hs) {
 	if (terrain === "desert")   parts.push("Cost: $1/hex")
 	if (terrain === "river")    parts.push("No consecutive")
 	if (hs?.roads?.length)      parts.push("Roads: " + hs.roads.map(ci => COMPANY_DEFS[ci]?.name.split(" ")[0]).join(", "))
-	if (hs?.disc != null)       parts.push(`P${hs.disc + 1}'s claim`)
+	if (hs?.disc != null)       parts.push(`${PLAYER_NAMES[hs.disc] ?? `P${hs.disc + 1}`}'s claim`)
 	tt.textContent = parts.join(" · ")
 	tt.style.display = "block"
 	tt.style.left = (e.clientX + 14) + "px"
@@ -534,9 +534,9 @@ function render_actions() {
 	if (view.actions.pick_share) {
 		view.actions.pick_share.forEach(ci => {
 			const btn = document.createElement("button")
-			btn.textContent = view.companies[ci].name
-			btn.style.backgroundColor = COMPANY_DEFS[ci].color
-			btn.style.color = COMPANY_DEFS[ci].light ? "#111" : "#f0f0f0"
+			btn.textContent = view.companies[ci]?.name
+			btn.style.backgroundColor = COMPANY_DEFS[ci]?.color
+			btn.style.color = COMPANY_DEFS[ci]?.light ? "#111" : "#f0f0f0"
 			btn.onclick = () => send_action("pick_share", ci)
 			btn_el.appendChild(btn)
 		})
@@ -567,7 +567,7 @@ function render_actions() {
 		const bid_btn = document.createElement("button")
 		bid_btn.textContent = `Bid $${bid_amount}`
 		bid_btn.disabled    = bid_amount > max_bid || bid_amount <= view.bid.current_bid
-		bid_btn.onclick     = () => { if (view.actions) view.actions.raise = [bid_amount]; send_action("raise", bid_amount) }
+		bid_btn.onclick     = () => send_action("raise", bid_amount)
 
 		const pass_btn = document.createElement("button")
 		pass_btn.textContent = "Pass"
@@ -584,9 +584,9 @@ function render_actions() {
 	if (view.actions.buy) {
 		view.actions.buy.forEach(ci => {
 			const btn = document.createElement("button")
-			btn.textContent = view.companies[ci].name
-			btn.style.backgroundColor = COMPANY_DEFS[ci].color
-			btn.style.color = COMPANY_DEFS[ci].light ? "#111" : "#f0f0f0"
+			btn.textContent = view.companies[ci]?.name
+			btn.style.backgroundColor = COMPANY_DEFS[ci]?.color
+			btn.style.color = COMPANY_DEFS[ci]?.light ? "#111" : "#f0f0f0"
 			btn.onclick = () => send_action("buy", ci)
 			btn_el.appendChild(btn)
 		})
@@ -596,9 +596,9 @@ function render_actions() {
 	if (view.actions.pick_company) {
 		view.actions.pick_company.forEach(ci => {
 			const btn = document.createElement("button")
-			btn.textContent = view.companies[ci].name
-			btn.style.backgroundColor = COMPANY_DEFS[ci].color
-			btn.style.color = COMPANY_DEFS[ci].light ? "#111" : "#f0f0f0"
+			btn.textContent = view.companies[ci]?.name
+			btn.style.backgroundColor = COMPANY_DEFS[ci]?.color
+			btn.style.color = COMPANY_DEFS[ci]?.light ? "#111" : "#f0f0f0"
 			btn.onclick = () => send_action("pick_company", ci)
 			btn_el.appendChild(btn)
 		})
