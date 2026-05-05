@@ -353,7 +353,7 @@ function render_left() {
 				pip.className = "claim-counter"
 				pip.style.background = PLAYER_COLORS[owner] || "#aaa"
 				pip.style.color = PLAYER_LIGHT[owner] ? "#111" : "#f0f0f0"
-				pip.title = PLAYER_NAMES[+owner] ?? `Player ${+owner + 1}`
+				pip.title = `${count} claim${count !== 1 ? "s" : ""} by ${PLAYER_NAMES[+owner] ?? `Player ${+owner + 1}`}`
 				pip.textContent = count
 				row.appendChild(pip)
 			})
@@ -497,7 +497,7 @@ function render_players() {
 			pip.className        = "pip-counter"
 			pip.style.background = COMPANY_DEFS[ci]?.color || "#888"
 			pip.style.color      = COMPANY_DEFS[ci]?.light ? "#111" : "#f0f0f0"
-			pip.title            = view.companies[ci]?.name
+			pip.title            = `${count} share${count !== 1 ? "s" : ""} in ${view.companies[ci]?.name}`
 			pip.textContent      = count
 			pips_el.appendChild(pip)
 		})
