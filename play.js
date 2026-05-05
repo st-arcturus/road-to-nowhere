@@ -578,12 +578,18 @@ function render_actions() {
 		})
 	}
 
-	// End turn confirmation
+	// End turn + undo (shown together when waiting for end turn)
 	if (view.actions.end_turn) {
 		const btn = document.createElement("button")
 		btn.textContent = "End Turn"
 		btn.onclick = () => send_action("end_turn")
 		btn_el.appendChild(btn)
+
+		const undo_btn = document.createElement("button")
+		undo_btn.textContent = "Undo"
+		undo_btn.disabled = !view.actions.undo
+		undo_btn.onclick = () => send_action("undo")
+		btn_el.appendChild(undo_btn)
 	}
 
 	// Claim land
