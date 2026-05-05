@@ -268,7 +268,7 @@ function show_tooltip(e, hex_id, terrain, hs) {
 	if (terrain === "desert")   parts.push("Cost: $1/hex")
 	if (terrain === "river")    parts.push("No consecutive")
 	if (hs?.roads?.length)      parts.push("Roads: " + hs.roads.map(ci => COMPANY_DEFS[ci]?.name.split(" ")[0]).join(", "))
-	if (hs?.disc != null)       parts.push(`P${hs.disc + 1}'s claim`)
+	if (hs?.disc != null)       parts.push(`${PLAYER_NAMES[hs.disc] ?? `P${hs.disc + 1}`}'s claim`)
 	tt.textContent = parts.join(" · ")
 	tt.style.display = "block"
 	tt.style.left = (e.clientX + 14) + "px"
@@ -508,9 +508,9 @@ function render_actions() {
 	if (view.actions.pick_share) {
 		view.actions.pick_share.forEach(ci => {
 			const btn = document.createElement("button")
-			btn.textContent = view.companies[ci].name
-			btn.style.backgroundColor = COMPANY_DEFS[ci].color
-			btn.style.color = COMPANY_DEFS[ci].light ? "#111" : "#f0f0f0"
+			btn.textContent = view.companies[ci]?.name
+			btn.style.backgroundColor = COMPANY_DEFS[ci]?.color
+			btn.style.color = COMPANY_DEFS[ci]?.light ? "#111" : "#f0f0f0"
 			btn.onclick = () => send_action("pick_share", ci)
 			btn_el.appendChild(btn)
 		})
@@ -541,7 +541,7 @@ function render_actions() {
 		const bid_btn = document.createElement("button")
 		bid_btn.textContent = `Bid $${bid_amount}`
 		bid_btn.disabled    = bid_amount > max_bid || bid_amount <= view.bid.current_bid
-		bid_btn.onclick     = () => { if (view.actions) view.actions.raise = [bid_amount]; send_action("raise", bid_amount) }
+		bid_btn.onclick     = () => send_action("raise", bid_amount)
 
 		const pass_btn = document.createElement("button")
 		pass_btn.textContent = "Pass"
@@ -558,9 +558,9 @@ function render_actions() {
 	if (view.actions.buy) {
 		view.actions.buy.forEach(ci => {
 			const btn = document.createElement("button")
-			btn.textContent = view.companies[ci].name
-			btn.style.backgroundColor = COMPANY_DEFS[ci].color
-			btn.style.color = COMPANY_DEFS[ci].light ? "#111" : "#f0f0f0"
+			btn.textContent = view.companies[ci]?.name
+			btn.style.backgroundColor = COMPANY_DEFS[ci]?.color
+			btn.style.color = COMPANY_DEFS[ci]?.light ? "#111" : "#f0f0f0"
 			btn.onclick = () => send_action("buy", ci)
 			btn_el.appendChild(btn)
 		})
@@ -570,9 +570,9 @@ function render_actions() {
 	if (view.actions.pick_company) {
 		view.actions.pick_company.forEach(ci => {
 			const btn = document.createElement("button")
-			btn.textContent = view.companies[ci].name
-			btn.style.backgroundColor = COMPANY_DEFS[ci].color
-			btn.style.color = COMPANY_DEFS[ci].light ? "#111" : "#f0f0f0"
+			btn.textContent = view.companies[ci]?.name
+			btn.style.backgroundColor = COMPANY_DEFS[ci]?.color
+			btn.style.color = COMPANY_DEFS[ci]?.light ? "#111" : "#f0f0f0"
 			btn.onclick = () => send_action("pick_company", ci)
 			btn_el.appendChild(btn)
 		})
