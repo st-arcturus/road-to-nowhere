@@ -46,7 +46,6 @@ const HEX_H = 2 * HEX_SIZE
 
 const TFILL = "#e8e8e8"
 
-const TICONS = { mountain: { g: "▲", sz: 22 }, river: { g: "≋", sz: 28 }, desert: { g: "☀", sz: 16 } }
 
 // ── Map geometry ──────────────────────────────────────────────────
 
@@ -195,17 +194,57 @@ function render_map(skip) {
 				b2.setAttribute("stroke-width", "1")
 				b2.setAttribute("pointer-events", "none")
 				g.appendChild(b2)
-			} else if (TICONS[terrain]) {
-				const icon = TICONS[terrain]
-				const t = document.createElementNS(ns, "text")
-				t.setAttribute("x", cx); t.setAttribute("y", cy)
-				t.setAttribute("text-anchor", "middle")
-				t.setAttribute("dominant-baseline", "central")
-				t.setAttribute("font-size", icon.sz)
-				t.setAttribute("fill", "#3a3a3a")
-				t.setAttribute("pointer-events", "none")
-				t.textContent = icon.g
-				g.appendChild(t)
+			} else if (terrain === "mountain") {
+				// Filled triangle, exactly centered on (cx, cy)
+				const H = 12, W = 14
+				const tri = document.createElementNS(ns, "polygon")
+				tri.setAttribute("points",
+					`${cx},${(cy - H/2).toFixed(1)} ` +
+					`${(cx - W/2).toFixed(1)},${(cy + H/2).toFixed(1)} ` +
+					`${(cx + W/2).toFixed(1)},${(cy + H/2).toFixed(1)}`)
+				tri.setAttribute("fill", "#3a3a3a")
+				tri.setAttribute("pointer-events", "none")
+				g.appendChild(tri)
+			} else if (terrain === "river") {
+				// Three horizontal wavy strokes, vertically centered on cy
+				const W = 14, GAP = 4
+				const path = document.createElementNS(ns, "path")
+				const segs = []
+				for (let k = -1; k <= 1; k++) {
+					const yk = cy + k * GAP
+					segs.push(`M${(cx - W/2).toFixed(1)},${yk.toFixed(1)} q${(W/4).toFixed(1)},-2 ${(W/2).toFixed(1)},0 t${(W/2).toFixed(1)},0`)
+				}
+				path.setAttribute("d", segs.join(" "))
+				path.setAttribute("fill", "none")
+				path.setAttribute("stroke", "#3a3a3a")
+				path.setAttribute("stroke-width", "1.4")
+				path.setAttribute("stroke-linecap", "round")
+				path.setAttribute("pointer-events", "none")
+				g.appendChild(path)
+			} else if (terrain === "desert") {
+				// Sun: filled circle with 8 rays, exactly centered
+				const R = 4, RAY_IN = 5.5, RAY_OUT = 8
+				const sun = document.createElementNS(ns, "g")
+				sun.setAttribute("pointer-events", "none")
+				const c = document.createElementNS(ns, "circle")
+				c.setAttribute("cx", cx); c.setAttribute("cy", cy); c.setAttribute("r", R)
+				c.setAttribute("fill", "#3a3a3a")
+				sun.appendChild(c)
+				for (let k = 0; k < 8; k++) {
+					const a = (Math.PI / 4) * k
+					const x1 = cx + Math.cos(a) * RAY_IN
+					const y1 = cy + Math.sin(a) * RAY_IN
+					const x2 = cx + Math.cos(a) * RAY_OUT
+					const y2 = cy + Math.sin(a) * RAY_OUT
+					const ln = document.createElementNS(ns, "line")
+					ln.setAttribute("x1", x1.toFixed(1)); ln.setAttribute("y1", y1.toFixed(1))
+					ln.setAttribute("x2", x2.toFixed(1)); ln.setAttribute("y2", y2.toFixed(1))
+					ln.setAttribute("stroke", "#3a3a3a")
+					ln.setAttribute("stroke-width", "1.4")
+					ln.setAttribute("stroke-linecap", "round")
+					sun.appendChild(ln)
+				}
+				g.appendChild(sun)
 			}
 
 			// Road cubes (on top of terrain icon)
