@@ -468,6 +468,7 @@ function render_players() {
 		role_el.style.backgroundColor = PLAYER_COLORS[i] || "#888"
 		role_el.style.color = PLAYER_LIGHT[i] ? "#111" : "#f0f0f0"
 		role_el.style.order = p.initial_order || (i + 1)
+		role_el.title = `${p.claims_left} claim${p.claims_left !== 1 ? "s" : ""} remaining`
 
 		const name_el = role_el.querySelector(".role_name")
 		if (name_el) name_el.textContent = p.disc_on_track
@@ -500,11 +501,6 @@ function render_players() {
 			pip.textContent      = count
 			pips_el.appendChild(pip)
 		})
-
-		const claims = document.createElement("span")
-		claims.className = "rstat-claims"
-		claims.textContent = `${p.claims_left} cl`
-		pips_el.appendChild(claims)
 	})
 
 	render_actions()
