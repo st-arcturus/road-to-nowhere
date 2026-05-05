@@ -565,5 +565,50 @@ test("resign: each score entry has player, cash, shares, claims, total", () => {
 	}
 })
 
+// ── Group F: Rules edge cases ─────────────────────────────────────
+
+test("7-share shutdown deactivates a company", () => {
+	let g = rules.setup(42, "3P", {})
+	g = play_initial_picks(g)
+	g = clone(g)
+	// Manually give company 0 the maximum 7 shares
+	g.companies[0].shares = [0, 0, 0, 0, 0, 0, 0]
+	// Play through to claim_land or game_end — start_claim_land fires the shutdown
+	g = play_to_claim_land(g)
+	assert.equal(g.companies[0].active, false, "company with 7 shares must be deactivated")
+})
+
+test("game ends when fewer than 2 companies remain active after 7-share shutdown", () => {
+	let g = rules.setup(42, "3P", {})
+	g = play_initial_picks(g)
+	g = clone(g)
+	// In a 3P game there are 4 companies. Giving 3 of them 7 shares means
+	// start_claim_land deactivates them, leaving only 1 active → game_end.
+	g.companies[0].shares = [0, 0, 0, 0, 0, 0, 0]
+	g.companies[1].shares = [1, 1, 1, 1, 1, 1, 1]
+	g.companies[2].shares = [2, 2, 2, 2, 2, 2, 2]
+	g = play_to_claim_land(g)
+	assert.equal(g.phase, "game_end", "game must end when < 2 companies remain active")
+	assert.ok(Array.isArray(g.final_scores), "final_scores must be present")
+})
+
+test("stalemate: game ends when 0 roads are built in build phase", () => {
+	let g = rules.setup(42, "3P", {})
+	g = play_initial_picks(g)
+	g = clone(g)
+	// Block all builds without deactivating companies: mark every city hex as already
+	// containing each company's road. Since last_road === null for all companies, the
+	// first build must be a city — but all cities are "Already here" → can_build fails
+	// for every hex. can_reach_second_city returns true when last_road is null, so
+	// companies stay active and check_game_end doesn't fire, leaving stalemate to trigger.
+	const city_hexes = Object.keys(g.hex_state).filter(id => g.hex_state[id].terrain === "city")
+	for (const id of city_hexes)
+		for (let ci = 0; ci < g.companies.length; ci++)
+			if (!g.hex_state[id].roads.includes(ci)) g.hex_state[id].roads.push(ci)
+	g = play_to_claim_land(g)
+	assert.equal(g.phase, "game_end", "stalemate must trigger game_end")
+	assert.ok(g.log.some(l => l.includes("No roads built")), "log must mention stalemate reason")
+})
+
 console.log("---")
 console.log("Done.")
