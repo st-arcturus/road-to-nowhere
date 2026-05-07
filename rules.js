@@ -327,7 +327,7 @@ function compute_scores() {
 	game.result = ROLE_NAMES[scores[0].player]
 	game.victory = `${game.result} won!`
 	add_log(game.victory)
-	for (const s of scores) add_log(`${ROLE_NAMES[s.player]}: $${s.total}`)
+	for (const s of scores) add_log(`${ROLE_NAMES[s.player]}: $${s.total} ($${s.shares} in shares, $${s.claims} in claims, $${s.cash} in cash)`)
 }
 
 function add_log(msg) {
