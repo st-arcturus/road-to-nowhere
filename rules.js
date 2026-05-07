@@ -480,7 +480,6 @@ function start_claim_land() {
 function advance_initial_pick() {
 	if (game.initial_share_pick_queue.length > 0) {
 		const next = game.initial_share_pick_queue.shift()
-		add_log(`${ROLE_NAMES[next]}: pick your second share.`)
 		set_active_player(next)
 	} else {
 		add_log("All shares dealt!")
@@ -765,8 +764,6 @@ exports.setup = function (seed, scenario, options) {
 	const rev_order = [...init_order].reverse()
 	game.active_player = rev_order[0]
 	game.initial_share_pick_queue = rev_order.slice(1)
-
-	add_log(`${ROLE_NAMES[rev_order[0]]}: pick your second share.`)
 
 	return save_game()
 }
