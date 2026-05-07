@@ -194,7 +194,7 @@ function render_map(skip) {
 				g.appendChild(b2)
 			} else if (terrain === "mountain") {
 				// Filled triangle, exactly centered on (cx, cy)
-				const H = 15.2, W = 17.7
+				const H = 16.7, W = 19.5
 				const tri = document.createElementNS(ns, "polygon")
 				tri.setAttribute("points",
 					`${cx},${(cy - H/2).toFixed(1)} ` +
