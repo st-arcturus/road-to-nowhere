@@ -285,6 +285,34 @@ test("bid raise above player cash throws", () => {
 	assert.throws(() => take(g, g.active, "raise", 99999), /enough cash/)
 })
 
+test("bid view.actions.raise includes all valid amounts, not just minimum", () => {
+	// Regression: previously only [min_raise] was in the array, so the framework's
+	// send_action(.includes check) silently rejected any bid above the minimum.
+	let g = rules.setup(42, "3P", {})
+	g = play_initial_picks(g)
+	assert.equal(g.phase, "bid")
+
+	const bidder = g.active
+	const pi = rules.roles("3P").indexOf(bidder)
+	const cash = g.players[pi].cash
+	const min_raise = g.bid.current_bid + 1
+
+	const v = rules.view(g, bidder)
+	assert.ok(Array.isArray(v.actions.raise), "raise must be an array")
+
+	// Every amount from min_raise to player cash must be present
+	for (let amount = min_raise; amount <= cash; amount++)
+		assert.ok(v.actions.raise.includes(amount),
+			`view.actions.raise missing $${amount} (min=$${min_raise}, cash=$${cash})`)
+
+	// A non-minimum raise must also be accepted by the action handler
+	if (cash > min_raise) {
+		const g2 = take(g, bidder, "raise", min_raise + 1)
+		assert.equal(g2.bid.current_bid, min_raise + 1,
+			"server must accept a raise above the minimum")
+	}
+})
+
 // ── Group B: Claim phase ──────────────────────────────────────────
 
 function play_to_claim_land(g) {

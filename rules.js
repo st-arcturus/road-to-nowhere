@@ -887,9 +887,12 @@ exports.view = function (state, current) {
 
 	else if (game.phase === "bid" && game.bid.active.includes(player)) {
 		const min_raise = game.bid.current_bid + 1
+		const max_raise = game.players[player].cash
 		view.actions.pass = 1
-		if (min_raise <= game.players[player].cash)
-			view.actions.raise = [min_raise]
+		if (min_raise <= max_raise) {
+			view.actions.raise = []
+			for (let a = min_raise; a <= max_raise; a++) view.actions.raise.push(a)
+		}
 		view.prompt = "Raise the bid to claim 1st position, or pass."
 	}
 
