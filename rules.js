@@ -570,6 +570,8 @@ function do_buy(player, action, arg) {
 	game.active_box.splice(game.active_box.indexOf(ci), 1)
 	game.buy_shares.pending.shift()
 	game.players[player].last_bid = null
+	const buy_slot = game.turn_track.find(s => s.player === player)
+	if (buy_slot) buy_slot.cube = ci
 	add_log(`${ROLE_NAMES[player]} buys ${game.companies[ci].name} for $${cost}.`)
 	game.waiting_end_turn = true
 }
@@ -584,6 +586,8 @@ function do_build_roads(player, action, arg) {
 		const ci = arg
 		if (!game.active_box.includes(ci)) throw new Error("Company not available")
 		game.active_box.splice(game.active_box.indexOf(ci), 1)
+		const draft_slot = game.turn_track.find(s => s.player === player)
+		if (draft_slot) draft_slot.cube = ci
 		add_log(`=co=${game.companies[ci].key}`)
 		add_log(`${ROLE_NAMES[player]} activates ${game.companies[ci].name}.`)
 		check_inactive(ci)
