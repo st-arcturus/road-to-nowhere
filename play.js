@@ -544,10 +544,6 @@ function render_actions() {
 		const max_bid = view.players[view.active_player].cash
 		if (bid_amount < min_bid) bid_amount = min_bid
 		if (bid_amount > max_bid) bid_amount = max_bid
-		// The framework's send_action validates raise via .includes(amount).
-		// The server only puts [min_raise] in the array, so any amount above
-		// the minimum silently fails. Keep it in sync with the displayed amount.
-		if (view.actions.raise) view.actions.raise = [bid_amount]
 
 		const widget  = document.createElement("div"); widget.className = "bid-widget"
 		const counter = document.createElement("div"); counter.className = "bid-counter"
