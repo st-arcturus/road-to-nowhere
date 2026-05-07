@@ -193,24 +193,25 @@ function render_map(skip) {
 				b2.setAttribute("pointer-events", "none")
 				g.appendChild(b2)
 			} else if (terrain === "mountain") {
-				// Filled triangle, exactly centered on (cx, cy)
+				// Triangle centered by centroid (not bounding box) on (cx, cy)
+				// centroid of isoceles triangle = apex + 2/3 * height from apex
+				// so apex at cy - 2H/3, base at cy + H/3 → centroid at cy
 				const H = 16.7, W = 19.5
 				const tri = document.createElementNS(ns, "polygon")
 				tri.setAttribute("points",
-					`${cx},${(cy - H/2).toFixed(1)} ` +
-					`${(cx - W/2).toFixed(1)},${(cy + H/2).toFixed(1)} ` +
-					`${(cx + W/2).toFixed(1)},${(cy + H/2).toFixed(1)}`)
+					`${cx},${(cy - 2*H/3).toFixed(1)} ` +
+					`${(cx - W/2).toFixed(1)},${(cy + H/3).toFixed(1)} ` +
+					`${(cx + W/2).toFixed(1)},${(cy + H/3).toFixed(1)}`)
 				tri.setAttribute("fill", "#3a3a3a")
 				tri.setAttribute("pointer-events", "none")
 				g.appendChild(tri)
 			} else if (terrain === "river") {
 				// Three horizontal wavy strokes, vertically centered on cy
-				// Waves curve up by ~1px, so shift baseline down 1px to center visually
 				const W = 14, GAP = 4
 				const path = document.createElementNS(ns, "path")
 				const segs = []
 				for (let k = -1; k <= 1; k++) {
-					const yk = cy + 1 + k * GAP
+					const yk = cy + k * GAP
 					segs.push(`M${(cx - W/2).toFixed(1)},${yk.toFixed(1)} q${(W/4).toFixed(1)},-2 ${(W/2).toFixed(1)},0 t${(W/2).toFixed(1)},0`)
 				}
 				path.setAttribute("d", segs.join(" "))
