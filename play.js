@@ -205,11 +205,12 @@ function render_map(skip) {
 				g.appendChild(tri)
 			} else if (terrain === "river") {
 				// Three horizontal wavy strokes, vertically centered on cy
+				// Waves curve up by ~1px, so shift baseline down 1px to center visually
 				const W = 14, GAP = 4
 				const path = document.createElementNS(ns, "path")
 				const segs = []
 				for (let k = -1; k <= 1; k++) {
-					const yk = cy + k * GAP
+					const yk = cy + 1 + k * GAP
 					segs.push(`M${(cx - W/2).toFixed(1)},${yk.toFixed(1)} q${(W/4).toFixed(1)},-2 ${(W/2).toFixed(1)},0 t${(W/2).toFixed(1)},0`)
 				}
 				path.setAttribute("d", segs.join(" "))
@@ -221,7 +222,7 @@ function render_map(skip) {
 				g.appendChild(path)
 			} else if (terrain === "desert") {
 				// Sun: filled circle with 8 rays, exactly centered
-				const R = 4, RAY_IN = 5.5, RAY_OUT = 8
+				const R = 3.6, RAY_IN = 5.0, RAY_OUT = 7.2
 				const sun = document.createElementNS(ns, "g")
 				sun.setAttribute("pointer-events", "none")
 				const c = document.createElementNS(ns, "circle")
