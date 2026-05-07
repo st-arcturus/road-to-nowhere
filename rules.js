@@ -325,6 +325,8 @@ function compute_scores() {
 	})
 	game.final_scores = scores
 	game.result = ROLE_NAMES[scores[0].player]
+	game.victory = `${game.result} won!`
+	add_log(game.victory)
 	for (const s of scores) add_log(`${ROLE_NAMES[s.player]}: $${s.total}`)
 }
 
@@ -853,7 +855,7 @@ exports.view = function (state, current) {
 	}
 
 	if (game.phase === "game_end") {
-		view.prompt = "Game over!"
+		view.prompt = game.victory || "Game over!"
 		return view
 	}
 

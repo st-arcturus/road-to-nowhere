@@ -111,8 +111,6 @@ function on_update() {
 	render_map(skip)
 	render_left()
 	render_players()
-
-	if (view.final_scores) render_scores()
 }
 
 // ── Map rendering ─────────────────────────────────────────────────
@@ -624,55 +622,3 @@ function render_actions() {
 	}
 }
 
-// ── Score card ────────────────────────────────────────────────────
-
-let scorecard_wired = false
-
-function render_scores() {
-	const card = document.getElementById("scorecard")
-	card.style.display = "block"
-
-	if (!scorecard_wired) {
-		scorecard_wired = true
-		document.getElementById("score-minimize").addEventListener("click", () => {
-			card.classList.toggle("minimized")
-			document.getElementById("score-minimize").textContent =
-				card.classList.contains("minimized") ? "□" : "—"
-		})
-		// Draggable
-		const hdr = document.getElementById("scorecard-header")
-		let mx = 0, my = 0
-		hdr.addEventListener("mousedown", e => {
-			mx = e.clientX; my = e.clientY
-			const r = card.getBoundingClientRect()
-			card.style.top    = r.top  + "px"
-			card.style.left   = r.left + "px"
-			card.style.bottom = "auto"
-			card.style.right  = "auto"
-			function on_move(e) {
-				const dx = e.clientX - mx, dy = e.clientY - my
-				mx = e.clientX; my = e.clientY
-				card.style.top  = (card.offsetTop  + dy) + "px"
-				card.style.left = (card.offsetLeft + dx) + "px"
-			}
-			function on_up() {
-				document.removeEventListener("mousemove", on_move)
-				document.removeEventListener("mouseup", on_up)
-			}
-			document.addEventListener("mousemove", on_move)
-			document.addEventListener("mouseup", on_up)
-		})
-	}
-
-	const rows = document.getElementById("scorerows")
-	rows.innerHTML = ""
-	view.final_scores.forEach((s, i) => {
-		const d = document.createElement("div")
-		d.className = "scorerow" + (i === 0 ? " winner" : "")
-		d.innerHTML = `<span>${PLAYER_NAMES[s.player] ?? `P${s.player + 1}`}${i === 0 ? " ★" : ""}</span><span>$${s.total}</span>`
-		rows.appendChild(d)
-		const det = document.createElement("div"); det.className = "scoredet"
-		det.textContent = `cash $${s.cash}  +  shares $${s.shares}  +  claims $${s.claims}`
-		rows.appendChild(det)
-	})
-}
