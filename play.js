@@ -330,17 +330,15 @@ function render_left() {
 		d.style.color = def.light ? "#111" : "#f0f0f0"
 		d.innerHTML = `
 			<div class="co-nm">${co.name.split(" ")[0]}</div>
-			<div class="co-stats">
-				<div class="co-primary">
-					<span class="co-val" title="Share value">$${sv}/sh</span>
-					<span class="co-treas" title="Treasury">$${co.treasury}</span>
-					${co.claim_owners?.length ? `<span class="co-claimval" title="Per claim">($${Math.ceil(co.treasury / co.claim_owners.length)}/cl)</span>` : ""}
-				</div>
-				<div class="co-claims-row" id="co-claims-${ci}"></div>
-				<div class="co-secondary">
-					<span title="Shares remaining">${shares_left}/7 sh</span>
-					<span title="Road cubes remaining">${co.road_track} cubes</span>
-				</div>
+			<div class="co-primary">
+				<span class="co-val" title="Share value">$${sv}/sh</span>
+				<span class="co-treas" title="Treasury">$${co.treasury}</span>
+				${co.claim_owners?.length ? `<span class="co-claimval" title="Per claim">($${Math.ceil(co.treasury / co.claim_owners.length)}/cl)</span>` : ""}
+			</div>
+			<div class="co-claims-row" id="co-claims-${ci}"></div>
+			<div class="co-secondary">
+				<span title="Shares remaining">${shares_left}/7 sh</span>
+				<span title="Road cubes remaining">${co.road_track} cubes</span>
 			</div>`
 		cl.appendChild(d)
 		// Claim owner counters
