@@ -214,7 +214,7 @@ aside #log {
   grid-column: 1 / 3;
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: 8px;
   flex-wrap: wrap;
   padding: 2px 4px 5px;
 }
