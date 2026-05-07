@@ -21,6 +21,9 @@ or hint. Sparse arrays cause silent no-ops.
   `view.prompt`, not `add_log`.
 - No exclamation points. Use periods.
 
+## Clarification
+Always seek clarification from the user if instructions or the optimal solution are unclear.
+
 ## Reference material
 For any questions about module-to-server communication, the view/action protocol,
 or complex framework behaviour, consult:
