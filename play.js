@@ -3,11 +3,11 @@
 // ── Display constants ─────────────────────────────────────────────
 
 const COMPANY_DEFS = [
-	{ key: "hovering", name: "Hovering Highways",  color: "#999933", light: true },
-	{ key: "dusty",    name: "Dusty Digging",       color: "#44AA99", light: true },
-	{ key: "scuttle",  name: "Scuttle Surveyors",   color: "#88CCEE", light: true },
+	{ key: "hovering", name: "Hovering Highways",  color: "#88CCEE", light: true },
+	{ key: "dusty",    name: "Dusty Digging",       color: "#CC6677", light: true },
+	{ key: "scuttle",  name: "Scuttle Surveyors",   color: "#999933", light: true },
 	{ key: "whooping", name: "Whooping Workzone",   color: "#DDCC77", light: true },
-	{ key: "teeming",  name: "Teeming Transit",     color: "#CC6677", light: true },
+	{ key: "teeming",  name: "Teeming Transit",     color: "#44AA99", light: true },
 	{ key: "coiled",   name: "Coiled Construction", color: "#AA4499", light: true },
 ]
 
