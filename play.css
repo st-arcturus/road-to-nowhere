@@ -99,6 +99,7 @@ aside #log {
   border-bottom: 1px solid #ddd;
   flex-shrink: 0;
 }
+.lpanel .psec:first-child { border-bottom-width: 2px; }
 
 .lpanel .plbl {
   font-size: 11px;
