@@ -265,7 +265,7 @@ function deactivate(ci) {
 	const co = game.companies[ci]
 	if (!co.active) return
 	co.active = false
-	add_log(`${co.name} becomes inactive!`)
+	add_log(`${co.name} becomes inactive.`)
 	const i = game.active_box.indexOf(ci)
 	if (i !== -1) game.active_box.splice(i, 1)
 	for (const s of game.turn_track) if (s.cube === ci) s.cube = null
@@ -482,7 +482,7 @@ function advance_initial_pick() {
 		const next = game.initial_share_pick_queue.shift()
 		set_active_player(next)
 	} else {
-		add_log("All shares dealt!")
+		add_log("All shares dealt.")
 		start_bid()
 	}
 }
@@ -629,7 +629,7 @@ function do_build_roads(player, action, arg) {
 		if (hs.disc !== null) {
 			co.claims.push(hex_id)
 			co.claim_owners.push(hs.disc)
-			add_log(`${co.name} builds on ${ROLE_NAMES[hs.disc]}'s claim!`)
+			add_log(`${co.name} builds on ${ROLE_NAMES[hs.disc]}'s claim.`)
 			hs.disc = null
 		}
 		br.roads_built++
