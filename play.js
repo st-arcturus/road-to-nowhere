@@ -386,6 +386,17 @@ function render_left() {
 
 	const bot_row = document.createElement("div")
 	bot_row.className = "ttrack-row"
+	function make_company_badge(ci) {
+		const def  = COMPANY_DEFS[ci]
+		const span = document.createElement("div")
+		span.className = "tcube-bot"
+		span.style.background = def?.color || "#888"
+		span.style.color = def?.light ? "#111" : "#f0f0f0"
+		span.textContent = def?.name?.[0] ?? "?"
+		span.title = view.companies[ci]?.name
+		return span
+	}
+
 	view.turn_track.forEach(slot => {
 		const d = document.createElement("div")
 		const has_bot  = slot.bottom_player != null
@@ -394,11 +405,7 @@ function render_left() {
 		if (has_bot) {
 			d.appendChild(make_player_badge(slot.bottom_player))
 		} else if (has_cube) {
-			const cube = document.createElement("div")
-			cube.className = "tcube-bot"
-			cube.style.background = COMPANY_DEFS[slot.cube]?.color || "#888"
-			cube.title = view.companies[slot.cube]?.name
-			d.appendChild(cube)
+			d.appendChild(make_company_badge(slot.cube))
 		}
 		bot_row.appendChild(d)
 	})
@@ -412,13 +419,7 @@ function render_left() {
 	if (!view.active_box?.length) {
 		ab.innerHTML = '<span style="color:gray;font-size:11px">empty</span>'
 	} else {
-		view.active_box.forEach(ci => {
-			const cube = document.createElement("div")
-			cube.className = "acube"
-			cube.style.background = COMPANY_DEFS[ci]?.color || "#888"
-			cube.title = view.companies[ci]?.name
-			ab.appendChild(cube)
-		})
+		view.active_box.forEach(ci => ab.appendChild(make_company_badge(ci)))
 	}
 
 }
