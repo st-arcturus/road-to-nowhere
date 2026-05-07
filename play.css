@@ -145,14 +145,14 @@ aside #log {
 .tslot {
   flex: 1; min-width: 0;
   border: 1px solid currentColor;
-  padding: 2px 3px;
+  padding: 2px;
   display: flex; flex-direction: column; align-items: center;
 }
 .tslot.empty { opacity: .4; }
 
 .tpos          { margin-bottom: 1px; }
-.tplayer-badge { width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
-.tcube-bot     { width: 18px; height: 18px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.tplayer-badge { width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.tcube-bot     { width: 22px; height: 22px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
 
 /* ── Active box ───────────────────────────────────────────────── */
 
