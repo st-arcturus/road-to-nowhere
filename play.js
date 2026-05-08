@@ -303,6 +303,7 @@ function on_hex_click(hex_id) {
 function show_tooltip(e, hex_id, terrain, hs) {
 	const tt    = document.getElementById("tt")
 	const parts = [terrain.charAt(0).toUpperCase() + terrain.slice(1)]
+	if (terrain === "city")     parts.push("Capacity: one cube per company")
 	if (terrain === "mountain") parts.push("Cost: 2 BP")
 	if (terrain === "desert")   parts.push("Cost: $1/hex")
 	if (terrain === "river")    parts.push("No consecutive")
