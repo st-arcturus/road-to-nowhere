@@ -765,6 +765,8 @@ exports.setup = function (seed, scenario, options) {
 	game.active_player = rev_order[0]
 	game.initial_share_pick_queue = rev_order.slice(1)
 
+	add_log("--- Initial Share Draft ---")
+
 	return save_game()
 }
 
