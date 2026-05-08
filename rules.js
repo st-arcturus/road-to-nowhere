@@ -884,7 +884,7 @@ exports.view = function (state, current) {
 		const held = game.players[player].shares
 		const picks = game.active_box.filter(ci => !held.includes(ci))
 		if (picks.length) view.actions.pick_share = picks
-		view.prompt = "Pick your second share — must differ from your first."
+		view.prompt = "Pick your second share, it must differ from your first."
 	}
 
 	else if (game.phase === "bid" && game.bid.active.includes(player)) {
