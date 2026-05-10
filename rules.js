@@ -635,7 +635,7 @@ function do_build_roads(player, action, arg) {
 		br.roads_built++
 		add_log(`${ROLE_NAMES[player]} builds ${co.name} at ${hex_id} (${hs.terrain}).`)
 		check_all_inactive()
-		if (!co.active) { advance_draft(); return }
+		if (!co.active) { game.waiting_end_turn = true; return }
 		if (br.build_points_remaining === 0 || !has_any_build(ci, br.build_points_remaining)) {
 			game.waiting_end_turn = true
 			return
@@ -792,10 +792,13 @@ exports.action = function (state, current, action, arg) {
 		case "initial_share_pick": advance_initial_pick(); break
 		case "bid":                advance_bid();          break
 		case "buy_shares":         advance_buy();          break
-		case "build_roads":
-			if (game.build_roads.state === "draft") advance_draft()
+		case "build_roads": {
+			const br = game.build_roads
+			const ci = br.current_company
+			if (br.state === "draft" || (ci !== null && !game.companies[ci].active)) advance_draft()
 			else next_builder()
 			break
+		}
 		case "claim_land":         claim_advance();        break
 		default: throw new Error(`end_turn not valid in phase: ${game.phase}`)
 		}
