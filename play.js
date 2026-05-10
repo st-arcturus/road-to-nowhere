@@ -330,14 +330,12 @@ function render_left() {
 		d.style.backgroundColor = def.color
 		d.style.color = def.light ? "#111" : "#f0f0f0"
 		const claim_val = co.claim_owners?.length ? Math.ceil(co.treasury / co.claim_owners.length) : null
-		const claim_info = claim_val !== null
-			? `$${claim_val}/cl ($${co.treasury} treasury)`
-			: `($${co.treasury} treasury)`
 		d.innerHTML = `
 			<div class="co-nm">${co.name.split(" ")[0]}</div>
-			<div class="co-primary">$${sv}/sh (${shares_left} shares, ${co.road_track} cubes)</div>
+			<div class="co-primary">$${sv}/sh</div>
 			<div class="co-claims-row" id="co-claims-${ci}"></div>
-			<div class="co-claiminfo">${claim_info}</div>`
+			<div class="co-claiminfo">${claim_val !== null ? `$${claim_val}/cl` : ""}</div>
+			<div class="co-secondary">${shares_left} shares, ${co.road_track} cubes, $${co.treasury} treasury</div>`
 		cl.appendChild(d)
 		// Claim owner counters
 		if (co.claim_owners?.length) {
