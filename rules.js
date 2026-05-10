@@ -626,14 +626,14 @@ function do_build_roads(player, action, arg) {
 		br.build_points_remaining -= cost
 		if (hs.terrain === "city" && !co.built_in_city.includes(hex_id))
 			co.built_in_city.push(hex_id)
+		br.roads_built++
+		add_log(`${ROLE_NAMES[player]} builds ${co.name} at ${hex_id} (${hs.terrain}).`)
 		if (hs.disc !== null) {
 			co.claims.push(hex_id)
 			co.claim_owners.push(hs.disc)
 			add_log(`${co.name} builds on ${ROLE_NAMES[hs.disc]}'s claim.`)
 			hs.disc = null
 		}
-		br.roads_built++
-		add_log(`${ROLE_NAMES[player]} builds ${co.name} at ${hex_id} (${hs.terrain}).`)
 		check_all_inactive()
 		if (!co.active) { game.waiting_end_turn = true; return }
 		if (br.build_points_remaining === 0 || !has_any_build(ci, br.build_points_remaining)) {
