@@ -590,14 +590,14 @@ function do_build_roads(player, action, arg) {
 		add_log(`=co=${game.companies[ci].key}`)
 		add_log(`${ROLE_NAMES[player]} activates ${game.companies[ci].name}.`)
 		check_inactive(ci)
-		if (!game.companies[ci].active) { advance_draft(); return }
+		if (!game.companies[ci].active) { game.waiting_end_turn = true; return }
 		const order = turn_order()
 		const idx = order.indexOf(player)
 		const wrapped = [...order.slice(idx), ...order.slice(0, idx)]
 		const build_queue = wrapped.filter(p => game.players[p].shares.includes(ci))
 		if (!build_queue.length) {
 			add_log(`${game.companies[ci].name}: no shareholders this round, skipping build.`)
-			advance_draft()
+			game.waiting_end_turn = true
 			return
 		}
 		br.current_company = ci
@@ -792,7 +792,10 @@ exports.action = function (state, current, action, arg) {
 		case "initial_share_pick": advance_initial_pick(); break
 		case "bid":                advance_bid();          break
 		case "buy_shares":         advance_buy();          break
-		case "build_roads":        next_builder();         break
+		case "build_roads":
+			if (game.build_roads.state === "draft") advance_draft()
+			else next_builder()
+			break
 		case "claim_land":         claim_advance();        break
 		default: throw new Error(`end_turn not valid in phase: ${game.phase}`)
 		}
