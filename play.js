@@ -528,7 +528,7 @@ function render_actions() {
 		const n = view.actions.claim.length
 		const span = document.createElement("span")
 		span.className = "maphint"
-		span.textContent = (prompt ? " · " : "") + `${n} hex${n > 1 ? "es" : ""} available — click map to claim`
+		span.textContent = (prompt ? " · " : "") + `${n} valid hex${n > 1 ? "es" : ""} highlighted — click to claim`
 		msg_el.appendChild(span)
 	}
 

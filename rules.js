@@ -936,7 +936,7 @@ exports.view = function (state, current) {
 			return hs.terrain !== "city" && hs.disc === null && hs.roads.length === 0
 		})
 		if (claimable.length) view.actions.claim = claimable
-		view.prompt = "Click any highlighted hex to place your claim disc."
+		view.prompt = "Place your claim disc."
 	}
 
 	view.actions.undo = (game.undo && game.undo.length > 0) ? 1 : 0
