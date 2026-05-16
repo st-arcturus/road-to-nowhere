@@ -265,7 +265,6 @@ function deactivate(ci) {
 	const co = game.companies[ci]
 	if (!co.active) return
 	co.active = false
-	add_log(`${co.name} becomes inactive.`)
 	const i = game.active_box.indexOf(ci)
 	if (i !== -1) game.active_box.splice(i, 1)
 	for (const s of game.turn_track) if (s.cube === ci) s.cube = null
@@ -274,9 +273,18 @@ function deactivate(ci) {
 function check_inactive(ci) {
 	const co = game.companies[ci]
 	if (!co.active) return
-	if (co.built_in_city.length >= 2) { deactivate(ci); return }
-	if (co.road_track <= 0)           { deactivate(ci); return }
-	if (!can_reach_second_city(ci))   { deactivate(ci); return }
+	if (co.built_in_city.length >= 2) {
+		add_log(`${co.name} deactivated (reached 2nd city).`)
+		deactivate(ci); return
+	}
+	if (co.road_track <= 0) {
+		add_log(`${co.name} deactivated (road track empty).`)
+		deactivate(ci); return
+	}
+	if (!can_reach_second_city(ci)) {
+		add_log(`${co.name} deactivated (cannot reach a 2nd city).`)
+		deactivate(ci); return
+	}
 }
 
 function check_all_inactive() {
@@ -325,9 +333,9 @@ function compute_scores() {
 	})
 	game.final_scores = scores
 	game.result = ROLE_NAMES[scores[0].player]
-	game.victory = `${game.result} won!`
+	game.victory = `${game.result} wins.`
 	add_log(game.victory)
-	for (const s of scores) add_log(`${ROLE_NAMES[s.player]}: $${s.total} ($${s.shares} in shares, $${s.claims} in claims, $${s.cash} in cash)`)
+	for (const s of scores) add_log(`${ROLE_NAMES[s.player]}: $${s.total} ($${s.shares} in shares, $${s.claims} in claims, $${s.cash} in cash).`)
 }
 
 function add_log(msg) {
@@ -459,7 +467,7 @@ function start_claim_land() {
 	for (let ci = 0; ci < game.companies.length; ci++) {
 		const co = game.companies[ci]
 		if (co.active && co.shares.length >= 7) {
-			add_log(`${co.name} shut down — all shares issued.`)
+			add_log(`${co.name} deactivated (all shares issued).`)
 			deactivate(ci)
 		}
 	}
@@ -483,6 +491,7 @@ function advance_initial_pick() {
 		set_active_player(next)
 	} else {
 		add_log("All shares dealt.")
+		add_log(`=== Round ${game.round} ===`)
 		start_bid()
 	}
 }
