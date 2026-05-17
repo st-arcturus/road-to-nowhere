@@ -519,7 +519,16 @@ function render_actions() {
 		const n = view.actions.build.length
 		const span = document.createElement("span")
 		span.className = "maphint"
-		span.textContent = (prompt ? " · " : "") + `${n} valid hex${n > 1 ? "es" : ""} highlighted — click to build`
+		span.textContent = (prompt ? " · " : "") + `${n} valid hex${n > 1 ? "es" : ""} highlighted, click to build.`
+		msg_el.appendChild(span)
+	}
+
+	// Claim land — append hex count to prompt
+	if (view.actions.claim) {
+		const n = view.actions.claim.length
+		const span = document.createElement("span")
+		span.className = "maphint"
+		span.textContent = (prompt ? " · " : "") + `${n} valid hex${n > 1 ? "es" : ""} highlighted, click to claim.`
 		msg_el.appendChild(span)
 	}
 
@@ -596,15 +605,7 @@ function render_actions() {
 		})
 	}
 
-	// End turn (shown when player's required actions are complete)
-	if (view.actions.end_turn) {
-		const btn = document.createElement("button")
-		btn.textContent = "End Turn"
-		btn.onclick = () => send_action("end_turn")
-		btn_el.appendChild(btn)
-	}
-
-	// Undo (shown throughout the player's turn; disabled when stack is empty)
+	// Undo then End Turn — always rightmost in that order
 	if (view.actions.undo !== undefined) {
 		const undo_btn = document.createElement("button")
 		undo_btn.textContent = "Undo"
@@ -613,11 +614,11 @@ function render_actions() {
 		btn_el.appendChild(undo_btn)
 	}
 
-	// Claim land
-	if (view.actions.claim) {
-		const hint = document.createElement("div"); hint.className = "maphint"
-		hint.textContent = `${view.actions.claim.length} hex${view.actions.claim.length > 1 ? "es" : ""} available — click map to claim`
-		btn_el.appendChild(hint)
+	if (view.actions.end_turn) {
+		const btn = document.createElement("button")
+		btn.textContent = "End Turn"
+		btn.onclick = () => send_action("end_turn")
+		btn_el.appendChild(btn)
 	}
 }
 
