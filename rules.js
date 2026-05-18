@@ -398,6 +398,7 @@ function advance_draft() {
 	const br = game.build_roads
 	br.current_company = null
 	br.current_builder = null
+	br.build_points_remaining = 0
 	br.state = "draft"
 	br.draft_queue.shift()
 	game.active_box = game.active_box.filter(ci => game.companies[ci].active)
@@ -614,7 +615,7 @@ function do_build_roads(player, action, arg) {
 		br.current_company = ci
 		br.build_queue = build_queue
 		br.state = "building"
-		next_builder()
+		game.waiting_end_turn = true
 		return
 	}
 	// Building sub-phase
