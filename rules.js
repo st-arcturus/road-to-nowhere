@@ -887,7 +887,7 @@ exports.view = function (state, current) {
 
 	if (game.waiting_end_turn) {
 		const has_undo = game.undo && game.undo.length > 0
-		let prompt = "Your actions are complete."
+		let prompt = "You have no more actions."
 		if (game.phase === "build_roads" && game.build_roads.state === "building"
 				&& game.build_roads.build_points_remaining > 0)
 			prompt = `No legal moves — ${game.build_roads.build_points_remaining} BP unused.`
