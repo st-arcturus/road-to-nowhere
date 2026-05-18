@@ -463,6 +463,8 @@ function claim_advance() {
 
 function start_claim_land() {
 	clear_undo()
+	game.active_box = active_company_indices()
+	for (const s of game.turn_track) { s.bottom_player = null; s.cube = null }
 	// 7-share shutdown
 	for (let ci = 0; ci < game.companies.length; ci++) {
 		const co = game.companies[ci]
