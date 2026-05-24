@@ -70,7 +70,9 @@ function hex_center(r, c, skip) {
 function hex_label(r, c, skip) {
 	const max_r  = MAP_ROWS.length - skip
 	const gc     = c + MAP_ROWS[r].offset
-	return String.fromCharCode(65 + (max_r - 1 - r)) + (gc + 1)
+	// 18xx convention: odd rows → even cols (2*gc), even rows → odd cols (2*gc+1)
+	const col    = 2 * gc + (r % 2 === 0 ? 1 : 0)
+	return String.fromCharCode(65 + (max_r - 1 - r)) + col
 }
 
 function hex_corners(cx, cy, s) {
@@ -315,21 +317,20 @@ function render_map(skip) {
 	}
 
 	// Column number labels — top of map
-	// For each gc, find the topmost row (highest r) where it appears, so the
-	// label sits directly above that hex.
-	const gc_top_row = new Map()
-	for (let r = max_r - 1; r >= 0; r--) {
+	// 18xx: col = 2*gc + (r%2===0 ? 1 : 0) so each integer maps to x = HEX_W*col/2,
+	// giving uniform HEX_W/2 spacing across the full column range.
+	const visible_cols = new Set()
+	for (let r = 0; r < max_r; r++) {
 		const rd = MAP_ROWS[r]
 		for (let c = 0; c < rd.count; c++) {
 			const gc = c + rd.offset
-			if (!gc_top_row.has(gc)) gc_top_row.set(gc, r)
+			visible_cols.add(2 * gc + (r % 2 === 0 ? 1 : 0))
 		}
 	}
-	for (let gc = 0; gc <= max_gc; gc++) {
-		const r = gc_top_row.get(gc)
-		if (r === undefined) continue
-		const x = HEX_W * (gc + (r % 2 === 1 ? -0.5 : 0)) + HEX_W * 0.5 + MLEFT
-		make_label(x, MTOP - 3, "middle", "auto", gc + 1)
+	const max_col = Math.max(...visible_cols)
+	for (let col = 1; col <= max_col; col++) {
+		if (!visible_cols.has(col)) continue
+		make_label(HEX_W * col / 2 + MLEFT, MTOP - 3, "middle", "auto", col)
 	}
 }
 
