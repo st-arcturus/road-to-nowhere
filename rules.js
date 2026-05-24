@@ -615,7 +615,8 @@ function do_build_roads(player, action, arg) {
 		br.current_company = ci
 		br.build_queue = build_queue
 		br.state = "building"
-		game.waiting_end_turn = true
+		if (build_queue[0] === player) next_builder()
+		else game.waiting_end_turn = true
 		return
 	}
 	// Building sub-phase
