@@ -928,7 +928,7 @@ exports.view = function (state, current) {
 	else if (game.phase === "build_roads") {
 		if (br.state === "draft" && br.draft_queue[0] === player) {
 			view.actions.pick_company = [...game.active_box]
-			view.prompt = "Pick a company to activate. You will build first."
+			view.prompt = "Pick a company to activate."
 		} else if (br.state === "building" && br.current_builder === player) {
 			const ci = br.current_company
 			const bp = br.build_points_remaining
