@@ -129,6 +129,14 @@ function role_to_idx(role) {
 
 // ── Map helpers ───────────────────────────────────────────────────
 
+function hex_label(hex_id) {
+	const [r, c] = hex_id.split("_").map(Number)
+	const skip   = MAP.player_row_skip[game.num_players] || 0
+	const max_r  = MAP.rows.length - skip
+	const gc     = c + MAP.rows[r].offset
+	return String.fromCharCode(65 + (max_r - 1 - r)) + (gc + 1)
+}
+
 function get_terrain(r, c) {
 	const rd = MAP.rows[r]
 	if (rd.city.includes(c))     return "city"
@@ -615,7 +623,8 @@ function do_build_roads(player, action, arg) {
 		br.current_company = ci
 		br.build_queue = build_queue
 		br.state = "building"
-		game.waiting_end_turn = true
+		if (build_queue[0] === player) next_builder()
+		else game.waiting_end_turn = true
 		return
 	}
 	// Building sub-phase
@@ -639,7 +648,7 @@ function do_build_roads(player, action, arg) {
 		if (hs.terrain === "city" && !co.built_in_city.includes(hex_id))
 			co.built_in_city.push(hex_id)
 		br.roads_built++
-		add_log(`${ROLE_NAMES[player]} builds ${co.name} at ${hex_id} (${hs.terrain}).`)
+		add_log(`${ROLE_NAMES[player]} builds ${co.name} at ${hex_label(hex_id)} (${hs.terrain}).`)
 		if (hs.disc !== null) {
 			co.claims.push(hex_id)
 			co.claim_owners.push(hs.disc)
@@ -671,7 +680,7 @@ function do_claim(player, action, arg) {
 	hs.disc = player
 	game.players[player].claims_left--
 	game.claim_land.pending.shift()
-	add_log(`${ROLE_NAMES[player]} claims ${hex_id}.`)
+	add_log(`${ROLE_NAMES[player]} claims ${hex_label(hex_id)}.`)
 	game.waiting_end_turn = true
 }
 
@@ -927,7 +936,7 @@ exports.view = function (state, current) {
 	else if (game.phase === "build_roads") {
 		if (br.state === "draft" && br.draft_queue[0] === player) {
 			view.actions.pick_company = [...game.active_box]
-			view.prompt = "Pick a company to activate. You will build first."
+			view.prompt = "Pick a company to activate."
 		} else if (br.state === "building" && br.current_builder === player) {
 			const ci = br.current_company
 			const bp = br.build_points_remaining
