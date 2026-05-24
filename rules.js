@@ -282,7 +282,7 @@ function check_inactive(ci) {
 	const co = game.companies[ci]
 	if (!co.active) return
 	if (co.built_in_city.length >= 2) {
-		add_log(`${co.name} deactivated (reached 2nd city).`)
+		add_log(`${co.name} deactivated (reached a 2nd city).`)
 		deactivate(ci); return
 	}
 	if (co.road_track <= 0) {
@@ -301,6 +301,7 @@ function check_all_inactive() {
 
 function check_game_end() {
 	if (game.companies.filter(c => c.active).length < 2) {
+		add_log("Fewer than 2 companies active at end of Build Phase. Game over.")
 		game.phase = "game_end"
 		compute_scores()
 		return true
@@ -377,9 +378,9 @@ function start_buy_shares() {
 	const eligible = order.filter(p => (game.bid.bids[p] || 0) > 0)
 	for (const p of order) if (!eligible.includes(p)) game.players[p].last_bid = null
 	game.buy_shares = { pending: [...eligible] }
-	if (!eligible.length) { start_build_roads(); return }
-	game.active_player = eligible[0]
 	add_log(`--- Round ${game.round}: Buy Shares ---`)
+	if (!eligible.length) { add_log("No players eligible to buy."); start_build_roads(); return }
+	game.active_player = eligible[0]
 }
 
 function start_build_roads() {
@@ -485,7 +486,7 @@ function start_claim_land() {
 	if (check_game_end()) return
 	// Stalemate: no roads built this phase
 	if (game.build_roads.roads_built === 0) {
-		add_log("No roads built this phase — game ends.")
+		add_log("No roads built in Build Phase. Game over.")
 		game.phase = "game_end"
 		compute_scores()
 		return
@@ -616,7 +617,7 @@ function do_build_roads(player, action, arg) {
 		const wrapped = [...order.slice(idx), ...order.slice(0, idx)]
 		const build_queue = wrapped.filter(p => game.players[p].shares.includes(ci))
 		if (!build_queue.length) {
-			add_log(`${game.companies[ci].name}: no shareholders this round, skipping build.`)
+			add_log(`${game.companies[ci].name}: no shareholders yet, skipping build.`)
 			game.waiting_end_turn = true
 			return
 		}
