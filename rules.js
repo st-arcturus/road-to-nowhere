@@ -129,6 +129,14 @@ function role_to_idx(role) {
 
 // ── Map helpers ───────────────────────────────────────────────────
 
+function hex_label(hex_id) {
+	const [r, c] = hex_id.split("_").map(Number)
+	const skip   = MAP.player_row_skip[game.num_players] || 0
+	const max_r  = MAP.rows.length - skip
+	const gc     = c + MAP.rows[r].offset
+	return String.fromCharCode(65 + (max_r - 1 - r)) + (gc + 1)
+}
+
 function get_terrain(r, c) {
 	const rd = MAP.rows[r]
 	if (rd.city.includes(c))     return "city"
@@ -640,7 +648,7 @@ function do_build_roads(player, action, arg) {
 		if (hs.terrain === "city" && !co.built_in_city.includes(hex_id))
 			co.built_in_city.push(hex_id)
 		br.roads_built++
-		add_log(`${ROLE_NAMES[player]} builds ${co.name} at ${hex_id} (${hs.terrain}).`)
+		add_log(`${ROLE_NAMES[player]} builds ${co.name} at ${hex_label(hex_id)} (${hs.terrain}).`)
 		if (hs.disc !== null) {
 			co.claims.push(hex_id)
 			co.claim_owners.push(hs.disc)
@@ -672,7 +680,7 @@ function do_claim(player, action, arg) {
 	hs.disc = player
 	game.players[player].claims_left--
 	game.claim_land.pending.shift()
-	add_log(`${ROLE_NAMES[player]} claims ${hex_id}.`)
+	add_log(`${ROLE_NAMES[player]} claims ${hex_label(hex_id)}.`)
 	game.waiting_end_turn = true
 }
 

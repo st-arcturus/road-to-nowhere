@@ -67,6 +67,12 @@ function hex_center(r, c, skip) {
 	return [x, y]
 }
 
+function hex_label(r, c, skip) {
+	const max_r  = MAP_ROWS.length - skip
+	const gc     = c + MAP_ROWS[r].offset
+	return String.fromCharCode(65 + (max_r - 1 - r)) + (gc + 1)
+}
+
 function hex_corners(cx, cy, s) {
 	const pts = []
 	for (let i = 0; i < 6; i++) {
@@ -107,8 +113,12 @@ function render_map(skip) {
 	const max_r  = MAP_ROWS.length - skip
 	const max_gc = Math.max(...MAP_ROWS.slice(0, max_r).map(rd => rd.offset + rd.count - 1))
 	svg.innerHTML = ""
-	svg.setAttribute("width",  HEX_W * (max_gc + 1.5) + 10)
-	svg.setAttribute("height", HEX_H * 0.75 * (max_r - 1) + HEX_H + 10)
+
+	const MLEFT = 20   // px reserved on left for row letter labels
+	const MTOP  = 16   // px reserved on top for column number labels
+
+	svg.setAttribute("width",  HEX_W * (max_gc + 1.5) + 10 + MLEFT)
+	svg.setAttribute("height", HEX_H * 0.75 * (max_r - 1) + HEX_H + 10 + MTOP)
 
 	const buildable = new Set((view.actions?.build  || []))
 	const claimable = new Set((view.actions?.claim  || []))
@@ -122,6 +132,10 @@ function render_map(skip) {
 		const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16)
 		return `rgba(${r},${g},${b},${a})`
 	}
+
+	// Translate group so all hex coordinates are offset by the label margins
+	const hex_group = document.createElementNS(ns, "g")
+	hex_group.setAttribute("transform", `translate(${MLEFT}, ${MTOP})`)
 
 	for (let r = 0; r < max_r; r++) {
 		const rd = MAP_ROWS[r]
@@ -276,8 +290,46 @@ function render_map(skip) {
 			g.addEventListener("click",      ()  => on_hex_click(hex_id))
 			g.addEventListener("mouseenter", (e) => show_tooltip(e, hex_id, terrain, hs))
 			g.addEventListener("mouseleave", ()  => { document.getElementById("tt").style.display = "none" })
-			svg.appendChild(g)
+			hex_group.appendChild(g)
 		}
+	}
+	svg.appendChild(hex_group)
+
+	// ── Axis labels ────────────────────────────────────────────────
+	const label_style = { fill: TFILL, "font-size": "10", "pointer-events": "none" }
+	function make_label(x, y, anchor, baseline, text) {
+		const t = document.createElementNS(ns, "text")
+		t.setAttribute("x", x); t.setAttribute("y", y)
+		t.setAttribute("text-anchor", anchor)
+		t.setAttribute("dominant-baseline", baseline)
+		for (const [k, v] of Object.entries(label_style)) t.setAttribute(k, v)
+		t.textContent = text
+		svg.appendChild(t)
+	}
+
+	// Row letter labels — left of map
+	for (let r = 0; r < max_r; r++) {
+		const letter  = String.fromCharCode(65 + (max_r - 1 - r))
+		const [, cy]  = hex_center(r, 0, skip)
+		make_label(MLEFT - 4, cy + MTOP, "end", "middle", letter)
+	}
+
+	// Column number labels — top of map
+	// For each gc, find the topmost row (highest r) where it appears, so the
+	// label sits directly above that hex.
+	const gc_top_row = new Map()
+	for (let r = max_r - 1; r >= 0; r--) {
+		const rd = MAP_ROWS[r]
+		for (let c = 0; c < rd.count; c++) {
+			const gc = c + rd.offset
+			if (!gc_top_row.has(gc)) gc_top_row.set(gc, r)
+		}
+	}
+	for (let gc = 0; gc <= max_gc; gc++) {
+		const r = gc_top_row.get(gc)
+		if (r === undefined) continue
+		const x = HEX_W * (gc + (r % 2 === 1 ? -0.5 : 0)) + HEX_W * 0.5 + MLEFT
+		make_label(x, MTOP - 3, "middle", "auto", gc + 1)
 	}
 }
 
@@ -289,7 +341,10 @@ function on_hex_click(hex_id) {
 
 function show_tooltip(e, hex_id, terrain, hs) {
 	const tt    = document.getElementById("tt")
-	const parts = [terrain.charAt(0).toUpperCase() + terrain.slice(1)]
+	const [r, c] = hex_id.split("_").map(Number)
+	const skip   = PLAYER_ROW_SKIP[view.players.length] || 0
+	const coord  = hex_label(r, c, skip)
+	const parts  = [coord, terrain.charAt(0).toUpperCase() + terrain.slice(1)]
 	if (terrain === "city")     parts.push("Capacity: one cube per company")
 	if (terrain === "mountain") parts.push("Cost: 2 BP")
 	if (terrain === "desert")   parts.push("Cost: $1/hex")
