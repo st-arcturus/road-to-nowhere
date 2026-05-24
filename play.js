@@ -89,19 +89,6 @@ function on_init(scenario, options) {
 	})
 }
 
-function get_phase_label() {
-	const br = view.build_roads
-	const labels = {
-		initial_share_pick: "Initial Shares",
-		bid:         "Bid for Turn Order",
-		buy_shares:  "Buy Shares",
-		build_roads: br?.state === "draft" ? "Build Roads — Draft" : "Build Roads — Building",
-		claim_land:  "Claim Land",
-		game_end:    "Game Over",
-	}
-	return labels[view.phase] || view.phase
-}
-
 function on_update() {
 	if (!view || !view.players || !view.players.length) return
 
@@ -513,24 +500,6 @@ function render_actions() {
 	if (!view.actions) return
 
 	const br = view.build_roads
-
-	// Build roads — append hex count to prompt
-	if (view.actions.build) {
-		const n = view.actions.build.length
-		const span = document.createElement("span")
-		span.className = "maphint"
-		span.textContent = (prompt ? " · " : "") + `${n} valid hex${n > 1 ? "es" : ""} highlighted, click to build.`
-		msg_el.appendChild(span)
-	}
-
-	// Claim land — append hex count to prompt
-	if (view.actions.claim) {
-		const n = view.actions.claim.length
-		const span = document.createElement("span")
-		span.className = "maphint"
-		span.textContent = (prompt ? " · " : "") + `${n} valid hex${n > 1 ? "es" : ""} highlighted, click to claim.`
-		msg_el.appendChild(span)
-	}
 
 	if (view.actions.pick_share) {
 		view.actions.pick_share.forEach(ci => {
