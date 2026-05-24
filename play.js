@@ -67,12 +67,11 @@ function hex_center(r, c, skip) {
 	return [x, y]
 }
 
-function hex_label(r, c, skip) {
-	const max_r  = MAP_ROWS.length - skip
-	const gc     = c + MAP_ROWS[r].offset
-	// 18xx convention: odd rows → even cols (2*gc), even rows → odd cols (2*gc+1)
-	const col    = 2 * gc + (r % 2 === 0 ? 1 : 0)
-	return String.fromCharCode(65 + (max_r - 1 - r)) + col
+function hex_label(r, c) {
+	const gc  = c + MAP_ROWS[r].offset
+	const col = 2 * gc + (r % 2 === 0 ? 1 : 0)
+	// Row letter based on full 5P map so coords are stable across player counts
+	return String.fromCharCode(65 + (MAP_ROWS.length - 1 - r)) + col
 }
 
 function hex_corners(cx, cy, s) {
@@ -311,7 +310,7 @@ function render_map(skip) {
 
 	// Row letter labels — left of map
 	for (let r = 0; r < max_r; r++) {
-		const letter  = String.fromCharCode(65 + (max_r - 1 - r))
+		const letter  = String.fromCharCode(65 + (MAP_ROWS.length - 1 - r))
 		const [, cy]  = hex_center(r, 0, skip)
 		make_label(MLEFT - 4, cy + MTOP, "end", "middle", letter)
 	}
@@ -344,7 +343,7 @@ function show_tooltip(e, hex_id, terrain, hs) {
 	const tt    = document.getElementById("tt")
 	const [r, c] = hex_id.split("_").map(Number)
 	const skip   = PLAYER_ROW_SKIP[view.players.length] || 0
-	const coord  = hex_label(r, c, skip)
+	const coord  = hex_label(r, c)
 	const parts  = [coord, terrain.charAt(0).toUpperCase() + terrain.slice(1)]
 	if (terrain === "city")     parts.push("Capacity: one cube per company")
 	if (terrain === "mountain") parts.push("Cost: 2 BP")

@@ -131,12 +131,10 @@ function role_to_idx(role) {
 
 function hex_label(hex_id) {
 	const [r, c] = hex_id.split("_").map(Number)
-	const skip   = MAP.player_row_skip[game.num_players] || 0
-	const max_r  = MAP.rows.length - skip
-	const gc     = c + MAP.rows[r].offset
-	// 18xx convention: odd rows → even cols (2*gc), even rows → odd cols (2*gc+1)
-	const col    = 2 * gc + (r % 2 === 0 ? 1 : 0)
-	return String.fromCharCode(65 + (max_r - 1 - r)) + col
+	const gc  = c + MAP.rows[r].offset
+	const col = 2 * gc + (r % 2 === 0 ? 1 : 0)
+	// Row letter based on full 5P map so coords are stable across player counts
+	return String.fromCharCode(65 + (MAP.rows.length - 1 - r)) + col
 }
 
 function get_terrain(r, c) {
