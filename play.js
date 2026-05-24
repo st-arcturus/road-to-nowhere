@@ -166,7 +166,7 @@ function render_map(skip) {
 				b1.setAttribute("height", "25.2")
 				b1.setAttribute("fill", TFILL)
 				b1.setAttribute("stroke", "#3a3a3a")
-				b1.setAttribute("stroke-width", "1")
+				b1.setAttribute("stroke-width", "1.4")
 				b1.setAttribute("pointer-events", "none")
 				g.appendChild(b1)
 				const b2 = document.createElementNS(ns, "rect")
@@ -176,7 +176,7 @@ function render_map(skip) {
 				b2.setAttribute("height", "18")
 				b2.setAttribute("fill", TFILL)
 				b2.setAttribute("stroke", "#3a3a3a")
-				b2.setAttribute("stroke-width", "1")
+				b2.setAttribute("stroke-width", "1.4")
 				b2.setAttribute("pointer-events", "none")
 				g.appendChild(b2)
 			} else if (terrain === "mountain") {
