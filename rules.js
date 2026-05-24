@@ -900,7 +900,7 @@ exports.view = function (state, current) {
 		let prompt = "You have no more actions."
 		if (game.phase === "build_roads" && game.build_roads.state === "building"
 				&& game.build_roads.build_points_remaining > 0)
-			prompt = `No legal moves — ${game.build_roads.build_points_remaining} BP unused.`
+			prompt = `No legal moves. ${game.build_roads.build_points_remaining} BP unused.`
 		view.actions = { end_turn: 1, undo: has_undo ? 1 : 0 }
 		view.prompt = prompt
 		return view
