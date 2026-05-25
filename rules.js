@@ -860,7 +860,7 @@ exports.view = function (state, current) {
 	// Observer or unexpected role — return a read-only snapshot
 	if (!current || !ROLE_NAMES.includes(current)) {
 		return {
-			prompt: null,
+			prompt: game.phase === "game_end" ? (game.victory || "Game over!") : null,
 			phase: game.phase,
 			round: game.round,
 			active_player: game.active_player,
