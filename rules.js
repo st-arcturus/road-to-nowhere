@@ -341,8 +341,21 @@ function compute_scores() {
 		return built_on_count(a.player) - built_on_count(b.player)
 	})
 	game.final_scores = scores
-	game.result = ROLE_NAMES[scores[0].player]
-	game.victory = `${game.result} wins.`
+	const top = scores[0]
+	const top_shares = game.players[top.player].shares.length
+	const top_built  = built_on_count(top.player)
+	const tied = scores.filter(s =>
+		s.total === top.total &&
+		game.players[s.player].shares.length === top_shares &&
+		built_on_count(s.player) === top_built
+	)
+	if (tied.length > 1) {
+		game.result  = tied.map(s => ROLE_NAMES[s.player]).join(", ")
+		game.victory = `${game.result} tie.`
+	} else {
+		game.result  = ROLE_NAMES[top.player]
+		game.victory = `${game.result} wins.`
+	}
 	add_log(game.victory)
 	for (const s of scores) add_log(`${ROLE_NAMES[s.player]}: $${s.total} ($${s.shares} in shares, $${s.claims} in claims, $${s.cash} in cash).`)
 }
