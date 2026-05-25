@@ -118,7 +118,7 @@ aside #log {
   line-height: 1.5;
 }
 .co-card:last-child { border-bottom: none; }
-.co-card.inactive   { opacity: .3; }
+.co-card.inactive   { opacity: .4; }
 
 .co-nm        { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; grid-column: 1; grid-row: 1; }
 .co-primary   { white-space: nowrap; text-align: right; align-self: center; grid-column: 2; grid-row: 1; }
