@@ -145,30 +145,36 @@ aside #log {
 
 .ttrack { margin-top: 4px; }
 
-.ttrack-tbl {
-  width: 100%;
-  border-collapse: collapse;
+.ttrack-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--n), 1fr);
 }
 
-.ttrack-tbl th {
+/* Ordinal header row */
+.tord {
+  text-align: center;
   font-size: 9px;
-  font-weight: normal;
-  text-align: center;
   line-height: 1;
-  padding: 0 0 2px;
+  padding-bottom: 2px;
 }
+.tord sup { font-size: 7px; }
 
-.ttrack-tbl sup { font-size: 7px; }
-
+/* Data cells: square via aspect-ratio (reliable on grid items) */
 .tslot {
-  border: 1px solid black;
   aspect-ratio: 1;
-  text-align: center;
-  vertical-align: middle;
+  border-top: 1px solid black;
+  border-right: 1px solid black;
+  border-bottom: 1px solid black;
+  border-left: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+.tslot-first { border-left: 1px solid black; }
+.tslot-t     { border-bottom: none; }
 
-.tplayer-badge { width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; }
-.tcube-bot     { width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; }
+.tplayer-badge { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.tcube-bot     { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; }
 
 /* ── Active box ───────────────────────────────────────────────── */
 

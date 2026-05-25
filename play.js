@@ -425,38 +425,40 @@ function render_left() {
 		return span
 	}
 
-	const tbl = document.createElement("table")
-	tbl.className = "ttrack-tbl"
+	// CSS grid: N columns, 3 rows (ordinals + 2 data rows).
+	// Grid items support aspect-ratio reliably even when empty.
+	const grid = document.createElement("div")
+	grid.className = "ttrack-grid"
+	grid.style.setProperty("--n", view.turn_track.length)
 
-	// Ordinal header row (outside the bordered cell area)
-	const hrow = tbl.createTHead().insertRow()
+	// Row 1: ordinals (no border)
 	view.turn_track.forEach((_, i) => {
-		const th = document.createElement("th")
-		th.innerHTML = `${i + 1}<sup>${suf[i] || "th"}</sup>`
-		hrow.appendChild(th)
+		const d = document.createElement("div")
+		d.className = "tord"
+		d.innerHTML = `${i + 1}<sup>${suf[i] || "th"}</sup>`
+		grid.appendChild(d)
 	})
 
-	// Two data rows: player spots (top) and company/bid slots (bottom)
-	const tbody = tbl.createTBody()
-
-	const top_tr = tbody.insertRow()
-	view.turn_track.forEach(slot => {
-		const td = top_tr.insertCell()
-		td.className = "tslot"
-		if (slot.player != null) td.appendChild(make_player_badge(slot.player))
+	// Row 2: player spots
+	view.turn_track.forEach((slot, i) => {
+		const d = document.createElement("div")
+		d.className = "tslot tslot-t" + (i === 0 ? " tslot-first" : "")
+		if (slot.player != null) d.appendChild(make_player_badge(slot.player))
+		grid.appendChild(d)
 	})
 
-	const bot_tr = tbody.insertRow()
-	view.turn_track.forEach(slot => {
-		const td = bot_tr.insertCell()
-		td.className = "tslot"
+	// Row 3: company cubes / bid passes
+	view.turn_track.forEach((slot, i) => {
+		const d = document.createElement("div")
+		d.className = "tslot" + (i === 0 ? " tslot-first" : "")
 		if (slot.bottom_player != null)
-			td.appendChild(make_player_badge(slot.bottom_player))
+			d.appendChild(make_player_badge(slot.bottom_player))
 		else if (slot.cube != null)
-			td.appendChild(make_company_badge(slot.cube))
+			d.appendChild(make_company_badge(slot.cube))
+		grid.appendChild(d)
 	})
 
-	tt.appendChild(tbl)
+	tt.appendChild(grid)
 
 	// Active box
 	const ab = document.getElementById("abox")
