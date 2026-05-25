@@ -235,7 +235,6 @@ function has_any_build(ci, bp) {
 }
 
 // DFS to check whether the company can still reach a second city.
-// Mirrors the HTML's canReachSecondCity exactly.
 function can_reach_second_city(ci) {
 	const co = game.companies[ci]
 	if (co.last_road === null) return true
@@ -745,7 +744,7 @@ exports.setup = function (seed, scenario, options) {
 		final_scores: null,
 	}
 
-	// Cache nb_map before any shuffle (shuffle itself doesn't need it, but later helpers do)
+	// Pre-cache the neighbour map for this player count
 	nb_cache[pc] = build_nb_map(pc)
 
 	for (let i = 0; i < cc; i++)
@@ -860,7 +859,7 @@ exports.view = function (state, current) {
 	// Observer or unexpected role — return a read-only snapshot
 	if (!current || !ROLE_NAMES.includes(current)) {
 		return {
-			prompt: null,
+			prompt: game.phase === "game_end" ? (game.victory || "Game over!") : null,
 			phase: game.phase,
 			round: game.round,
 			active_player: game.active_player,

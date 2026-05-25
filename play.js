@@ -342,7 +342,6 @@ function on_hex_click(hex_id) {
 function show_tooltip(e, hex_id, terrain, hs) {
 	const tt    = document.getElementById("tt")
 	const [r, c] = hex_id.split("_").map(Number)
-	const skip   = PLAYER_ROW_SKIP[view.players.length] || 0
 	const coord  = hex_label(r, c)
 	const parts  = [coord, terrain.charAt(0).toUpperCase() + terrain.slice(1)]
 	if (terrain === "city")     parts.push("Capacity: one cube per company")
@@ -489,10 +488,11 @@ function on_log(text) {
 }
 
 // ── Player info (merged with RTT #roles) ─────────────────────────
-// The framework creates #role_P1, #role_P2 etc. inside #roles.
-// We populate .role_stat with cash/bid, and append a .role_pips row
-// for disc position, shares, and claims. The framework handles the
-// active/present classes and the username link in .role_user.
+// The framework creates #role_Blue, #role_Purple etc. inside #roles.
+// We set background color, inject disc position into .role_name,
+// populate .role_stat with cash/bid, and append a .role_pips row
+// for share pip-counters. The framework handles the active/present
+// classes and the username link in .role_user.
 
 function render_players() {
 	view.players.forEach((p, i) => {
