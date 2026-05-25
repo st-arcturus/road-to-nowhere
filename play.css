@@ -81,6 +81,9 @@ aside .psec {
   flex-shrink: 0;
 }
 
+aside .psec:first-child  { border-bottom: none; }
+aside .psec:nth-child(2) { border-bottom: 1px solid black; }
+
 aside .plbl {
   font-size: 11px;
   margin-bottom: 5px;
