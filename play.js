@@ -428,7 +428,7 @@ function render_left() {
 	})
 
 	const bot_row = document.createElement("div")
-	bot_row.className = "ttrack-row"
+	bot_row.className = "ttrack-row ttrack-bot"
 	function make_company_badge(ci) {
 		const def  = COMPANY_DEFS[ci]
 		const span = document.createElement("div")

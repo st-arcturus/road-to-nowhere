@@ -81,6 +81,9 @@ aside .psec {
   flex-shrink: 0;
 }
 
+aside .psec:first-child  { border-bottom: none; }
+aside .psec:nth-child(2) { border-bottom: 1px solid black; }
+
 aside .plbl {
   font-size: 11px;
   margin-bottom: 5px;
@@ -147,9 +150,9 @@ aside #log {
   flex: 1; min-width: 0;
   border: 1px solid currentColor;
   padding: 2px;
+  min-height: 22px;
   display: flex; flex-direction: column; align-items: center;
 }
-.tslot.empty { opacity: .4; }
 
 .tpos          { margin-bottom: 1px; }
 .tplayer-badge { width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
@@ -157,7 +160,7 @@ aside #log {
 
 /* ── Active box ───────────────────────────────────────────────── */
 
-.abox  { display: flex; gap: 3px; flex-wrap: wrap; min-height: 18px; border: 1px solid #888; padding: 3px; margin-top: 4px; }
+.abox  { display: flex; gap: 3px; flex-wrap: wrap; min-height: 18px; border: 1px solid black; padding: 3px; margin-top: 4px; }
 
 /* ── Log entries (pax-pamir style) ───────────────────────────── */
 
