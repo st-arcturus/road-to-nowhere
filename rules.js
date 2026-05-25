@@ -285,7 +285,7 @@ function check_inactive(ci) {
 		deactivate(ci); return
 	}
 	if (co.road_track <= 0) {
-		add_log(`${co.name} deactivated (road track empty).`)
+		add_log(`${co.name} deactivated (no roads left).`)
 		deactivate(ci); return
 	}
 	if (!can_reach_second_city(ci)) {
@@ -491,7 +491,7 @@ function start_claim_land() {
 	for (let ci = 0; ci < game.companies.length; ci++) {
 		const co = game.companies[ci]
 		if (co.active && co.shares.length >= 7) {
-			add_log(`${co.name} deactivated (all shares issued).`)
+			add_log(`${co.name} deactivated (no shares left).`)
 			deactivate(ci)
 		}
 	}
