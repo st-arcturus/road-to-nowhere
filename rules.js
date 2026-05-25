@@ -285,7 +285,7 @@ function check_inactive(ci) {
 		deactivate(ci); return
 	}
 	if (co.road_track <= 0) {
-		add_log(`${co.name} deactivated (road track empty).`)
+		add_log(`${co.name} deactivated (no roads left).`)
 		deactivate(ci); return
 	}
 	if (!can_reach_second_city(ci)) {
