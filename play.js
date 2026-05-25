@@ -84,8 +84,11 @@ function hex_corners(cx, cy, s) {
 }
 
 // ── Bid widget state ──────────────────────────────────────────────
+// Reset to min_bid whenever context changes (new round, new bidder, or undo).
 
-let bid_amount = 1
+let bid_amount      = 1
+let bid_last_player = -1
+let bid_last_current = -1
 
 // ── RTT client callbacks ──────────────────────────────────────────
 
@@ -571,6 +574,12 @@ function render_actions() {
 	if (view.actions.pass || view.actions.raise) {
 		const min_bid = (view.bid.current_bid || 0) + 1
 		const max_bid = view.players[view.active_player].cash
+		// Reset counter when context changes: new bidder, new round, or undo
+		if (view.active_player !== bid_last_player || view.bid.current_bid !== bid_last_current) {
+			bid_amount       = min_bid
+			bid_last_player  = view.active_player
+			bid_last_current = view.bid.current_bid
+		}
 		if (bid_amount < min_bid) bid_amount = min_bid
 		if (bid_amount > max_bid) bid_amount = max_bid
 
