@@ -669,7 +669,7 @@ function do_build_roads(player, action, arg) {
 
 function do_claim(player, action, arg) {
 	if (game.claim_land.pending[0] !== player) throw new Error("Not your turn")
-	if (action !== "claim") throw new Error("Claiming is mandatory — pick a hex")
+	if (action !== "claim") throw new Error("Claiming is mandatory. Pick a hex.")
 	const hex_id = arg
 	const hs = game.hex_state[hex_id]
 	if (!hs)                          throw new Error("Invalid hex")
@@ -726,7 +726,7 @@ exports.setup = function (seed, scenario, options) {
 			build_queue: [], current_builder: null, build_points_remaining: 0, roads_built: 0,
 		},
 		claim_land: { pending: [] },
-		log: [`Road to Nowhere — ${pc} players, ${cc} companies.`],
+		log: [`Road to Nowhere. ${pc} players, ${cc} companies.`],
 		undo: [],
 		waiting_end_turn: false,
 		final_scores: null,
