@@ -147,17 +147,17 @@ aside #log {
 
 .ttrack-grid {
   display: grid;
-  grid-template-columns: repeat(var(--n), 1fr);
+  grid-template-columns: repeat(var(--n), 28px);
 }
 
 /* Ordinal header row */
 .tord {
   text-align: center;
-  font-size: 9px;
+  font-size: 11px;
   line-height: 1;
   padding-bottom: 2px;
 }
-.tord sup { font-size: 7px; }
+.tord sup { font-size: 9px; }
 
 /* Data cells: square via aspect-ratio (reliable on grid items) */
 .tslot {
