@@ -414,21 +414,6 @@ function render_left() {
 		return span
 	}
 
-	const top_row = document.createElement("div")
-	top_row.className = "ttrack-row"
-	view.turn_track.forEach((slot, i) => {
-		const d   = document.createElement("div")
-		d.className = "tslot" + (slot.player == null ? " empty" : "")
-		const pos = document.createElement("div")
-		pos.className   = "tpos"
-		pos.textContent = `${i + 1}${suf[i] || ""}`
-		d.appendChild(pos)
-		if (slot.player != null) d.appendChild(make_player_badge(slot.player))
-		top_row.appendChild(d)
-	})
-
-	const bot_row = document.createElement("div")
-	bot_row.className = "ttrack-row ttrack-bot"
 	function make_company_badge(ci) {
 		const def  = COMPANY_DEFS[ci]
 		const span = document.createElement("div")
@@ -440,21 +425,38 @@ function render_left() {
 		return span
 	}
 
-	view.turn_track.forEach(slot => {
-		const d = document.createElement("div")
-		const has_bot  = slot.bottom_player != null
-		const has_cube = slot.cube != null
-		d.className = "tslot" + (!has_bot && !has_cube ? " empty" : "")
-		if (has_bot) {
-			d.appendChild(make_player_badge(slot.bottom_player))
-		} else if (has_cube) {
-			d.appendChild(make_company_badge(slot.cube))
-		}
-		bot_row.appendChild(d)
+	const tbl = document.createElement("table")
+	tbl.className = "ttrack-tbl"
+
+	// Ordinal header row (outside the bordered cell area)
+	const hrow = tbl.createTHead().insertRow()
+	view.turn_track.forEach((_, i) => {
+		const th = document.createElement("th")
+		th.innerHTML = `${i + 1}<sup>${suf[i] || "th"}</sup>`
+		hrow.appendChild(th)
 	})
 
-	tt.appendChild(top_row)
-	tt.appendChild(bot_row)
+	// Two data rows: player spots (top) and company/bid slots (bottom)
+	const tbody = tbl.createTBody()
+
+	const top_tr = tbody.insertRow()
+	view.turn_track.forEach(slot => {
+		const td = top_tr.insertCell()
+		td.className = "tslot"
+		if (slot.player != null) td.appendChild(make_player_badge(slot.player))
+	})
+
+	const bot_tr = tbody.insertRow()
+	view.turn_track.forEach(slot => {
+		const td = bot_tr.insertCell()
+		td.className = "tslot"
+		if (slot.bottom_player != null)
+			td.appendChild(make_player_badge(slot.bottom_player))
+		else if (slot.cube != null)
+			td.appendChild(make_company_badge(slot.cube))
+	})
+
+	tt.appendChild(tbl)
 
 	// Active box
 	const ab = document.getElementById("abox")
