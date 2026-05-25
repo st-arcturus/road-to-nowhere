@@ -163,13 +163,12 @@ aside #log {
 .tslot {
   border: 1px solid black;
   aspect-ratio: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  text-align: center;
+  vertical-align: middle;
 }
 
-.tplayer-badge { width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
-.tcube-bot     { width: 22px; height: 22px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.tplayer-badge { width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; }
+.tcube-bot     { width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; }
 
 /* ── Active box ───────────────────────────────────────────────── */
 
