@@ -203,6 +203,11 @@ aside #log {
   font-weight: 700;
 }
 
+.lpanel .role.active .role_name::before {
+  content: "\25cf  ";
+  opacity: 1;
+}
+
 .lpanel .role_stat {
   line-height: 1.4;
 }
