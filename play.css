@@ -160,7 +160,7 @@ aside #log {
 
 /* ── Active box ───────────────────────────────────────────────── */
 
-.abox  { display: flex; gap: 3px; flex-wrap: wrap; min-height: 18px; border: 1px solid #888; padding: 3px; margin-top: 4px; }
+.abox  { display: flex; gap: 3px; flex-wrap: wrap; min-height: 18px; border: 1px solid black; padding: 3px; margin-top: 4px; }
 
 /* ── Log entries (pax-pamir style) ───────────────────────────── */
 
