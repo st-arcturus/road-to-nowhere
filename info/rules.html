@@ -47,7 +47,7 @@
 <body>
 
 <h1>Road to Nowhere</h1>
-<p class="subtitle">3–5 players &nbsp;|&nbsp; 45–60 minutes &nbsp;|&nbsp; designed by st_arcturus</p>
+<p class="subtitle">3–5 players &nbsp;|&nbsp; 45–60 minutes &nbsp;|&nbsp; designed by st_arcturus &nbsp;|&nbsp; rules v.34</p>
 
 <h2>Components</h2>
 <ul>
@@ -64,7 +64,7 @@
   <li>Place the map on a table. If playing at 3/4 players cover the top 5/3 rows of hexes.</li>
   <li>Companies equal to players +1 will be in play. Place 1 cube from each company in the active box on the map.</li>
   <li>Place 1 charter for each company next to the map. Place 25 cubes of the same color on the road track of each charter. Place 7 share cards matching the cube color in the shares section of each charter.</li>
-  <li>Give each player 10 discs in one color and $25/$30/$35 (at 3/4/5 players). Place 1 disc from each player in a random order on the turn track; this is the initial turn order.</li>
+  <li>Give each player 10 discs in one color and $25/$30/$35 (at 3/4/5 players). Place 1 disc from each player in a random order on the turn track. This is the initial turn order.</li>
   <li>Each player draws 1 share at random from a pool of 1 share from each company. Then, in reverse turn order, each player chooses a second share (of a different color from their first) from a pool of 1 share from each company.</li>
 </ul>
 
@@ -73,13 +73,13 @@
   <li>The game is played in rounds. There are 4 phases in a round. Players act in turn order in every phase.
     <ol>
       <li><strong>Bid for Turn Order</strong> for the rest of this round and the first phase of the next.</li>
-      <li><strong>Buy Shares</strong> which are worth [roads company built ÷ 2] (round up) at game end.</li>
+      <li><strong>Buy Shares</strong> which are worth [roads company built ÷ 2] at game end.</li>
       <li><strong>Build Roads</strong> with build points. Companies become inactive if they build in 2 cities or can never do so.</li>
       <li><strong>Claim Land</strong> which, if built on, is worth [company's treasury ÷ claims company built on] at game end.</li>
     </ol>
   </li>
-  <li>The game ends if, after the Build Roads phase, there are fewer than 2 companies still active.</li>
-  <li>The player with the most money wins. There are 3 sources of money: shares, land claims, and leftover cash.</li>
+  <li>The game ends immediately after the Build Roads phase if: there are < 2 companies active or no roads were built.</li>
+  <li>The player with the most money wins. There are 3 sources of money: shares, claims, and leftover cash.</li>
 </ul>
 
 <h2>Sequence of Play</h2>
@@ -109,6 +109,7 @@
           <li>Shareholders have 1 build point per share they have in the building company.</li>
           <li>A company becomes inactive if it ever builds in a second city or is permanently unable to do so.
             <ul>
+              <li>If a company has > 0 roads on its charter, treat it as if it has unlimited roads. However,  if a company has 0 roads left on its charter it becomes inactive.</li>
               <li>Immediately stop building its roads and remove its cube from the turn track or active box.</li>
             </ul>
           </li>
@@ -116,6 +117,7 @@
       </li>
       <li>Once all players have taken from the active box, or it is empty, return all cubes on the turn track there.
         <ul>
+          <li>If a company has issued all its shares it becomes inactive now. Remove its cube from the active box.</li>
           <li>If there are now fewer than 2 cubes in the active box, the game ends.</li>
         </ul>
       </li>
@@ -152,11 +154,11 @@
 
 <h2>Game End</h2>
 <ul>
-  <li>The game ends if, immediately after the Build Roads phase ends, there are fewer than 2 companies still active.</li>
+  <li>The game ends immediately after the Build Roads phase if: there are < 2 companies active or no roads were built.</li>
   <li>The winner is the player with the most money. There are three sources of money.
     <ul>
       <li><strong>Shares:</strong> Worth [roads company built ÷ 2] (round up).</li>
-      <li><strong>Land Claims:</strong> Worth, if built on, [company's treasury ÷ claims company built on] (round up).</li>
+      <li><strong>Claims:</strong> Worth, if built on, [company's treasury ÷ claims company built on] (round up).</li>
       <li><strong>Cash:</strong> Worth face value.</li>
     </ul>
   </li>
