@@ -491,7 +491,7 @@ function start_claim_land() {
 	for (let ci = 0; ci < game.companies.length; ci++) {
 		const co = game.companies[ci]
 		if (co.active && co.shares.length >= 7) {
-			add_log(`${co.name} deactivated (all shares issued).`)
+			add_log(`${co.name} deactivated (no shares left).`)
 			deactivate(ci)
 		}
 	}
