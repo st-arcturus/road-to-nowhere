@@ -573,6 +573,22 @@ test("compute_scores: game.result set to winner role name", () => {
 	assert.equal(g.result, roles[1], "result should be winner's role name")
 })
 
+test("compute_scores: shared victory when all tiebreakers equal", () => {
+	let g = rules.setup(99, "3P", {})
+	g = clone(g)
+	// Give all players identical totals with no shares or claims
+	for (const p of g.players) { p.cash = 50; p.shares = [] }
+	for (const co of g.companies) { co.shares = []; co.claims = []; co.claim_owners = []; co.road_track = 25 }
+
+	const roles = rules.roles("3P")
+	g = rules.resign(g, roles[0])
+
+	assert.ok(g.result.includes(roles[0]), "result includes Blue")
+	assert.ok(g.result.includes(roles[1]), "result includes Purple")
+	assert.ok(g.result.includes(roles[2]), "result includes Magenta")
+	assert.ok(g.victory.includes("tie"), "victory message says tie")
+})
+
 // ── Group E: resign ───────────────────────────────────────────────
 
 test("resign triggers game_end with final_scores", () => {

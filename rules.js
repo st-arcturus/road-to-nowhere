@@ -131,12 +131,10 @@ function role_to_idx(role) {
 
 function hex_label(hex_id) {
 	const [r, c] = hex_id.split("_").map(Number)
-	const skip   = MAP.player_row_skip[game.num_players] || 0
-	const max_r  = MAP.rows.length - skip
-	const gc     = c + MAP.rows[r].offset
-	// 18xx convention: odd rows → even cols (2*gc), even rows → odd cols (2*gc+1)
-	const col    = 2 * gc + (r % 2 === 0 ? 1 : 0)
-	return String.fromCharCode(65 + (max_r - 1 - r)) + col
+	const gc  = c + MAP.rows[r].offset
+	const col = 2 * gc + (r % 2 === 0 ? 1 : 0)
+	// Row letter based on full 5P map so coords are stable across player counts
+	return String.fromCharCode(65 + (MAP.rows.length - 1 - r)) + col
 }
 
 function get_terrain(r, c) {
@@ -284,7 +282,7 @@ function check_inactive(ci) {
 	const co = game.companies[ci]
 	if (!co.active) return
 	if (co.built_in_city.length >= 2) {
-		add_log(`${co.name} deactivated (reached 2nd city).`)
+		add_log(`${co.name} deactivated (reached a 2nd city).`)
 		deactivate(ci); return
 	}
 	if (co.road_track <= 0) {
@@ -303,6 +301,7 @@ function check_all_inactive() {
 
 function check_game_end() {
 	if (game.companies.filter(c => c.active).length < 2) {
+		add_log("Fewer than 2 companies active at end of Build Phase. Game over.")
 		game.phase = "game_end"
 		compute_scores()
 		return true
@@ -342,8 +341,21 @@ function compute_scores() {
 		return built_on_count(a.player) - built_on_count(b.player)
 	})
 	game.final_scores = scores
-	game.result = ROLE_NAMES[scores[0].player]
-	game.victory = `${game.result} wins.`
+	const top = scores[0]
+	const top_shares = game.players[top.player].shares.length
+	const top_built  = built_on_count(top.player)
+	const tied = scores.filter(s =>
+		s.total === top.total &&
+		game.players[s.player].shares.length === top_shares &&
+		built_on_count(s.player) === top_built
+	)
+	if (tied.length > 1) {
+		game.result  = tied.map(s => ROLE_NAMES[s.player]).join(", ")
+		game.victory = `${game.result} tie.`
+	} else {
+		game.result  = ROLE_NAMES[top.player]
+		game.victory = `${game.result} wins.`
+	}
 	add_log(game.victory)
 	for (const s of scores) add_log(`${ROLE_NAMES[s.player]}: $${s.total} ($${s.shares} in shares, $${s.claims} in claims, $${s.cash} in cash).`)
 }
@@ -379,9 +391,9 @@ function start_buy_shares() {
 	const eligible = order.filter(p => (game.bid.bids[p] || 0) > 0)
 	for (const p of order) if (!eligible.includes(p)) game.players[p].last_bid = null
 	game.buy_shares = { pending: [...eligible] }
-	if (!eligible.length) { start_build_roads(); return }
-	game.active_player = eligible[0]
 	add_log(`--- Round ${game.round}: Buy Shares ---`)
+	if (!eligible.length) { add_log("No players eligible to buy."); start_build_roads(); return }
+	game.active_player = eligible[0]
 }
 
 function start_build_roads() {
@@ -487,7 +499,7 @@ function start_claim_land() {
 	if (check_game_end()) return
 	// Stalemate: no roads built this phase
 	if (game.build_roads.roads_built === 0) {
-		add_log("No roads built this phase — game ends.")
+		add_log("No roads built in Build Phase. Game over.")
 		game.phase = "game_end"
 		compute_scores()
 		return
@@ -618,7 +630,7 @@ function do_build_roads(player, action, arg) {
 		const wrapped = [...order.slice(idx), ...order.slice(0, idx)]
 		const build_queue = wrapped.filter(p => game.players[p].shares.includes(ci))
 		if (!build_queue.length) {
-			add_log(`${game.companies[ci].name}: no shareholders this round, skipping build.`)
+			add_log(`${game.companies[ci].name}: no shareholders yet, skipping build.`)
 			game.waiting_end_turn = true
 			return
 		}
@@ -670,7 +682,7 @@ function do_build_roads(player, action, arg) {
 
 function do_claim(player, action, arg) {
 	if (game.claim_land.pending[0] !== player) throw new Error("Not your turn")
-	if (action !== "claim") throw new Error("Claiming is mandatory — pick a hex")
+	if (action !== "claim") throw new Error("Claiming is mandatory. Pick a hex.")
 	const hex_id = arg
 	const hs = game.hex_state[hex_id]
 	if (!hs)                          throw new Error("Invalid hex")
@@ -727,7 +739,7 @@ exports.setup = function (seed, scenario, options) {
 			build_queue: [], current_builder: null, build_points_remaining: 0, roads_built: 0,
 		},
 		claim_land: { pending: [] },
-		log: [`Road to Nowhere — ${pc} players, ${cc} companies.`],
+		log: [`Road to Nowhere. ${pc} players, ${cc} companies.`],
 		undo: [],
 		waiting_end_turn: false,
 		final_scores: null,
@@ -852,6 +864,7 @@ exports.view = function (state, current) {
 			phase: game.phase,
 			round: game.round,
 			active_player: game.active_player,
+			active: game.phase === "game_end" ? "None" : ROLE_NAMES[game.active_player],
 			companies: game.companies,
 			players: game.players,
 			active_box: game.active_box,
@@ -874,6 +887,7 @@ exports.view = function (state, current) {
 		phase: game.phase,
 		round: game.round,
 		active_player: game.active_player,
+		active: game.phase === "game_end" ? "None" : ROLE_NAMES[game.active_player],
 		companies: game.companies,
 		players: game.players,
 		active_box: game.active_box,
@@ -901,7 +915,7 @@ exports.view = function (state, current) {
 		let prompt = "You have no more actions."
 		if (game.phase === "build_roads" && game.build_roads.state === "building"
 				&& game.build_roads.build_points_remaining > 0)
-			prompt = `No legal moves — ${game.build_roads.build_points_remaining} BP unused.`
+			prompt = `No legal moves. ${game.build_roads.build_points_remaining} BP unused.`
 		view.actions = { end_turn: 1, undo: has_undo ? 1 : 0 }
 		view.prompt = prompt
 		return view

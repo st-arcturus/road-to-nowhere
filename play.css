@@ -118,7 +118,7 @@ aside #log {
   line-height: 1.5;
 }
 .co-card:last-child { border-bottom: none; }
-.co-card.inactive   { opacity: .3; }
+.co-card.inactive   { opacity: .4; }
 
 .co-nm        { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; grid-column: 1; grid-row: 1; }
 .co-primary   { white-space: nowrap; text-align: right; align-self: center; grid-column: 2; grid-row: 1; }
@@ -201,6 +201,11 @@ aside #log {
 
 .lpanel .role.active .role_name {
   font-weight: 700;
+}
+
+.lpanel .role.active .role_name::before {
+  content: "\25cf  ";
+  opacity: 1;
 }
 
 .lpanel .role_stat {
