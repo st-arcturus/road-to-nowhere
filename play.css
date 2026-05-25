@@ -151,6 +151,10 @@ aside #log {
 }
 .tslot.empty { opacity: .4; }
 
+/* Bottom row: always full-height and full-opacity */
+.ttrack-bot .tslot         { min-height: 22px; }
+.ttrack-bot .tslot.empty   { opacity: 1; }
+
 .tpos          { margin-bottom: 1px; }
 .tplayer-badge { width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
 .tcube-bot     { width: 22px; height: 22px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
