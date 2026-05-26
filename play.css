@@ -147,7 +147,7 @@ aside #log {
 
 .ttrack-grid {
   display: grid;
-  grid-template-columns: repeat(var(--n), 28px);
+  grid-template-columns: repeat(var(--n), 34px);
 }
 
 /* Ordinal header row */
@@ -174,12 +174,12 @@ aside #log {
 .tslot-first { border-left: 1px solid black; }
 .tslot-t     { border-bottom: none; }
 
-.tplayer-badge { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-.tcube-bot     { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; }
+.tplayer-badge { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.tcube-bot     { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; }
 
 /* ── Active box ───────────────────────────────────────────────── */
 
-.abox  { display: flex; gap: 3px; flex-wrap: wrap; min-height: 18px; border: 1px solid black; padding: 3px; margin-top: 4px; }
+.abox  { display: flex; gap: 3px; flex-wrap: wrap; min-height: 28px; border: 1px solid black; padding: 3px; margin-top: 4px; }
 
 /* ── Log entries (pax-pamir style) ───────────────────────────── */
 
