@@ -1,5 +1,8 @@
 # Road to Nowhere
 
+## Branch
+Develop and push on `claude/convert-rules-to-module`. Do not push to `main` or create other branches.
+
 ## Clarification
 Always seek clarification from the user if instructions or the optimal solution are unclear.
 
