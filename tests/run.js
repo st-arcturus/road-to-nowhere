@@ -654,5 +654,142 @@ test("stalemate: game ends when 0 roads are built in build phase", () => {
 	assert.ok(g.log.some(l => l.includes("No roads built")), "log must mention stalemate reason")
 })
 
+// ── Group G: Build phase undo ────────────────────────────────────
+//
+// These tests cover the regression where undo was not available after
+// pick_company in the draft sub-phase when the company had no shareholders
+// (or when the drafter held no shares). The fix was ensuring push_undo()
+// is called before all mutations in do_build_roads draft path.
+
+test("build draft: undo available after pick_company with no shareholders", () => {
+	let g = rules.setup(42, "3P", {})
+	g = play_initial_picks(g)
+	g = play_to_build_roads(g)
+	if (g.phase !== "build_roads" || g.build_roads.state !== "draft") return
+
+	const ci = g.active_box[0]
+	const drafter = g.active
+
+	// Remove all players' shares in this company so build_queue will be empty
+	g = clone(g)
+	for (const p of g.players) p.shares = p.shares.filter(s => s !== ci)
+	g.companies[ci].shares = []
+
+	g = take(g, drafter, "pick_company", ci)
+
+	assert.equal(g.waiting_end_turn, true, "should be waiting for end_turn")
+	assert.equal(g.undo.length, 1, "push_undo must have been called before mutations")
+	const v = rules.view(g, drafter)
+	assert.equal(v.actions.undo, 1, "undo must be enabled (regression: was absent when push_undo missing)")
+	assert.equal(v.actions.end_turn, 1, "end_turn must also be available")
+})
+
+test("build draft: undo of no-shareholder pick restores full state", () => {
+	let g = rules.setup(42, "3P", {})
+	g = play_initial_picks(g)
+	g = play_to_build_roads(g)
+	if (g.phase !== "build_roads" || g.build_roads.state !== "draft") return
+
+	const ci = g.active_box[0]
+	const drafter = g.active
+
+	g = clone(g)
+	for (const p of g.players) p.shares = p.shares.filter(s => s !== ci)
+	g.companies[ci].shares = []
+
+	const log_len_before = g.log.length
+	g = take(g, drafter, "pick_company", ci)
+	assert.ok(g.log.length > log_len_before, "log should have grown after pick")
+	assert.equal(g.undo.length, 1)
+
+	// Undo should fully restore pre-pick state
+	g = take(g, drafter, "undo")
+	assert.equal(g.waiting_end_turn, false, "waiting_end_turn cleared by undo")
+	assert.equal(g.undo.length, 0, "undo stack empty after pop")
+	assert.ok(g.active_box.includes(ci), "company must be back in active_box after undo")
+	assert.equal(g.build_roads.state, "draft", "sub-phase must still be draft")
+	assert.equal(g.log.length, log_len_before, "log must be truncated back to pre-pick length")
+})
+
+test("build draft: undo available when drafter has no shares but others do", () => {
+	// The drafter picks a company they don't own shares in; another player does.
+	// build_queue excludes the drafter → waiting_end_turn = true before build starts.
+	// Regression: this path also needed push_undo() to have been called.
+	let g = rules.setup(42, "3P", {})
+	g = play_initial_picks(g)
+	g = play_to_build_roads(g)
+	if (g.phase !== "build_roads" || g.build_roads.state !== "draft") return
+
+	const ci = g.active_box[0]
+	const drafter = g.active
+	const drafter_pi = rules.roles("3P").indexOf(drafter)
+
+	g = clone(g)
+	// Remove drafter's shares in ci
+	g.players[drafter_pi].shares = g.players[drafter_pi].shares.filter(s => s !== ci)
+	// Ensure a different player has at least one share in ci so build_queue is non-empty
+	const other_pi = (drafter_pi + 1) % 3
+	if (!g.players[other_pi].shares.includes(ci)) g.players[other_pi].shares.push(ci)
+	if (!g.companies[ci].shares.includes(other_pi)) g.companies[ci].shares.push(other_pi)
+
+	g = take(g, drafter, "pick_company", ci)
+
+	// Since drafter isn't in build_queue, control goes to waiting_end_turn
+	assert.equal(g.waiting_end_turn, true, "drafter waits while another player is first builder")
+	assert.equal(g.undo.length, 1, "undo stack must have 1 entry")
+	const v = rules.view(g, drafter)
+	assert.equal(v.actions.undo, 1, "undo must be enabled for the drafter")
+})
+
+test("build draft: undo after end_turn is not available (clear_undo was called)", () => {
+	// end_turn unconditionally calls clear_undo(), so after it fires, undo stack is empty.
+	let g = rules.setup(42, "3P", {})
+	g = play_initial_picks(g)
+	g = play_to_build_roads(g)
+	if (g.phase !== "build_roads" || g.build_roads.state !== "draft") return
+
+	const ci = g.active_box[0]
+	const drafter = g.active
+
+	g = clone(g)
+	for (const p of g.players) p.shares = p.shares.filter(s => s !== ci)
+	g.companies[ci].shares = []
+
+	g = take(g, drafter, "pick_company", ci)
+	assert.equal(g.undo.length, 1, "undo has 1 entry before end_turn")
+
+	g = take(g, drafter, "end_turn")
+	assert.equal(g.undo.length, 0, "undo cleared by end_turn — cannot undo a completed turn")
+})
+
+test("build action: undo restores hex road and build points", () => {
+	let g = rules.setup(42, "3P", {})
+	g = play_initial_picks(g)
+	g = play_to_build_roads(g)
+	g = play_to_building(g)
+	if (g.phase !== "build_roads" || g.build_roads.state !== "building") return
+
+	const builder = g.active
+	const ci = g.build_roads.current_company
+	const before_bp = g.build_roads.build_points_remaining
+	const before_undo_len = g.undo.length  // may be > 0 (draft push_undo still on stack)
+
+	const v = rules.view(g, builder)
+	if (!v.actions?.build?.length) return
+
+	const hex_id = v.actions.build[0]
+	g = take(g, builder, "build", hex_id)
+
+	assert.ok(g.hex_state[hex_id].roads.includes(ci), "road placed on hex after build")
+	assert.ok(g.build_roads.build_points_remaining < before_bp, "BP reduced after build")
+	assert.equal(g.undo.length, before_undo_len + 1, "build action pushed one undo entry")
+
+	// Undo the build action
+	g = take(g, builder, "undo")
+	assert.ok(!g.hex_state[hex_id].roads.includes(ci), "road removed from hex after undo")
+	assert.equal(g.build_roads.build_points_remaining, before_bp, "BP fully restored after undo")
+	assert.equal(g.undo.length, before_undo_len, "undo stack back to pre-build depth")
+})
+
 console.log("---")
 console.log("Done.")
