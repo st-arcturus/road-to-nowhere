@@ -147,7 +147,7 @@ aside #log {
 
 .ttrack-grid {
   display: grid;
-  grid-template-columns: repeat(var(--n), 34px);
+  grid-template-columns: repeat(var(--n), 38px);
   justify-content: center;
 }
 
