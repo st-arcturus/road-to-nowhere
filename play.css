@@ -129,14 +129,14 @@ aside #log {
 .co-claiminfo:empty { display: none; }
 .co-secondary { font-size: 11px; opacity: 0.75; text-align: right; grid-column: 1 / 3; grid-row: 3; }
 
-.co-claims-row { display: flex; gap: 7px; flex-wrap: wrap; min-height: 18px; margin-top: 3px; grid-column: 1; grid-row: 2; }
+.co-claims-row { display: flex; gap: 7px; flex-wrap: wrap; min-height: 22px; margin-top: 3px; grid-column: 1; grid-row: 2; }
 .co-claims-row:empty { display: none; }
 
 .claim-counter {
   display: flex; align-items: center; justify-content: center;
-  width: 18px; height: 18px; flex-shrink: 0;
+  width: 22px; height: 22px; flex-shrink: 0;
   border-radius: 50%;
-  font-size: 10px; font-weight: 500;
+  font-size: 11px; font-weight: 500;
   color: black;
   outline: 1.5px solid currentColor;
 }
@@ -147,7 +147,7 @@ aside #log {
 
 .ttrack-grid {
   display: grid;
-  grid-template-columns: repeat(var(--n), 28px);
+  grid-template-columns: repeat(var(--n), 34px);
 }
 
 /* Ordinal header row */
@@ -174,12 +174,12 @@ aside #log {
 .tslot-first { border-left: 1px solid black; }
 .tslot-t     { border-bottom: none; }
 
-.tplayer-badge { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-.tcube-bot     { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; }
+.tplayer-badge { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.tcube-bot     { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; }
 
 /* ── Active box ───────────────────────────────────────────────── */
 
-.abox  { display: flex; gap: 3px; flex-wrap: wrap; min-height: 18px; border: 1px solid black; padding: 3px; margin-top: 4px; }
+.abox  { display: flex; gap: 3px; flex-wrap: wrap; min-height: 28px; border: 1px solid black; padding: 3px; margin-top: 4px; }
 
 /* ── Log entries (pax-pamir style) ───────────────────────────── */
 
@@ -244,8 +244,8 @@ aside #log {
 
 .pip-counter {
   display: flex; align-items: center; justify-content: center;
-  width: 18px; height: 18px; padding: 0;
-  font-size: 10px; font-weight: 500;
+  width: 22px; height: 22px; padding: 0;
+  font-size: 11px; font-weight: 500;
   color: black;
   outline: 1.5px solid currentColor;
 }
