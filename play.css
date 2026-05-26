@@ -85,7 +85,7 @@ aside .psec:first-child  { border-bottom: none; }
 aside .psec:nth-child(2) { border-bottom: 1px solid black; }
 
 aside .plbl {
-  font-size: 11px;
+  font-size: 14px;
   margin-bottom: 5px;
 }
 
@@ -148,16 +148,17 @@ aside #log {
 .ttrack-grid {
   display: grid;
   grid-template-columns: repeat(var(--n), 34px);
+  justify-content: center;
 }
 
 /* Ordinal header row */
 .tord {
   text-align: center;
-  font-size: 11px;
+  font-size: 18px;
   line-height: 1;
   padding-bottom: 2px;
 }
-.tord sup { font-size: 9px; }
+.tord sup { font-size: 13px; }
 
 /* Data cells: square via aspect-ratio (reliable on grid items) */
 .tslot {
