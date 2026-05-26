@@ -161,6 +161,7 @@ aside #log {
 
 /* Data cells: square via aspect-ratio (reliable on grid items) */
 .tslot {
+  box-sizing: border-box;
   aspect-ratio: 1;
   border-top: 1px solid black;
   border-right: 1px solid black;
