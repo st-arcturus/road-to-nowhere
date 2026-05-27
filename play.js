@@ -11,34 +11,11 @@ const COMPANY_DEFS = [
 	{ key: "coiled",   name: "Coiled Construction", color: "#AA4499", light: true },
 ]
 
-const ROAD_TRACK_START = 25
+// MAPS, get_terrain, hex_label loaded from map.js (script tag before play.js).
 
 const PLAYER_COLORS = [ "#648FFF", "#785EF0", "#DC267F", "#FE6100", "#FFB000" ]
 const PLAYER_LIGHT  = [ true,      true,      true,      true,      true     ]
 const PLAYER_NAMES  = [ "Blue",    "Purple",  "Magenta", "Orange",  "Yellow" ]
-
-// Map rows — needed client-side for terrain lookup and hex geometry
-const MAP_ROWS = [
-	{ offset:7, count:4,  city:[],    river:[2],   mountain:[],    desert:[] },
-	{ offset:7, count:4,  city:[0],   river:[2],   mountain:[],    desert:[] },
-	{ offset:5, count:6,  city:[],    river:[3],   mountain:[],    desert:[5] },
-	{ offset:5, count:6,  city:[],    river:[3],   mountain:[],    desert:[5] },
-	{ offset:4, count:7,  city:[0],   river:[2,3], mountain:[],    desert:[5,6] },
-	{ offset:3, count:8,  city:[],    river:[3],   mountain:[],    desert:[6,7] },
-	{ offset:2, count:9,  city:[],    river:[3],   mountain:[],    desert:[6,7,8] },
-	{ offset:2, count:9,  city:[],    river:[2,3], mountain:[],    desert:[6,7,8] },
-	{ offset:1, count:10, city:[],    river:[2],   mountain:[6],   desert:[7,8,9] },
-	{ offset:1, count:10, city:[3,9], river:[2],   mountain:[6],   desert:[7,8] },
-	{ offset:0, count:11, city:[],    river:[2],   mountain:[5,6], desert:[8,9,10] },
-	{ offset:1, count:10, city:[0],   river:[1],   mountain:[5],   desert:[7,8,9] },
-	{ offset:0, count:11, city:[],    river:[2],   mountain:[5],   desert:[7,8,9,10] },
-	{ offset:1, count:10, city:[3],   river:[2],   mountain:[4],   desert:[7,8,9] },
-	{ offset:0, count:11, city:[],    river:[2],   mountain:[5,6], desert:[7,8,9,10] },
-	{ offset:1, count:10, city:[9],   river:[2],   mountain:[5],   desert:[6,7,8] },
-	{ offset:0, count:11, city:[],    river:[3],   mountain:[6],   desert:[7,8,9,10] },
-]
-
-const PLAYER_ROW_SKIP = { 3: 5, 4: 3, 5: 0 }
 
 const HEX_SIZE = 26
 const HEX_W = Math.sqrt(3) * HEX_SIZE
@@ -48,30 +25,16 @@ const TFILL = "#e8e8e8"
 
 
 // ── Map geometry ──────────────────────────────────────────────────
+//
+// get_terrain(map, r, c) and hex_label(map, r, c) come from map.js.
 
-function get_terrain(r, c) {
-	const rd = MAP_ROWS[r]
-	if (rd.city.includes(c))     return "city"
-	if (rd.river.includes(c))    return "river"
-	if (rd.mountain.includes(c)) return "mountain"
-	if (rd.desert.includes(c))   return "desert"
-	return "plain"
-}
-
-function hex_center(r, c, skip) {
-	const rd = MAP_ROWS[r]
-	const dr = (MAP_ROWS.length - 1 - skip) - r
+function hex_center(map, r, c, skip) {
+	const rd = map.rows[r]
+	const dr = (map.rows.length - 1 - skip) - r
 	const gc = c + rd.offset
 	const x = HEX_W * (gc + (r % 2 === 1 ? -0.5 : 0)) + HEX_W * 0.5
 	const y = HEX_H * 0.75 * dr + HEX_SIZE
 	return [x, y]
-}
-
-function hex_label(r, c) {
-	const gc  = c + MAP_ROWS[r].offset
-	const col = 2 * gc + (r % 2 === 0 ? 1 : 0)
-	// Row letter based on full 5P map so coords are stable across player counts
-	return String.fromCharCode(65 + (MAP_ROWS.length - 1 - r)) + col
 }
 
 function hex_corners(cx, cy, s) {
@@ -103,20 +66,21 @@ function on_init(scenario, options) {
 function on_update() {
 	if (!view || !view.players || !view.players.length) return
 
+	const map  = MAPS[view.map_id || "default"]
 	const pc   = view.players.length
-	const skip = PLAYER_ROW_SKIP[pc] || 0
+	const skip = map.player_row_skip[pc] || 0
 
-	render_map(skip)
-	render_left()
+	render_map(map, skip)
+	render_left(map)
 	render_players()
 }
 
 // ── Map rendering ─────────────────────────────────────────────────
 
-function render_map(skip) {
+function render_map(map, skip) {
 	const svg    = document.getElementById("map")
-	const max_r  = MAP_ROWS.length - skip
-	const max_gc = Math.max(...MAP_ROWS.slice(0, max_r).map(rd => rd.offset + rd.count - 1))
+	const max_r  = map.rows.length - skip
+	const max_gc = Math.max(...map.rows.slice(0, max_r).map(rd => rd.offset + rd.count - 1))
 	svg.innerHTML = ""
 
 	const MLEFT = 20   // px reserved on left for row letter labels
@@ -143,11 +107,11 @@ function render_map(skip) {
 	hex_group.setAttribute("transform", `translate(${MLEFT}, ${MTOP})`)
 
 	for (let r = 0; r < max_r; r++) {
-		const rd = MAP_ROWS[r]
+		const rd = map.rows[r]
 		for (let c = 0; c < rd.count; c++) {
 			const hex_id  = `${r}_${c}`
-			const terrain = get_terrain(r, c)
-			const [cx, cy] = hex_center(r, c, skip)
+			const terrain = get_terrain(map, r, c)
+			const [cx, cy] = hex_center(map, r, c, skip)
 			const hs = view.hex_state?.[hex_id]
 			const g  = document.createElementNS(ns, "g")
 			g.style.cursor = "pointer"
@@ -314,8 +278,8 @@ function render_map(skip) {
 
 	// Row letter labels — left of map
 	for (let r = 0; r < max_r; r++) {
-		const letter  = String.fromCharCode(65 + (MAP_ROWS.length - 1 - r))
-		const [, cy]  = hex_center(r, 0, skip)
+		const letter  = String.fromCharCode(65 + (map.rows.length - 1 - r))
+		const [, cy]  = hex_center(map, r, 0, skip)
 		make_label(MLEFT - 4, cy + MTOP, "end", "middle", letter)
 	}
 
@@ -324,7 +288,7 @@ function render_map(skip) {
 	// giving uniform HEX_W/2 spacing across the full column range.
 	const visible_cols = new Set()
 	for (let r = 0; r < max_r; r++) {
-		const rd = MAP_ROWS[r]
+		const rd = map.rows[r]
 		for (let c = 0; c < rd.count; c++) {
 			const gc = c + rd.offset
 			visible_cols.add(2 * gc + (r % 2 === 0 ? 1 : 0))
@@ -346,7 +310,8 @@ function on_hex_click(hex_id) {
 function show_tooltip(e, hex_id, terrain, hs) {
 	const tt    = document.getElementById("tt")
 	const [r, c] = hex_id.split("_").map(Number)
-	const coord  = hex_label(r, c)
+	const map   = MAPS[view.map_id || "default"]
+	const coord  = hex_label(map, r, c)
 	const parts  = [coord, terrain.charAt(0).toUpperCase() + terrain.slice(1)]
 	if (terrain === "city")     parts.push("Capacity: one cube per company")
 	if (terrain === "mountain") parts.push("Cost: 2 BP")
@@ -362,12 +327,12 @@ function show_tooltip(e, hex_id, terrain, hs) {
 
 // ── Left panel ────────────────────────────────────────────────────
 
-function render_left() {
+function render_left(map) {
 	// Companies
 	const cl = document.getElementById("co-list")
 	cl.innerHTML = ""
 	view.companies.forEach((co, ci) => {
-		const sv          = Math.ceil((ROAD_TRACK_START - co.road_track) / 2)
+		const sv          = Math.ceil((map.road_track_start - co.road_track) / 2)
 		const shares_left = 7 - co.shares.length
 		const d = document.createElement("div")
 		const def = COMPANY_DEFS[ci]

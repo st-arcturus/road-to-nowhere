@@ -11,30 +11,7 @@ const COMPANY_DEFS = [
 	{ key: "coiled",   name: "Coiled Construction" },
 ]
 
-const ROAD_TRACK_START = 25
-
-const MAP = {
-	rows: [
-		{ offset: 7, count: 4,  city: [],    river: [2],   mountain: [],    desert: [] },
-		{ offset: 7, count: 4,  city: [0],   river: [2],   mountain: [],    desert: [] },
-		{ offset: 5, count: 6,  city: [],    river: [3],   mountain: [],    desert: [5] },
-		{ offset: 5, count: 6,  city: [],    river: [3],   mountain: [],    desert: [5] },
-		{ offset: 4, count: 7,  city: [0],   river: [2,3], mountain: [],    desert: [5,6] },
-		{ offset: 3, count: 8,  city: [],    river: [3],   mountain: [],    desert: [6,7] },
-		{ offset: 2, count: 9,  city: [],    river: [3],   mountain: [],    desert: [6,7,8] },
-		{ offset: 2, count: 9,  city: [],    river: [2,3], mountain: [],    desert: [6,7,8] },
-		{ offset: 1, count: 10, city: [],    river: [2],   mountain: [6],   desert: [7,8,9] },
-		{ offset: 1, count: 10, city: [3,9], river: [2],   mountain: [6],   desert: [7,8] },
-		{ offset: 0, count: 11, city: [],    river: [2],   mountain: [5,6], desert: [8,9,10] },
-		{ offset: 1, count: 10, city: [0],   river: [1],   mountain: [5],   desert: [7,8,9] },
-		{ offset: 0, count: 11, city: [],    river: [2],   mountain: [5],   desert: [7,8,9,10] },
-		{ offset: 1, count: 10, city: [3],   river: [2],   mountain: [4],   desert: [7,8,9] },
-		{ offset: 0, count: 11, city: [],    river: [2],   mountain: [5,6], desert: [7,8,9,10] },
-		{ offset: 1, count: 10, city: [9],   river: [2],   mountain: [5],   desert: [6,7,8] },
-		{ offset: 0, count: 11, city: [],    river: [3],   mountain: [6],   desert: [7,8,9,10] },
-	],
-	player_row_skip: { 3: 5, 4: 3, 5: 0 },
-}
+const { MAPS, get_terrain, hex_label } = require("./map.js")
 
 // ── Scenarios & Roles ─────────────────────────────────────────────
 
@@ -128,41 +105,28 @@ function role_to_idx(role) {
 }
 
 // ── Map helpers ───────────────────────────────────────────────────
+//
+// hex_label(map, r, c) and get_terrain(map, r, c) imported from map.js.
 
-function hex_label(hex_id) {
-	const [r, c] = hex_id.split("_").map(Number)
-	const gc  = c + MAP.rows[r].offset
-	const col = 2 * gc + (r % 2 === 0 ? 1 : 0)
-	// Row letter based on full 5P map so coords are stable across player counts
-	return String.fromCharCode(65 + (MAP.rows.length - 1 - r)) + col
-}
+function game_map() { return MAPS[game.map_id] || MAPS.default }
 
-function get_terrain(r, c) {
-	const rd = MAP.rows[r]
-	if (rd.city.includes(c))     return "city"
-	if (rd.river.includes(c))    return "river"
-	if (rd.mountain.includes(c)) return "mountain"
-	if (rd.desert.includes(c))   return "desert"
-	return "plain"
-}
-
-function build_nb_map(num_players) {
-	const skip = MAP.player_row_skip[num_players] || 0
-	const max_r = MAP.rows.length - skip
+function build_nb_map(map, num_players) {
+	const skip = map.player_row_skip[num_players] || 0
+	const max_r = map.rows.length - skip
 	const hex_map = {}
 	for (let r = 0; r < max_r; r++)
-		for (let c = 0; c < MAP.rows[r].count; c++)
+		for (let c = 0; c < map.rows[r].count; c++)
 			hex_map[`${r}_${c}`] = true
 	const nb = {}
 	for (let r = 0; r < max_r; r++) {
-		const rd = MAP.rows[r]
+		const rd = map.rows[r]
 		for (let c = 0; c < rd.count; c++) {
 			const id = `${r}_${c}`, gc = c + rd.offset, nbs = []
 			if (c > 0) nbs.push(`${r}_${c - 1}`)
 			if (c < rd.count - 1) nbs.push(`${r}_${c + 1}`)
 			const add_nr = nr => {
 				if (nr < 0 || nr >= max_r) return
-				const nrd = MAP.rows[nr]
+				const nrd = map.rows[nr]
 				for (const dg of (r % 2 === 0 ? [0, 1] : [-1, 0])) {
 					const ngc = gc + dg, nc = ngc - nrd.offset
 					if (nc >= 0 && nc < nrd.count && hex_map[`${nr}_${nc}`])
@@ -177,12 +141,12 @@ function build_nb_map(num_players) {
 	return nb
 }
 
-// Cache by player count — deterministic, so safe to reuse across calls
+// Cache by map ID + player count — deterministic, safe to reuse across calls
 const nb_cache = {}
 function nb_map() {
-	const pc = game.num_players
-	if (!nb_cache[pc]) nb_cache[pc] = build_nb_map(pc)
-	return nb_cache[pc]
+	const key = `${game.map_id}:${game.num_players}`
+	if (!nb_cache[key]) nb_cache[key] = build_nb_map(game_map(), game.num_players)
+	return nb_cache[key]
 }
 
 // ── Game logic helpers ────────────────────────────────────────────
@@ -310,7 +274,7 @@ function check_game_end() {
 
 function compute_scores() {
 	add_log("=== GAME OVER ===")
-	const share_value = ci => Math.ceil((ROAD_TRACK_START - game.companies[ci].road_track) / 2)
+	const share_value = ci => Math.ceil((game_map().road_track_start - game.companies[ci].road_track) / 2)
 	const built_on_count = pi => {
 		let n = 0
 		for (let ci = 0; ci < game.companies.length; ci++) {
@@ -661,7 +625,8 @@ function do_build_roads(player, action, arg) {
 		if (hs.terrain === "city" && !co.built_in_city.includes(hex_id))
 			co.built_in_city.push(hex_id)
 		br.roads_built++
-		add_log(`${ROLE_NAMES[player]} builds ${co.name} at ${hex_label(hex_id)} (${hs.terrain}).`)
+		const [hr, hc] = hex_id.split("_").map(Number)
+		add_log(`${ROLE_NAMES[player]} builds ${co.name} at ${hex_label(game_map(), hr, hc)} (${hs.terrain}).`)
 		if (hs.disc !== null) {
 			co.claims.push(hex_id)
 			co.claim_owners.push(hs.disc)
@@ -693,7 +658,8 @@ function do_claim(player, action, arg) {
 	hs.disc = player
 	game.players[player].claims_left--
 	game.claim_land.pending.shift()
-	add_log(`${ROLE_NAMES[player]} claims ${hex_label(hex_id)}.`)
+	const [hr, hc] = hex_id.split("_").map(Number)
+	add_log(`${ROLE_NAMES[player]} claims ${hex_label(game_map(), hr, hc)}.`)
 	game.waiting_end_turn = true
 }
 
@@ -709,19 +675,22 @@ exports.setup = function (seed, scenario, options) {
 	const pc = { "3P": 3, "4P": 4, "5P": 5 }[scenario]
 	const cc = pc + 1
 	const starting_cash = { 3: 25, 4: 30, 5: 35 }[pc]
-	const skip = MAP.player_row_skip[pc] || 0
-	const max_r = MAP.rows.length - skip
+	const map_id = options?.map || "default"
+	const map    = MAPS[map_id]
+	const skip   = map.player_row_skip[pc] || 0
+	const max_r  = map.rows.length - skip
 
 	// Build hex state
 	const hex_state = {}
 	for (let r = 0; r < max_r; r++)
-		for (let c = 0; c < MAP.rows[r].count; c++)
-			hex_state[`${r}_${c}`] = { terrain: get_terrain(r, c), roads: [], disc: null }
+		for (let c = 0; c < map.rows[r].count; c++)
+			hex_state[`${r}_${c}`] = { terrain: get_terrain(map, r, c), roads: [], disc: null }
 
 	// Initialise game object (seed must be set before any shuffle calls)
 	game = {
 		seed,
 		num_players: pc,
+		map_id,
 		round: 1,
 		phase: "initial_share_pick",
 		active_player: 0,
@@ -744,14 +713,14 @@ exports.setup = function (seed, scenario, options) {
 		final_scores: null,
 	}
 
-	// Pre-cache the neighbour map for this player count
-	nb_cache[pc] = build_nb_map(pc)
+	// Pre-cache the neighbour map for this map + player count
+	nb_cache[`${map_id}:${pc}`] = build_nb_map(map, pc)
 
 	for (let i = 0; i < cc; i++)
 		game.companies.push({
 			key: COMPANY_DEFS[i].key,
 			name: COMPANY_DEFS[i].name,
-			road_track: ROAD_TRACK_START,
+			road_track: map.road_track_start,
 			treasury: 0,
 			active: true,
 			built_in_city: [],
@@ -869,6 +838,7 @@ exports.view = function (state, current) {
 			round: game.round,
 			active_player: game.active_player,
 			active: game.phase === "game_end" ? "None" : ROLE_NAMES[game.active_player],
+			map_id: game.map_id,
 			companies: game.companies,
 			players: game.players,
 			active_box: game.active_box,
@@ -892,6 +862,7 @@ exports.view = function (state, current) {
 		round: game.round,
 		active_player: game.active_player,
 		active: game.phase === "game_end" ? "None" : ROLE_NAMES[game.active_player],
+		map_id: game.map_id,
 		companies: game.companies,
 		players: game.players,
 		active_box: game.active_box,
