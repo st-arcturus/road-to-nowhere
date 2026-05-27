@@ -2,6 +2,7 @@
 
 const assert = require("node:assert/strict")
 const rules  = require("../rules.js")
+const { MAPS, get_terrain, hex_label } = require("../map.js")
 
 function clone(o) { return JSON.parse(JSON.stringify(o)) }
 
@@ -789,6 +790,80 @@ test("build action: undo restores hex road and build points", () => {
 	assert.ok(!g.hex_state[hex_id].roads.includes(ci), "road removed from hex after undo")
 	assert.equal(g.build_roads.build_points_remaining, before_bp, "BP fully restored after undo")
 	assert.equal(g.undo.length, before_undo_len, "undo stack back to pre-build depth")
+})
+
+// ── Group H: map.js module and refactor integration ──────────────
+//
+// These tests pin the shared map data so that:
+//   - accidental edits to a row in MAPS are caught immediately
+//   - the hex coordinate formula is locked to known expected values
+//   - view.map_id is confirmed present so the client can look up the right map
+//
+// Reference values computed from MAPS.default and verified by hand.
+
+test("map.js: get_terrain returns correct terrain for known hexes", () => {
+	const map = MAPS.default
+	// Cities — row 9 has city: [3, 9]
+	assert.equal(get_terrain(map, 9, 3),  "city",     "9_3 should be city")
+	assert.equal(get_terrain(map, 9, 9),  "city",     "9_9 should be city")
+	// Mountain — row 8 has mountain: [6]
+	assert.equal(get_terrain(map, 8, 6),  "mountain", "8_6 should be mountain")
+	// River — row 10 has river: [2]
+	assert.equal(get_terrain(map, 10, 2), "river",    "10_2 should be river")
+	// Desert — row 6 has desert: [6,7,8]
+	assert.equal(get_terrain(map, 6, 7),  "desert",   "6_7 should be desert")
+	// Plain — row 0 col 0 has no special terrain
+	assert.equal(get_terrain(map, 0, 0),  "plain",    "0_0 should be plain")
+})
+
+test("map.js: hex_label returns correct 18xx coordinates", () => {
+	const map = MAPS.default
+	// Letters count from bottom of 17-row map: A = row 16, Q = row 0
+	// Columns: col = 2*(c + offset) + (r%2===0 ? 1 : 0)
+	assert.equal(hex_label(map, 9,  3),  "H8",  "city 9_3  → H8")
+	assert.equal(hex_label(map, 9,  9),  "H20", "city 9_9  → H20")
+	assert.equal(hex_label(map, 8,  6),  "I15", "mountain 8_6  → I15")
+	assert.equal(hex_label(map, 0,  0),  "Q15", "top-right corner 0_0 → Q15")
+	assert.equal(hex_label(map, 16, 0),  "A1",  "bottom-left corner 16_0 → A1")
+})
+
+test("setup: game.map_id defaults to 'default' when options is empty", () => {
+	const g = rules.setup(42, "3P", {})
+	assert.equal(g.map_id, "default", "map_id must be stored in game state")
+})
+
+test("view: map_id present for active player, inactive player, and observer", () => {
+	const g = rules.setup(42, "3P", {})
+	const roles    = ["Blue", "Purple", "Magenta"]
+	const inactive = roles.find(r => r !== g.active)
+
+	const v_active   = rules.view(g, g.active)
+	const v_inactive = rules.view(g, inactive)
+	const v_observer = rules.view(g, "Observer")
+
+	assert.equal(v_active.map_id,   "default", "active player view must have map_id")
+	assert.equal(v_inactive.map_id, "default", "inactive player view must have map_id")
+	assert.equal(v_observer.map_id, "default", "observer view must have map_id")
+})
+
+test("setup: hex_state terrain matches MAPS.default for known hexes", () => {
+	// Use 5P so all 17 rows are present in the game
+	const g = rules.setup(42, "5P", {})
+	assert.equal(g.hex_state["9_3"]?.terrain,  "city",     "9_3  terrain: city")
+	assert.equal(g.hex_state["9_9"]?.terrain,  "city",     "9_9  terrain: city")
+	assert.equal(g.hex_state["8_6"]?.terrain,  "mountain", "8_6  terrain: mountain")
+	assert.equal(g.hex_state["10_2"]?.terrain, "river",    "10_2 terrain: river")
+	assert.equal(g.hex_state["6_7"]?.terrain,  "desert",   "6_7  terrain: desert")
+	assert.equal(g.hex_state["0_0"]?.terrain,  "plain",    "0_0  terrain: plain")
+})
+
+test("setup: 3P hex_state omits rows hidden by player_row_skip", () => {
+	// 3P skips 5 rows from the bottom (rows 12–16 are not in the game)
+	const g = rules.setup(42, "3P", {})
+	// Row 11 is the last visible row (max_r = 17 - 5 = 12, rows 0–11)
+	assert.ok(g.hex_state["11_0"] !== undefined, "row 11 must be present in 3P")
+	assert.ok(g.hex_state["12_0"] === undefined, "row 12 must be absent in 3P (skipped)")
+	assert.ok(g.hex_state["16_0"] === undefined, "row 16 must be absent in 3P (skipped)")
 })
 
 console.log("---")
