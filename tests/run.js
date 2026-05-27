@@ -857,13 +857,26 @@ test("setup: hex_state terrain matches MAPS.default for known hexes", () => {
 	assert.equal(g.hex_state["0_0"]?.terrain,  "plain",    "0_0  terrain: plain")
 })
 
-test("setup: 3P hex_state omits rows hidden by player_row_skip", () => {
-	// 3P skips 5 rows from the bottom (rows 12–16 are not in the game)
-	const g = rules.setup(42, "3P", {})
-	// Row 11 is the last visible row (max_r = 17 - 5 = 12, rows 0–11)
-	assert.ok(g.hex_state["11_0"] !== undefined, "row 11 must be present in 3P")
-	assert.ok(g.hex_state["12_0"] === undefined, "row 12 must be absent in 3P (skipped)")
-	assert.ok(g.hex_state["16_0"] === undefined, "row 16 must be absent in 3P (skipped)")
+test("setup: hex_state respects player_row_skip for each player count", () => {
+	// Boundaries are derived from the map definition, not hardcoded,
+	// so this test stays correct when player_row_skip values change or a
+	// new map with a different row count / skip table is added.
+	const map = MAPS.default
+	for (const [scenario, pc] of [["3P", 3], ["4P", 4], ["5P", 5]]) {
+		const g      = rules.setup(42, scenario, {})
+		const skip   = map.player_row_skip[pc] || 0
+		const max_r  = map.rows.length - skip
+		const last_visible = max_r - 1
+		const first_hidden = max_r
+
+		assert.ok(g.hex_state[`${last_visible}_0`] !== undefined,
+			`${scenario}: row ${last_visible} must be present (last visible row)`)
+
+		if (skip > 0) {
+			assert.ok(g.hex_state[`${first_hidden}_0`] === undefined,
+				`${scenario}: row ${first_hidden} must be absent (first skipped row)`)
+		}
+	}
 })
 
 console.log("---")
