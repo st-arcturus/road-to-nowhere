@@ -832,6 +832,21 @@ test("setup: game.map_id defaults to 'default' when options is empty", () => {
 	assert.equal(g.map_id, "default", "map_id must be stored in game state")
 })
 
+test("setup: explicit map option is honoured and stored", () => {
+	// Passing a valid map id explicitly must round-trip into game state.
+	const g = rules.setup(42, "3P", { map: "default" })
+	assert.equal(g.map_id, "default", "explicit map option must be stored")
+})
+
+test("setup: unknown map option throws a clear error", () => {
+	// External option strings enter only through setup, so it must validate
+	// rather than crash later with a cryptic 'undefined' error.
+	assert.throws(
+		() => rules.setup(42, "3P", { map: "no_such_map" }),
+		/Unknown map: "no_such_map"/,
+		"setup must reject an unknown map id with a descriptive error")
+})
+
 test("view: map_id present for active player, inactive player, and observer", () => {
 	const g = rules.setup(42, "3P", {})
 	const roles    = ["Blue", "Purple", "Magenta"]
