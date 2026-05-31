@@ -884,11 +884,15 @@ test("setup: hex_state respects player_row_skip for each player count", () => {
 	}
 })
 
-test("map.js: hex labels are bottom-anchored to the full map, stable under row-skip", () => {
+test("map.js: hex labels are top-anchored to the full map, stable under row-skip", () => {
 	// Row letters must be anchored to the FULL map (map.rows.length), not to
 	// the trimmed row count for a given player count. So a fixed physical hex
-	// keeps its coordinate no matter how many bottom rows are hidden, and the
-	// bottom-VISIBLE row climbs the alphabet as players decrease (5P→A, fewer→D/F).
+	// keeps its coordinate no matter how many top rows are hidden.
+	//
+	// Geometry: r=0 (Q, narrow) is at the BOTTOM of the screen; r=16 (A, wide)
+	// is at the TOP. player_row_skip trims from the END of the rows array (high
+	// indices = top of screen), so the top-VISIBLE row climbs the alphabet as
+	// player count decreases: 5P→A, 4P→D, 3P→F.
 	//
 	// This catches a regression the other label tests cannot: at 5P the full
 	// map and the visible map coincide, so an implementation that (wrongly)
@@ -905,19 +909,20 @@ test("map.js: hex labels are bottom-anchored to the full map, stable under row-s
 		assert.equal(labels[1], labels[2], `row ${r}: 4P and 5P labels must match`)
 	}
 
-	// 2. The bottom-VISIBLE row carries its full-map letter, not a relabeled "A".
+	// 2. The top-VISIBLE row (highest surviving array index) carries its
+	//    full-map letter, not a relabeled "A".
 	for (const [scenario, pc] of [["3P", 3], ["4P", 4], ["5P", 5]]) {
-		const skip   = map.player_row_skip[pc] || 0
-		const bottom = map.rows.length - skip - 1
-		const letter = String.fromCharCode(65 + (map.rows.length - 1 - bottom))
-		const label  = hex_label(map, bottom, 0)
+		const skip    = map.player_row_skip[pc] || 0
+		const top_row = map.rows.length - skip - 1   // highest visible index = top of screen
+		const letter  = String.fromCharCode(65 + (map.rows.length - 1 - top_row))
+		const label   = hex_label(map, top_row, 0)
 		assert.ok(label.startsWith(letter),
-			`${scenario}: bottom visible row ${bottom} must be letter ${letter}, got ${label}`)
+			`${scenario}: top visible row ${top_row} must be letter ${letter}, got ${label}`)
 	}
 	// Spell out the expected anchoring so the intent is obvious if this breaks.
-	assert.ok(hex_label(map, 16, 0).startsWith("A"), "5P bottom row → A")
-	assert.ok(hex_label(map, 13, 0).startsWith("D"), "4P bottom row → D")
-	assert.ok(hex_label(map, 11, 0).startsWith("F"), "3P bottom row → F")
+	assert.ok(hex_label(map, 16, 0).startsWith("A"), "5P top visible row (r=16) → A")
+	assert.ok(hex_label(map, 13, 0).startsWith("D"), "4P top visible row (r=13) → D")
+	assert.ok(hex_label(map, 11, 0).startsWith("F"), "3P top visible row (r=11) → F")
 })
 
 // ── Multi-map invariants ─────────────────────────────────────────
