@@ -66,7 +66,7 @@ function on_init(scenario, options) {
 function on_update() {
 	if (!view || !view.players || !view.players.length) return
 
-	const map  = MAPS[view.map_id || "default"]
+	const map  = MAPS[view.map_id || "gold"]
 	const pc   = view.players.length
 	const skip = map.player_row_skip[pc] || 0
 
@@ -83,11 +83,11 @@ function render_map(map, skip) {
 	const max_gc = Math.max(...map.rows.slice(0, max_r).map(rd => rd.offset + rd.count - 1))
 	svg.innerHTML = ""
 
-	const MLEFT = 20   // px reserved on left for row letter labels
-	const MTOP  = 16   // px reserved on top for column number labels
+	const MARGIN = 20  // equal margin on all four sides for axis labels
+	const hex_area_h = HEX_H * 0.75 * (max_r - 1) + HEX_H
 
-	svg.setAttribute("width",  HEX_W * (max_gc + 1.5) + 10 + MLEFT)
-	svg.setAttribute("height", HEX_H * 0.75 * (max_r - 1) + HEX_H + 10 + MTOP)
+	svg.setAttribute("width",  2 * MARGIN + HEX_W * (max_gc + 1))
+	svg.setAttribute("height", 2 * MARGIN + hex_area_h)
 
 	const buildable = new Set((view.actions?.build  || []))
 	const claimable = new Set((view.actions?.claim  || []))
@@ -104,7 +104,7 @@ function render_map(map, skip) {
 
 	// Translate group so all hex coordinates are offset by the label margins
 	const hex_group = document.createElementNS(ns, "g")
-	hex_group.setAttribute("transform", `translate(${MLEFT}, ${MTOP})`)
+	hex_group.setAttribute("transform", `translate(${MARGIN}, ${MARGIN})`)
 
 	for (let r = 0; r < max_r; r++) {
 		const rd = map.rows[r]
@@ -276,16 +276,7 @@ function render_map(map, skip) {
 		svg.appendChild(t)
 	}
 
-	// Row letter labels — left of map
-	for (let r = 0; r < max_r; r++) {
-		const letter  = String.fromCharCode(65 + (map.rows.length - 1 - r))
-		const [, cy]  = hex_center(map, r, 0, skip)
-		make_label(MLEFT - 4, cy + MTOP, "end", "middle", letter)
-	}
-
-	// Column number labels — top of map
-	// 18xx: col = 2*gc + (r%2===0 ? 1 : 0) so each integer maps to x = HEX_W*col/2,
-	// giving uniform HEX_W/2 spacing across the full column range.
+	// Build the set of A1 column numbers that have at least one hex
 	const visible_cols = new Set()
 	for (let r = 0; r < max_r; r++) {
 		const rd = map.rows[r]
@@ -295,9 +286,29 @@ function render_map(map, skip) {
 		}
 	}
 	const max_col = Math.max(...visible_cols)
+
+	// 18xx col → SVG x: col = 2*gc + parity, so x = HEX_W*col/2 + MARGIN
+	// Row r → SVG y: hex_center y is in hex_group coords; add MARGIN for SVG
+
+	const x_right = MARGIN + HEX_W * (max_gc + 1) + 4
+	const y_top   = MARGIN - 4           // top labels: text baseline 4 px above hex top
+	const y_bot   = MARGIN + hex_area_h + 4  // bottom labels: text top 4 px below hex bottom
+
+	// Row letters — left and right
+	for (let r = 0; r < max_r; r++) {
+		const letter = String.fromCharCode(65 + (map.rows.length - 1 - r))
+		const [, cy] = hex_center(map, r, 0, skip)
+		const sy = cy + MARGIN
+		make_label(MARGIN - 4, sy, "end",   "middle",  letter)
+		make_label(x_right,    sy, "start", "middle",  letter)
+	}
+
+	// Column numbers — top and bottom
 	for (let col = 1; col <= max_col; col++) {
 		if (!visible_cols.has(col)) continue
-		make_label(HEX_W * col / 2 + MLEFT, MTOP - 3, "middle", "auto", col)
+		const sx = HEX_W * col / 2 + MARGIN
+		make_label(sx, y_top, "middle", "auto",    col)
+		make_label(sx, y_bot, "middle", "hanging", col)
 	}
 }
 
@@ -310,7 +321,7 @@ function on_hex_click(hex_id) {
 function show_tooltip(e, hex_id, terrain, hs) {
 	const tt    = document.getElementById("tt")
 	const [r, c] = hex_id.split("_").map(Number)
-	const map   = MAPS[view.map_id || "default"]
+	const map   = MAPS[view.map_id || "gold"]
 	const coord  = hex_label(map, r, c)
 	const parts  = [coord, terrain.charAt(0).toUpperCase() + terrain.slice(1)]
 	if (terrain === "city")     parts.push("Capacity: one cube per company")

@@ -832,19 +832,9 @@ test("setup: game.map_id defaults to 'gold' when options is empty", () => {
 	assert.equal(g.map_id, "gold", "map_id must be stored in game state")
 })
 
-test("setup: explicit map option is honoured and stored", () => {
-	// Passing a valid map id explicitly must round-trip into game state.
-	const g = rules.setup(42, "3P", { map: "gold" })
-	assert.equal(g.map_id, "gold", "explicit map option must be stored")
-})
-
-test("setup: unknown map option throws a clear error", () => {
-	// External option strings enter only through setup, so it must validate
-	// rather than crash later with a cryptic 'undefined' error.
-	assert.throws(
-		() => rules.setup(42, "3P", { map: "no_such_map" }),
-		/Unknown map: "no_such_map"/,
-		"setup must reject an unknown map id with a descriptive error")
+test("setup: Granite_map option selects granite", () => {
+	const g = rules.setup(42, "3P", { Granite_map: true })
+	assert.equal(g.map_id, "granite", "Granite_map option must select granite map")
 })
 
 test("view: map_id present for active player, inactive player, and observer", () => {
@@ -938,7 +928,7 @@ test("setup: a non-default map round-trips through setup for every player count"
 	// Proves the option path works for a map that is NOT the default,
 	// across all scenarios — not just that the default value is stored.
 	for (const [scenario, pc] of [["3P", 3], ["4P", 4], ["5P", 5]]) {
-		const g = rules.setup(42, scenario, { map: "granite" })
+		const g = rules.setup(42, scenario, { Granite_map: true })
 		assert.equal(g.map_id, "granite", `${scenario}: granite map_id must round-trip`)
 		const skip  = MAPS.granite.player_row_skip[pc] || 0
 		const max_r = MAPS.granite.rows.length - skip
@@ -957,7 +947,7 @@ test("map.js: granite cities land at their published 18xx coordinates", () => {
 })
 
 test("setup: granite hex_state marks city terrain at the right hexes", () => {
-	const g = rules.setup(42, "5P", { map: "granite" })
+	const g = rules.setup(42, "5P", { Granite_map: true })
 	assert.equal(g.hex_state["0_4"]?.terrain, "city",  "Q11 (0_4) must be a city")
 	assert.equal(g.hex_state["2_8"]?.terrain, "city",  "O19 (2_8) must be a city")
 	assert.equal(g.hex_state["6_0"]?.terrain, "city",  "K5  (6_0) must be a city")

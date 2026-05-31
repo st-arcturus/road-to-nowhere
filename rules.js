@@ -675,9 +675,8 @@ exports.setup = function (seed, scenario, options) {
 	const pc = { "3P": 3, "4P": 4, "5P": 5 }[scenario]
 	const cc = pc + 1
 	const starting_cash = { 3: 25, 4: 30, 5: 35 }[pc]
-	const map_id = options?.map || "gold"
+	const map_id = options?.Granite_map ? "granite" : "gold"
 	const map    = MAPS[map_id]
-	if (!map) throw new Error(`Unknown map: "${map_id}". Valid maps: ${Object.keys(MAPS).join(", ")}`)
 	const skip   = map.player_row_skip[pc] || 0
 	const max_r  = map.rows.length - skip
 
