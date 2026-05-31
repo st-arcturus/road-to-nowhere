@@ -1,9 +1,0 @@
-#!/bin/bash
-while true
-do
-	npx nodemon --exitcrash server.js
-	echo
-	echo "Restarting soon!"
-	echo "Hit Ctl-C to exit."
-	sleep 3
-done
