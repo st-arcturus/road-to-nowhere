@@ -40,8 +40,9 @@ const MAPS = {
 	granite: {
 		name: "Granite",
 		road_track_start: 25,
-		// Rows Q(r=0) … A(r=16), top to bottom.
-		// Cities: Q11, O19, N10, M15, K5, B12
+		// Rows in array-index order r=0 (Q) … r=16 (A). On screen r=0 (Q) is
+		// the bottom row and r=16 (A) the top; player_row_skip hides from the
+		// top (high indices). Cities: Q11, O19, N10, M15, K5, B12
 		rows: [
 			{ offset: 1, count: 7,  city: [4],   river: [],    mountain: [],    desert: [] }, // Q
 			{ offset: 1, count: 9,  city: [],    river: [],    mountain: [],    desert: [] }, // P
@@ -76,8 +77,11 @@ function get_terrain(map, r, c) {
 }
 
 // Returns the 18xx-style alphanumeric label for hex (r, c) on a given map.
-// Row letters count from the bottom of the full 5P map so coordinates
-// remain stable regardless of how many rows are hidden for 3P/4P.
+// Letters are anchored to the FULL map (map.rows.length, not the visible row
+// count). Index r=0 is the bottom-of-screen row and gets the highest letter;
+// in the full map the top-of-screen row (highest index) is "A". Because
+// player_row_skip hides rows from the top (high indices), anchoring to the
+// full count keeps every remaining hex's coordinate stable across 3P/4P/5P.
 function hex_label(map, r, c) {
 	const gc  = c + map.rows[r].offset
 	const col = 2 * gc + (r % 2 === 0 ? 1 : 0)
