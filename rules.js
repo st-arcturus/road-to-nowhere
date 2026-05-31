@@ -19,8 +19,6 @@ const ROLE_NAMES = ["Blue", "Purple", "Magenta", "Orange", "Yellow"]
 
 exports.scenarios = [ "3P", "4P", "5P" ]
 
-exports.options = () => [{ name: "map", label: "Map", items: Object.keys(MAPS) }]
-
 exports.roles = function (scenario) {
 	const n = { "3P": 3, "4P": 4, "5P": 5 }[scenario]
 	return ROLE_NAMES.slice(0, n)
