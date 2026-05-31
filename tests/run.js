@@ -2,6 +2,7 @@
 
 const assert = require("node:assert/strict")
 const rules  = require("../rules.js")
+const { MAPS, get_terrain, hex_label } = require("../map.js")
 
 function clone(o) { return JSON.parse(JSON.stringify(o)) }
 
@@ -652,6 +653,315 @@ test("stalemate: game ends when 0 roads are built in build phase", () => {
 	g = play_to_claim_land(g)
 	assert.equal(g.phase, "game_end", "stalemate must trigger game_end")
 	assert.ok(g.log.some(l => l.includes("No roads built")), "log must mention stalemate reason")
+})
+
+// ── Group G: Build phase undo ────────────────────────────────────
+//
+// These tests cover the regression where undo was not available after
+// pick_company in the draft sub-phase when the company had no shareholders
+// (or when the drafter held no shares). The fix was ensuring push_undo()
+// is called before all mutations in do_build_roads draft path.
+
+test("build draft: undo available after pick_company with no shareholders", () => {
+	let g = rules.setup(42, "3P", {})
+	g = play_initial_picks(g)
+	g = play_to_build_roads(g)
+	if (g.phase !== "build_roads" || g.build_roads.state !== "draft") return
+
+	const ci = g.active_box[0]
+	const drafter = g.active
+
+	// Remove all players' shares in this company so build_queue will be empty
+	g = clone(g)
+	for (const p of g.players) p.shares = p.shares.filter(s => s !== ci)
+	g.companies[ci].shares = []
+
+	g = take(g, drafter, "pick_company", ci)
+
+	assert.equal(g.waiting_end_turn, true, "should be waiting for end_turn")
+	assert.equal(g.undo.length, 1, "push_undo must have been called before mutations")
+	const v = rules.view(g, drafter)
+	assert.equal(v.actions.undo, 1, "undo must be enabled (regression: was absent when push_undo missing)")
+	assert.equal(v.actions.end_turn, 1, "end_turn must also be available")
+})
+
+test("build draft: undo of no-shareholder pick restores full state", () => {
+	let g = rules.setup(42, "3P", {})
+	g = play_initial_picks(g)
+	g = play_to_build_roads(g)
+	if (g.phase !== "build_roads" || g.build_roads.state !== "draft") return
+
+	const ci = g.active_box[0]
+	const drafter = g.active
+
+	g = clone(g)
+	for (const p of g.players) p.shares = p.shares.filter(s => s !== ci)
+	g.companies[ci].shares = []
+
+	const log_len_before = g.log.length
+	g = take(g, drafter, "pick_company", ci)
+	assert.ok(g.log.length > log_len_before, "log should have grown after pick")
+	assert.equal(g.undo.length, 1)
+
+	// Undo should fully restore pre-pick state
+	g = take(g, drafter, "undo")
+	assert.equal(g.waiting_end_turn, false, "waiting_end_turn cleared by undo")
+	assert.equal(g.undo.length, 0, "undo stack empty after pop")
+	assert.ok(g.active_box.includes(ci), "company must be back in active_box after undo")
+	assert.equal(g.build_roads.state, "draft", "sub-phase must still be draft")
+	assert.equal(g.log.length, log_len_before, "log must be truncated back to pre-pick length")
+})
+
+test("build draft: undo available when drafter has no shares but others do", () => {
+	// The drafter picks a company they don't own shares in; another player does.
+	// build_queue excludes the drafter → waiting_end_turn = true before build starts.
+	// Regression: this path also needed push_undo() to have been called.
+	let g = rules.setup(42, "3P", {})
+	g = play_initial_picks(g)
+	g = play_to_build_roads(g)
+	if (g.phase !== "build_roads" || g.build_roads.state !== "draft") return
+
+	const ci = g.active_box[0]
+	const drafter = g.active
+	const drafter_pi = rules.roles("3P").indexOf(drafter)
+
+	g = clone(g)
+	// Remove drafter's shares in ci
+	g.players[drafter_pi].shares = g.players[drafter_pi].shares.filter(s => s !== ci)
+	// Ensure a different player has at least one share in ci so build_queue is non-empty
+	const other_pi = (drafter_pi + 1) % 3
+	if (!g.players[other_pi].shares.includes(ci)) g.players[other_pi].shares.push(ci)
+	if (!g.companies[ci].shares.includes(other_pi)) g.companies[ci].shares.push(other_pi)
+
+	g = take(g, drafter, "pick_company", ci)
+
+	// Since drafter isn't in build_queue, control goes to waiting_end_turn
+	assert.equal(g.waiting_end_turn, true, "drafter waits while another player is first builder")
+	assert.equal(g.undo.length, 1, "undo stack must have 1 entry")
+	const v = rules.view(g, drafter)
+	assert.equal(v.actions.undo, 1, "undo must be enabled for the drafter")
+})
+
+test("build draft: undo after end_turn is not available (clear_undo was called)", () => {
+	// end_turn unconditionally calls clear_undo(), so after it fires, undo stack is empty.
+	let g = rules.setup(42, "3P", {})
+	g = play_initial_picks(g)
+	g = play_to_build_roads(g)
+	if (g.phase !== "build_roads" || g.build_roads.state !== "draft") return
+
+	const ci = g.active_box[0]
+	const drafter = g.active
+
+	g = clone(g)
+	for (const p of g.players) p.shares = p.shares.filter(s => s !== ci)
+	g.companies[ci].shares = []
+
+	g = take(g, drafter, "pick_company", ci)
+	assert.equal(g.undo.length, 1, "undo has 1 entry before end_turn")
+
+	g = take(g, drafter, "end_turn")
+	assert.equal(g.undo.length, 0, "undo cleared by end_turn — cannot undo a completed turn")
+})
+
+test("build action: undo restores hex road and build points", () => {
+	let g = rules.setup(42, "3P", {})
+	g = play_initial_picks(g)
+	g = play_to_build_roads(g)
+	g = play_to_building(g)
+	if (g.phase !== "build_roads" || g.build_roads.state !== "building") return
+
+	const builder = g.active
+	const ci = g.build_roads.current_company
+	const before_bp = g.build_roads.build_points_remaining
+	const before_undo_len = g.undo.length  // may be > 0 (draft push_undo still on stack)
+
+	const v = rules.view(g, builder)
+	if (!v.actions?.build?.length) return
+
+	const hex_id = v.actions.build[0]
+	g = take(g, builder, "build", hex_id)
+
+	assert.ok(g.hex_state[hex_id].roads.includes(ci), "road placed on hex after build")
+	assert.ok(g.build_roads.build_points_remaining < before_bp, "BP reduced after build")
+	assert.equal(g.undo.length, before_undo_len + 1, "build action pushed one undo entry")
+
+	// Undo the build action
+	g = take(g, builder, "undo")
+	assert.ok(!g.hex_state[hex_id].roads.includes(ci), "road removed from hex after undo")
+	assert.equal(g.build_roads.build_points_remaining, before_bp, "BP fully restored after undo")
+	assert.equal(g.undo.length, before_undo_len, "undo stack back to pre-build depth")
+})
+
+// ── Group H: map.js module and refactor integration ──────────────
+//
+// These tests pin the shared map data so that:
+//   - accidental edits to a row in MAPS are caught immediately
+//   - the hex coordinate formula is locked to known expected values
+//   - view.map_id is confirmed present so the client can look up the right map
+//
+// Reference values computed from MAPS.gold and verified by hand.
+
+test("map.js: get_terrain returns correct terrain for known hexes", () => {
+	const map = MAPS.gold
+	// Cities — row 9 has city: [3, 9]
+	assert.equal(get_terrain(map, 9, 3),  "city",     "9_3 should be city")
+	assert.equal(get_terrain(map, 9, 9),  "city",     "9_9 should be city")
+	// Mountain — row 8 has mountain: [6]
+	assert.equal(get_terrain(map, 8, 6),  "mountain", "8_6 should be mountain")
+	// River — row 10 has river: [2]
+	assert.equal(get_terrain(map, 10, 2), "river",    "10_2 should be river")
+	// Desert — row 6 has desert: [6,7,8]
+	assert.equal(get_terrain(map, 6, 7),  "desert",   "6_7 should be desert")
+	// Plain — row 0 col 0 has no special terrain
+	assert.equal(get_terrain(map, 0, 0),  "plain",    "0_0 should be plain")
+})
+
+test("map.js: hex_label returns correct 18xx coordinates", () => {
+	const map = MAPS.gold
+	// Letters count from bottom of 17-row map: A = row 16, Q = row 0
+	// Columns: col = 2*(c + offset) + (r%2===0 ? 1 : 0)
+	assert.equal(hex_label(map, 9,  3),  "H8",  "city 9_3  → H8")
+	assert.equal(hex_label(map, 9,  9),  "H20", "city 9_9  → H20")
+	assert.equal(hex_label(map, 8,  6),  "I15", "mountain 8_6  → I15")
+	assert.equal(hex_label(map, 0,  0),  "Q15", "top-right corner 0_0 → Q15")
+	assert.equal(hex_label(map, 16, 0),  "A1",  "bottom-left corner 16_0 → A1")
+})
+
+test("setup: game.map_id defaults to 'gold' when options is empty", () => {
+	const g = rules.setup(42, "3P", {})
+	assert.equal(g.map_id, "gold", "map_id must be stored in game state")
+})
+
+test("setup: explicit map option is honoured and stored", () => {
+	// Passing a valid map id explicitly must round-trip into game state.
+	const g = rules.setup(42, "3P", { map: "gold" })
+	assert.equal(g.map_id, "gold", "explicit map option must be stored")
+})
+
+test("setup: unknown map option throws a clear error", () => {
+	// External option strings enter only through setup, so it must validate
+	// rather than crash later with a cryptic 'undefined' error.
+	assert.throws(
+		() => rules.setup(42, "3P", { map: "no_such_map" }),
+		/Unknown map: "no_such_map"/,
+		"setup must reject an unknown map id with a descriptive error")
+})
+
+test("view: map_id present for active player, inactive player, and observer", () => {
+	const g = rules.setup(42, "3P", {})
+	const roles    = ["Blue", "Purple", "Magenta"]
+	const inactive = roles.find(r => r !== g.active)
+
+	const v_active   = rules.view(g, g.active)
+	const v_inactive = rules.view(g, inactive)
+	const v_observer = rules.view(g, "Observer")
+
+	assert.equal(v_active.map_id,   "gold", "active player view must have map_id")
+	assert.equal(v_inactive.map_id, "gold", "inactive player view must have map_id")
+	assert.equal(v_observer.map_id, "gold", "observer view must have map_id")
+})
+
+test("setup: hex_state terrain matches MAPS.gold for known hexes", () => {
+	// Use 5P so all 17 rows are present in the game
+	const g = rules.setup(42, "5P", {})
+	assert.equal(g.hex_state["9_3"]?.terrain,  "city",     "9_3  terrain: city")
+	assert.equal(g.hex_state["9_9"]?.terrain,  "city",     "9_9  terrain: city")
+	assert.equal(g.hex_state["8_6"]?.terrain,  "mountain", "8_6  terrain: mountain")
+	assert.equal(g.hex_state["10_2"]?.terrain, "river",    "10_2 terrain: river")
+	assert.equal(g.hex_state["6_7"]?.terrain,  "desert",   "6_7  terrain: desert")
+	assert.equal(g.hex_state["0_0"]?.terrain,  "plain",    "0_0  terrain: plain")
+})
+
+test("setup: hex_state respects player_row_skip for each player count", () => {
+	// Boundaries are derived from the map definition, not hardcoded,
+	// so this test stays correct when player_row_skip values change or a
+	// new map with a different row count / skip table is added.
+	const map = MAPS.gold
+	for (const [scenario, pc] of [["3P", 3], ["4P", 4], ["5P", 5]]) {
+		const g      = rules.setup(42, scenario, {})
+		const skip   = map.player_row_skip[pc] || 0
+		const max_r  = map.rows.length - skip
+		const last_visible = max_r - 1
+		const first_hidden = max_r
+
+		assert.ok(g.hex_state[`${last_visible}_0`] !== undefined,
+			`${scenario}: row ${last_visible} must be present (last visible row)`)
+
+		if (skip > 0) {
+			assert.ok(g.hex_state[`${first_hidden}_0`] === undefined,
+				`${scenario}: row ${first_hidden} must be absent (first skipped row)`)
+		}
+	}
+})
+
+// ── Multi-map invariants ─────────────────────────────────────────
+//
+// The tests above pin one specific map (gold). These tests run over
+// EVERY map in MAPS, so adding or editing a map can't silently ship a
+// structurally broken board (out-of-range terrain, no city to start a
+// road in, a skip that hides the whole map, etc.).
+
+test("map.js: every map is structurally valid", () => {
+	for (const [id, map] of Object.entries(MAPS)) {
+		assert.ok(map.name, `${id}: must have a display name`)
+		assert.ok(map.road_track_start > 0, `${id}: road_track_start must be positive`)
+		assert.ok(Array.isArray(map.rows) && map.rows.length > 0, `${id}: must have rows`)
+
+		let city_count = 0
+		map.rows.forEach((rd, r) => {
+			assert.ok(rd.count > 0,  `${id} row ${r}: count must be positive`)
+			assert.ok(rd.offset >= 0, `${id} row ${r}: offset must be >= 0`)
+			for (const kind of ["city", "river", "mountain", "desert"]) {
+				assert.ok(Array.isArray(rd[kind]),
+					`${id} row ${r}: ${kind} must be an array`)
+				for (const c of rd[kind]) {
+					assert.ok(c >= 0 && c < rd.count,
+						`${id} row ${r}: ${kind} index ${c} out of range [0,${rd.count})`)
+				}
+			}
+			city_count += rd.city.length
+		})
+
+		// Companies must start their first road in a city, so a map with
+		// zero cities is unplayable.
+		assert.ok(city_count > 0, `${id}: must have at least one city`)
+
+		// A skip must never hide every row.
+		for (const [pc, skip] of Object.entries(map.player_row_skip || {})) {
+			assert.ok(skip >= 0 && skip < map.rows.length,
+				`${id}: player_row_skip[${pc}]=${skip} must leave at least one row`)
+		}
+	}
+})
+
+test("setup: a non-default map round-trips through setup for every player count", () => {
+	// Proves the option path works for a map that is NOT the default,
+	// across all scenarios — not just that the default value is stored.
+	for (const [scenario, pc] of [["3P", 3], ["4P", 4], ["5P", 5]]) {
+		const g = rules.setup(42, scenario, { map: "granite" })
+		assert.equal(g.map_id, "granite", `${scenario}: granite map_id must round-trip`)
+		const skip  = MAPS.granite.player_row_skip[pc] || 0
+		const max_r = MAPS.granite.rows.length - skip
+		assert.ok(g.hex_state[`${max_r - 1}_0`] !== undefined,
+			`${scenario}: last visible row must exist on granite`)
+	}
+})
+
+test("map.js: granite cities land at their published 18xx coordinates", () => {
+	const map = MAPS.granite
+	const labels = []
+	map.rows.forEach((rd, r) => rd.city.forEach(c => labels.push(hex_label(map, r, c))))
+	assert.deepEqual(labels.sort(),
+		["B12", "K5", "M15", "N10", "O19", "Q11"].sort(),
+		"granite cities must match the published layout B12/K5/M15/N10/O19/Q11")
+})
+
+test("setup: granite hex_state marks city terrain at the right hexes", () => {
+	const g = rules.setup(42, "5P", { map: "granite" })
+	assert.equal(g.hex_state["0_4"]?.terrain, "city",  "Q11 (0_4) must be a city")
+	assert.equal(g.hex_state["2_8"]?.terrain, "city",  "O19 (2_8) must be a city")
+	assert.equal(g.hex_state["6_0"]?.terrain, "city",  "K5  (6_0) must be a city")
+	assert.equal(g.hex_state["1_0"]?.terrain, "plain", "a non-city granite hex must be plain")
 })
 
 console.log("---")
