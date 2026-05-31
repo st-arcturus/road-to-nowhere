@@ -894,5 +894,75 @@ test("setup: hex_state respects player_row_skip for each player count", () => {
 	}
 })
 
+// ── Multi-map invariants ─────────────────────────────────────────
+//
+// The tests above pin one specific map (gold). These tests run over
+// EVERY map in MAPS, so adding or editing a map can't silently ship a
+// structurally broken board (out-of-range terrain, no city to start a
+// road in, a skip that hides the whole map, etc.).
+
+test("map.js: every map is structurally valid", () => {
+	for (const [id, map] of Object.entries(MAPS)) {
+		assert.ok(map.name, `${id}: must have a display name`)
+		assert.ok(map.road_track_start > 0, `${id}: road_track_start must be positive`)
+		assert.ok(Array.isArray(map.rows) && map.rows.length > 0, `${id}: must have rows`)
+
+		let city_count = 0
+		map.rows.forEach((rd, r) => {
+			assert.ok(rd.count > 0,  `${id} row ${r}: count must be positive`)
+			assert.ok(rd.offset >= 0, `${id} row ${r}: offset must be >= 0`)
+			for (const kind of ["city", "river", "mountain", "desert"]) {
+				assert.ok(Array.isArray(rd[kind]),
+					`${id} row ${r}: ${kind} must be an array`)
+				for (const c of rd[kind]) {
+					assert.ok(c >= 0 && c < rd.count,
+						`${id} row ${r}: ${kind} index ${c} out of range [0,${rd.count})`)
+				}
+			}
+			city_count += rd.city.length
+		})
+
+		// Companies must start their first road in a city, so a map with
+		// zero cities is unplayable.
+		assert.ok(city_count > 0, `${id}: must have at least one city`)
+
+		// A skip must never hide every row.
+		for (const [pc, skip] of Object.entries(map.player_row_skip || {})) {
+			assert.ok(skip >= 0 && skip < map.rows.length,
+				`${id}: player_row_skip[${pc}]=${skip} must leave at least one row`)
+		}
+	}
+})
+
+test("setup: a non-default map round-trips through setup for every player count", () => {
+	// Proves the option path works for a map that is NOT the default,
+	// across all scenarios — not just that the default value is stored.
+	for (const [scenario, pc] of [["3P", 3], ["4P", 4], ["5P", 5]]) {
+		const g = rules.setup(42, scenario, { map: "granite" })
+		assert.equal(g.map_id, "granite", `${scenario}: granite map_id must round-trip`)
+		const skip  = MAPS.granite.player_row_skip[pc] || 0
+		const max_r = MAPS.granite.rows.length - skip
+		assert.ok(g.hex_state[`${max_r - 1}_0`] !== undefined,
+			`${scenario}: last visible row must exist on granite`)
+	}
+})
+
+test("map.js: granite cities land at their published 18xx coordinates", () => {
+	const map = MAPS.granite
+	const labels = []
+	map.rows.forEach((rd, r) => rd.city.forEach(c => labels.push(hex_label(map, r, c))))
+	assert.deepEqual(labels.sort(),
+		["B12", "K5", "M15", "N10", "O19", "Q11"].sort(),
+		"granite cities must match the published layout B12/K5/M15/N10/O19/Q11")
+})
+
+test("setup: granite hex_state marks city terrain at the right hexes", () => {
+	const g = rules.setup(42, "5P", { map: "granite" })
+	assert.equal(g.hex_state["0_4"]?.terrain, "city",  "Q11 (0_4) must be a city")
+	assert.equal(g.hex_state["2_8"]?.terrain, "city",  "O19 (2_8) must be a city")
+	assert.equal(g.hex_state["6_0"]?.terrain, "city",  "K5  (6_0) must be a city")
+	assert.equal(g.hex_state["1_0"]?.terrain, "plain", "a non-city granite hex must be plain")
+})
+
 console.log("---")
 console.log("Done.")
