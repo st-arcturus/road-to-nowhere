@@ -799,10 +799,10 @@ test("build action: undo restores hex road and build points", () => {
 //   - the hex coordinate formula is locked to known expected values
 //   - view.map_id is confirmed present so the client can look up the right map
 //
-// Reference values computed from MAPS.default and verified by hand.
+// Reference values computed from MAPS.gold and verified by hand.
 
 test("map.js: get_terrain returns correct terrain for known hexes", () => {
-	const map = MAPS.default
+	const map = MAPS.gold
 	// Cities — row 9 has city: [3, 9]
 	assert.equal(get_terrain(map, 9, 3),  "city",     "9_3 should be city")
 	assert.equal(get_terrain(map, 9, 9),  "city",     "9_9 should be city")
@@ -817,7 +817,7 @@ test("map.js: get_terrain returns correct terrain for known hexes", () => {
 })
 
 test("map.js: hex_label returns correct 18xx coordinates", () => {
-	const map = MAPS.default
+	const map = MAPS.gold
 	// Letters count from bottom of 17-row map: A = row 16, Q = row 0
 	// Columns: col = 2*(c + offset) + (r%2===0 ? 1 : 0)
 	assert.equal(hex_label(map, 9,  3),  "H8",  "city 9_3  → H8")
@@ -827,15 +827,15 @@ test("map.js: hex_label returns correct 18xx coordinates", () => {
 	assert.equal(hex_label(map, 16, 0),  "A1",  "bottom-left corner 16_0 → A1")
 })
 
-test("setup: game.map_id defaults to 'default' when options is empty", () => {
+test("setup: game.map_id defaults to 'gold' when options is empty", () => {
 	const g = rules.setup(42, "3P", {})
-	assert.equal(g.map_id, "default", "map_id must be stored in game state")
+	assert.equal(g.map_id, "gold", "map_id must be stored in game state")
 })
 
 test("setup: explicit map option is honoured and stored", () => {
 	// Passing a valid map id explicitly must round-trip into game state.
-	const g = rules.setup(42, "3P", { map: "default" })
-	assert.equal(g.map_id, "default", "explicit map option must be stored")
+	const g = rules.setup(42, "3P", { map: "gold" })
+	assert.equal(g.map_id, "gold", "explicit map option must be stored")
 })
 
 test("setup: unknown map option throws a clear error", () => {
@@ -856,12 +856,12 @@ test("view: map_id present for active player, inactive player, and observer", ()
 	const v_inactive = rules.view(g, inactive)
 	const v_observer = rules.view(g, "Observer")
 
-	assert.equal(v_active.map_id,   "default", "active player view must have map_id")
-	assert.equal(v_inactive.map_id, "default", "inactive player view must have map_id")
-	assert.equal(v_observer.map_id, "default", "observer view must have map_id")
+	assert.equal(v_active.map_id,   "gold", "active player view must have map_id")
+	assert.equal(v_inactive.map_id, "gold", "inactive player view must have map_id")
+	assert.equal(v_observer.map_id, "gold", "observer view must have map_id")
 })
 
-test("setup: hex_state terrain matches MAPS.default for known hexes", () => {
+test("setup: hex_state terrain matches MAPS.gold for known hexes", () => {
 	// Use 5P so all 17 rows are present in the game
 	const g = rules.setup(42, "5P", {})
 	assert.equal(g.hex_state["9_3"]?.terrain,  "city",     "9_3  terrain: city")
@@ -876,7 +876,7 @@ test("setup: hex_state respects player_row_skip for each player count", () => {
 	// Boundaries are derived from the map definition, not hardcoded,
 	// so this test stays correct when player_row_skip values change or a
 	// new map with a different row count / skip table is added.
-	const map = MAPS.default
+	const map = MAPS.gold
 	for (const [scenario, pc] of [["3P", 3], ["4P", 4], ["5P", 5]]) {
 		const g      = rules.setup(42, scenario, {})
 		const skip   = map.player_row_skip[pc] || 0

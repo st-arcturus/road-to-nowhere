@@ -19,6 +19,8 @@ const ROLE_NAMES = ["Blue", "Purple", "Magenta", "Orange", "Yellow"]
 
 exports.scenarios = [ "3P", "4P", "5P" ]
 
+exports.options = () => [{ name: "map", label: "Map", items: Object.keys(MAPS) }]
+
 exports.roles = function (scenario) {
 	const n = { "3P": 3, "4P": 4, "5P": 5 }[scenario]
 	return ROLE_NAMES.slice(0, n)
@@ -108,7 +110,7 @@ function role_to_idx(role) {
 //
 // hex_label(map, r, c) and get_terrain(map, r, c) imported from map.js.
 
-function game_map() { return MAPS[game.map_id] || MAPS.default }
+function game_map() { return MAPS[game.map_id] || MAPS.gold }
 
 function build_nb_map(map, num_players) {
 	const skip = map.player_row_skip[num_players] || 0
@@ -675,7 +677,7 @@ exports.setup = function (seed, scenario, options) {
 	const pc = { "3P": 3, "4P": 4, "5P": 5 }[scenario]
 	const cc = pc + 1
 	const starting_cash = { 3: 25, 4: 30, 5: 35 }[pc]
-	const map_id = options?.map || "default"
+	const map_id = options?.map || "gold"
 	const map    = MAPS[map_id]
 	if (!map) throw new Error(`Unknown map: "${map_id}". Valid maps: ${Object.keys(MAPS).join(", ")}`)
 	const skip   = map.player_row_skip[pc] || 0

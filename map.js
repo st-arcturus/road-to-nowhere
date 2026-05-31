@@ -7,14 +7,14 @@
 //   play.js   — via <script src="map.js"> (lands as globals)
 //
 // To add a second map:
-//   1. Add an entry to MAPS with the same shape as "default".
+//   1. Add an entry to MAPS with the same shape as "gold".
 //   2. Add exports.options in rules.js:
 //        exports.options = () => [{ name:"map", label:"Map", items: Object.keys(MAPS) }]
 //   3. The RTT lobby will show the dropdown automatically.
 
 const MAPS = {
-	default: {
-		name: "Standard",
+	gold: {
+		name: "Gold",
 		road_track_start: 25,
 		rows: [
 			{ offset: 7, count: 4,  city: [],    river: [2],   mountain: [],    desert: [] },
@@ -36,6 +36,32 @@ const MAPS = {
 			{ offset: 0, count: 11, city: [],    river: [3],   mountain: [6],   desert: [7,8,9,10] },
 		],
 		player_row_skip: { 3: 5, 4: 3, 5: 0 },
+	},
+	granite: {
+		name: "Granite",
+		road_track_start: 25,
+		// Rows Q(r=0) … A(r=16), top to bottom.
+		// Cities: Q11, O19, N10, M15, K5, B12
+		rows: [
+			{ offset: 1, count: 7,  city: [4],   river: [],    mountain: [],    desert: [] }, // Q
+			{ offset: 1, count: 9,  city: [],    river: [],    mountain: [],    desert: [] }, // P
+			{ offset: 1, count: 9,  city: [8],   river: [],    mountain: [],    desert: [] }, // O
+			{ offset: 2, count: 8,  city: [3],   river: [],    mountain: [],    desert: [] }, // N
+			{ offset: 1, count: 8,  city: [6],   river: [],    mountain: [],    desert: [] }, // M
+			{ offset: 2, count: 7,  city: [],    river: [],    mountain: [],    desert: [] }, // L
+			{ offset: 2, count: 6,  city: [0],   river: [],    mountain: [],    desert: [] }, // K
+			{ offset: 3, count: 6,  city: [],    river: [],    mountain: [],    desert: [] }, // J
+			{ offset: 3, count: 5,  city: [],    river: [],    mountain: [],    desert: [] }, // I
+			{ offset: 4, count: 5,  city: [],    river: [],    mountain: [],    desert: [] }, // H
+			{ offset: 3, count: 6,  city: [],    river: [],    mountain: [],    desert: [] }, // G
+			{ offset: 5, count: 4,  city: [],    river: [],    mountain: [],    desert: [] }, // F
+			{ offset: 5, count: 3,  city: [],    river: [],    mountain: [],    desert: [] }, // E
+			{ offset: 5, count: 4,  city: [],    river: [],    mountain: [],    desert: [] }, // D
+			{ offset: 5, count: 3,  city: [],    river: [],    mountain: [],    desert: [] }, // C
+			{ offset: 6, count: 3,  city: [0],   river: [],    mountain: [],    desert: [] }, // B
+			{ offset: 6, count: 2,  city: [],    river: [],    mountain: [],    desert: [] }, // A
+		],
+		player_row_skip: {},
 	},
 }
 
