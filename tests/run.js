@@ -884,6 +884,47 @@ test("setup: hex_state respects player_row_skip for each player count", () => {
 	}
 })
 
+test("map.js: hex labels are top-anchored to the full map, stable under row-skip", () => {
+	// Row letters must be anchored to the FULL map (map.rows.length), not to
+	// the trimmed row count for a given player count. So a fixed physical hex
+	// keeps its coordinate no matter how many top rows are hidden.
+	//
+	// Geometry: r=0 (Q, narrow) is at the BOTTOM of the screen; r=16 (A, wide)
+	// is at the TOP. player_row_skip trims from the END of the rows array (high
+	// indices = top of screen), so the top-VISIBLE row climbs the alphabet as
+	// player count decreases: 5P→A, 4P→D, 3P→F.
+	//
+	// This catches a regression the other label tests cannot: at 5P the full
+	// map and the visible map coincide, so an implementation that (wrongly)
+	// anchored to the visible row count would still pass every 5P-based check.
+	const map = MAPS.gold
+
+	// 1. Same (r, c) yields the same label across every player count.
+	for (const r of [0, 5, 11]) {
+		const labels = ["3P", "4P", "5P"].map(s => {
+			rules.setup(42, s, {})            // skip changes per scenario…
+			return hex_label(map, r, 0)        // …but the label must not.
+		})
+		assert.equal(labels[0], labels[1], `row ${r}: 3P and 4P labels must match`)
+		assert.equal(labels[1], labels[2], `row ${r}: 4P and 5P labels must match`)
+	}
+
+	// 2. The top-VISIBLE row (highest surviving array index) carries its
+	//    full-map letter, not a relabeled "A".
+	for (const [scenario, pc] of [["3P", 3], ["4P", 4], ["5P", 5]]) {
+		const skip    = map.player_row_skip[pc] || 0
+		const top_row = map.rows.length - skip - 1   // highest visible index = top of screen
+		const letter  = String.fromCharCode(65 + (map.rows.length - 1 - top_row))
+		const label   = hex_label(map, top_row, 0)
+		assert.ok(label.startsWith(letter),
+			`${scenario}: top visible row ${top_row} must be letter ${letter}, got ${label}`)
+	}
+	// Spell out the expected anchoring so the intent is obvious if this breaks.
+	assert.ok(hex_label(map, 16, 0).startsWith("A"), "5P top visible row (r=16) → A")
+	assert.ok(hex_label(map, 13, 0).startsWith("D"), "4P top visible row (r=13) → D")
+	assert.ok(hex_label(map, 11, 0).startsWith("F"), "3P top visible row (r=11) → F")
+})
+
 // ── Multi-map invariants ─────────────────────────────────────────
 //
 // The tests above pin one specific map (gold). These tests run over
