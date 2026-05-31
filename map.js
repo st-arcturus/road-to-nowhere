@@ -40,8 +40,9 @@ const MAPS = {
 	granite: {
 		name: "Granite",
 		road_track_start: 25,
-		// Rows Q(r=0) … A(r=16), top to bottom.
-		// Cities: Q11, O19, N10, M15, K5, B12
+		// Rows in array-index order r=0 (Q) … r=16 (A). On screen r=0 (Q) is
+		// the bottom row and r=16 (A) the top; player_row_skip hides from the
+		// top (high indices). Cities: Q11, O19, N10, M15, K5, B12
 		rows: [
 			{ offset: 1, count: 7,  city: [4],   river: [],    mountain: [],    desert: [] }, // Q
 			{ offset: 1, count: 9,  city: [],    river: [],    mountain: [],    desert: [] }, // P

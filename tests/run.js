@@ -818,13 +818,14 @@ test("map.js: get_terrain returns correct terrain for known hexes", () => {
 
 test("map.js: hex_label returns correct 18xx coordinates", () => {
 	const map = MAPS.gold
-	// Letters count from bottom of 17-row map: A = row 16, Q = row 0
+	// Letters anchored to the full 17-row map: A = row 16 (top of screen),
+	// Q = row 0 (bottom of screen). Index r=0 is the bottom-of-screen row.
 	// Columns: col = 2*(c + offset) + (r%2===0 ? 1 : 0)
 	assert.equal(hex_label(map, 9,  3),  "H8",  "city 9_3  → H8")
 	assert.equal(hex_label(map, 9,  9),  "H20", "city 9_9  → H20")
 	assert.equal(hex_label(map, 8,  6),  "I15", "mountain 8_6  → I15")
-	assert.equal(hex_label(map, 0,  0),  "Q15", "top-right corner 0_0 → Q15")
-	assert.equal(hex_label(map, 16, 0),  "A1",  "bottom-left corner 16_0 → A1")
+	assert.equal(hex_label(map, 0,  0),  "Q15", "bottom-right corner 0_0 → Q15")
+	assert.equal(hex_label(map, 16, 0),  "A1",  "top-left corner 16_0 → A1")
 })
 
 test("setup: game.map_id defaults to 'gold' when options is empty", () => {
