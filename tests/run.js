@@ -996,5 +996,58 @@ test("setup: granite hex_state marks city terrain at the right hexes", () => {
 	assert.equal(g.hex_state["1_0"]?.terrain, "plain", "a non-city granite hex must be plain")
 })
 
+// ── Subsidies variant ─────────────────────────────────────────────
+
+test("setup: Subsidies_variant is stored in game state", () => {
+	const g_on  = rules.setup(42, "3P", { Subsidies_variant: true })
+	const g_off = rules.setup(42, "3P", {})
+	assert.equal(g_on.subsidies,  true,  "Subsidies_variant:true must set subsidies=true")
+	assert.equal(g_off.subsidies, false, "omitted option must set subsidies=false")
+})
+
+test("subsidies: each company receives $10 per unissued share after draft", () => {
+	let g = rules.setup(1, "3P", { Subsidies_variant: true })
+	// 3P: 4 companies, 3 players each hold 2 shares → 6 shares total
+	// Each company can hold at most 2; subsidy = (2 - held) * $10
+	g = play_initial_picks(g)
+	assert.notEqual(g.phase, "initial_share_pick", "draft must have ended")
+	const total_subsidy = g.companies.reduce((sum, co) => sum + co.treasury, 0)
+	// 4 companies * 2 max shares = 8 possible; 6 issued → 2 unissued → $20 total subsidy
+	assert.equal(total_subsidy, 20, "total subsidy across all companies must be $20 in 3P")
+	for (const co of g.companies) {
+		const expected = Math.max(0, 2 - co.shares.length) * 10
+		assert.equal(co.treasury, expected,
+			`${co.name}: treasury must equal (2 - ${co.shares.length}) * 10 = $${expected}`)
+	}
+})
+
+test("subsidies: no treasury added when variant is off", () => {
+	let g = rules.setup(1, "3P", {})
+	g = play_initial_picks(g)
+	for (const co of g.companies)
+		assert.equal(co.treasury, 0, `${co.name}: treasury must be $0 without Subsidies variant`)
+})
+
+test("subsidies: subsidy total is $20 in every player count", () => {
+	// 3P: 4 co, 6 shares issued → 8-6=2 unissued → $20
+	// 4P: 5 co, 8 shares issued → 10-8=2 unissued → $20
+	// 5P: 6 co, 10 shares issued → 12-10=2 unissued → $20
+	for (const scenario of ["3P", "4P", "5P"]) {
+		let g = rules.setup(7, scenario, { Subsidies_variant: true })
+		g = play_initial_picks(g)
+		const total = g.companies.reduce((sum, co) => sum + co.treasury, 0)
+		assert.equal(total, 20, `${scenario}: total subsidy must always be $20`)
+	}
+})
+
+test("subsidies: works with Granite map", () => {
+	let g = rules.setup(3, "4P", { Granite_map: true, Subsidies_variant: true })
+	assert.equal(g.map_id,    "granite", "granite map must be selected")
+	assert.equal(g.subsidies, true,      "subsidies flag must be set")
+	g = play_initial_picks(g)
+	const total = g.companies.reduce((sum, co) => sum + co.treasury, 0)
+	assert.equal(total, 20, "4P granite: total subsidy must be $20")
+})
+
 console.log("---")
 console.log("Done.")
