@@ -1005,19 +1005,20 @@ test("setup: Subsidies_variant is stored in game state", () => {
 	assert.equal(g_off.subsidies, false, "omitted option must set subsidies=false")
 })
 
-test("subsidies: each company receives $10 per unissued share after draft", () => {
+test("subsidies: each company receives $2 per share per player per unissued share", () => {
 	let g = rules.setup(1, "3P", { Subsidies_variant: true })
-	// 3P: 4 companies, 3 players each hold 2 shares → 6 shares total
-	// Each company can hold at most 2; subsidy = (2 - held) * $10
+	// 3P: per-share subsidy = $2 * 3 players = $6
+	// 4 companies, 3 players each hold 2 shares → 6 shares total
+	// Each company can hold at most 2; subsidy = (2 - held) * $6
 	g = play_initial_picks(g)
 	assert.notEqual(g.phase, "initial_share_pick", "draft must have ended")
 	const total_subsidy = g.companies.reduce((sum, co) => sum + co.treasury, 0)
-	// 4 companies * 2 max shares = 8 possible; 6 issued → 2 unissued → $20 total subsidy
-	assert.equal(total_subsidy, 20, "total subsidy across all companies must be $20 in 3P")
+	// 8 possible shares; 6 issued → 2 unissued → 2 * $6 = $12 total subsidy
+	assert.equal(total_subsidy, 12, "total subsidy across all companies must be $12 in 3P")
 	for (const co of g.companies) {
-		const expected = Math.max(0, 2 - co.shares.length) * 10
+		const expected = Math.max(0, 2 - co.shares.length) * 6
 		assert.equal(co.treasury, expected,
-			`${co.name}: treasury must equal (2 - ${co.shares.length}) * 10 = $${expected}`)
+			`${co.name}: treasury must equal (2 - ${co.shares.length}) * $6 = $${expected}`)
 	}
 })
 
@@ -1028,15 +1029,14 @@ test("subsidies: no treasury added when variant is off", () => {
 		assert.equal(co.treasury, 0, `${co.name}: treasury must be $0 without Subsidies variant`)
 })
 
-test("subsidies: subsidy total is $20 in every player count", () => {
-	// 3P: 4 co, 6 shares issued → 8-6=2 unissued → $20
-	// 4P: 5 co, 8 shares issued → 10-8=2 unissued → $20
-	// 5P: 6 co, 10 shares issued → 12-10=2 unissued → $20
-	for (const scenario of ["3P", "4P", "5P"]) {
+test("subsidies: per-share subsidy scales $2/share/player across player counts", () => {
+	// Always exactly 2 unissued shares; per-share = $2 * num_players
+	// 3P: 2 * ($2*3) = $12   4P: 2 * ($2*4) = $16   5P: 2 * ($2*5) = $20
+	for (const [scenario, expected] of [["3P", 12], ["4P", 16], ["5P", 20]]) {
 		let g = rules.setup(7, scenario, { Subsidies_variant: true })
 		g = play_initial_picks(g)
 		const total = g.companies.reduce((sum, co) => sum + co.treasury, 0)
-		assert.equal(total, 20, `${scenario}: total subsidy must always be $20`)
+		assert.equal(total, expected, `${scenario}: total subsidy must be $${expected}`)
 	}
 })
 
@@ -1046,7 +1046,8 @@ test("subsidies: works with Granite map", () => {
 	assert.equal(g.subsidies, true,      "subsidies flag must be set")
 	g = play_initial_picks(g)
 	const total = g.companies.reduce((sum, co) => sum + co.treasury, 0)
-	assert.equal(total, 20, "4P granite: total subsidy must be $20")
+	// 4P: 2 unissued * ($2*4) = $16
+	assert.equal(total, 16, "4P granite: total subsidy must be $16")
 })
 
 console.log("---")

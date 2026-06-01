@@ -480,8 +480,9 @@ function advance_initial_pick() {
 	} else {
 		add_log("All shares dealt.")
 		if (game.subsidies) {
+			const per_share = 2 * game.num_players  // $2 per share per player
 			for (const co of game.companies) {
-				const amount = Math.max(0, 2 - co.shares.length) * 10
+				const amount = Math.max(0, 2 - co.shares.length) * per_share
 				if (amount > 0) {
 					co.treasury += amount
 					add_log(`${co.name} receives $${amount} subsidy (${co.shares.length}/2 shares issued).`)
