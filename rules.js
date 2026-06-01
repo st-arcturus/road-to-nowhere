@@ -479,6 +479,16 @@ function advance_initial_pick() {
 		set_active_player(next)
 	} else {
 		add_log("All shares dealt.")
+		if (game.subsidies) {
+			const per_share = 2 * game.num_players  // $2 per share per player
+			for (const co of game.companies) {
+				const amount = Math.max(0, 2 - co.shares.length) * per_share
+				if (amount > 0) {
+					co.treasury += amount
+					add_log(`${co.name} receives $${amount} subsidy (${co.shares.length}/2 shares issued).`)
+				}
+			}
+		}
 		add_log(`=== Round ${game.round} ===`)
 		start_bid()
 	}
@@ -675,7 +685,8 @@ exports.setup = function (seed, scenario, options) {
 	const pc = { "3P": 3, "4P": 4, "5P": 5 }[scenario]
 	const cc = pc + 1
 	const starting_cash = { 3: 25, 4: 30, 5: 35 }[pc]
-	const map_id = options?.Granite_map ? "granite" : "gold"
+	const map_id   = options?.Granite_map      ? "granite" : "gold"
+	const subsidies = !!options?.Subsidies_variant
 	const map    = MAPS[map_id]
 	const skip   = map.player_row_skip[pc] || 0
 	const max_r  = map.rows.length - skip
@@ -691,6 +702,7 @@ exports.setup = function (seed, scenario, options) {
 		seed,
 		num_players: pc,
 		map_id,
+		subsidies,
 		round: 1,
 		phase: "initial_share_pick",
 		active_player: 0,
