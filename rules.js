@@ -21,7 +21,7 @@ exports.scenarios        = ["Gold", "Granite"]
 exports.default_scenario = "Gold"
 
 exports.roles = function (scenario, options) {
-	return ROLE_NAMES.slice(0, Number(options?.players) || 4)
+	return ROLE_NAMES.slice(0, Number(options?.players) || 5)
 }
 
 // ── Module-level game variable ────────────────────────────────────
@@ -682,7 +682,7 @@ exports.static_view = function (game) {
 // ── exports.setup ─────────────────────────────────────────────────
 
 exports.setup = function (seed, scenario, options) {
-	const pc = Number(options?.players) || 4
+	const pc = Number(options?.players) || 5
 	const cc = pc + 1
 	const starting_cash = { 3: 25, 4: 30, 5: 35 }[pc]
 	const map_id    = scenario.toLowerCase()          // "gold" or "granite"
