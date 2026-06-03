@@ -27,7 +27,7 @@ function test(name, fn) {
 // ── Basic setup ───────────────────────────────────────────────────
 
 test("setup creates valid 3P game", () => {
-	const g = rules.setup(42, "3P", {})
+	const g = rules.setup(42, "Gold", { players: 3 })
 	assert.equal(typeof g, "object")
 	assert.equal(g.players.length, 3)
 	assert.ok(["Blue","Purple","Magenta","Orange","Yellow"].includes(g.active))
@@ -36,19 +36,19 @@ test("setup creates valid 3P game", () => {
 })
 
 test("roles() returns color names", () => {
-	const r = rules.roles("3P")
+	const r = rules.roles("Gold", { players: 3 })
 	assert.deepEqual(r, ["Blue","Purple","Magenta","Orange"].slice(0,3))
 })
 
 test("view as Observer returns read-only snapshot (no actions)", () => {
-	const g = rules.setup(42, "3P", {})
+	const g = rules.setup(42, "Gold", { players: 3 })
 	const v = rules.view(g, "Observer")
 	assert.equal(v.actions, undefined, "observer view must not have actions")
 	assert.equal(v.phase, "initial_share_pick")
 })
 
 test("view as inactive player has no actions", () => {
-	const g = rules.setup(42, "3P", {})
+	const g = rules.setup(42, "Gold", { players: 3 })
 	const inactive = ["Blue","Purple","Magenta"].find(r => r !== g.active)
 	const v = rules.view(g, inactive)
 	assert.equal(v.actions, undefined, "inactive player must not have actions")
@@ -56,7 +56,7 @@ test("view as inactive player has no actions", () => {
 })
 
 test("view as active player has actions in initial_share_pick", () => {
-	const g = rules.setup(42, "3P", {})
+	const g = rules.setup(42, "Gold", { players: 3 })
 	const v = rules.view(g, g.active)
 	assert.ok(v.actions, "active player should have actions")
 	assert.ok(Array.isArray(v.actions.pick_share), "should have pick_share array")
@@ -84,7 +84,7 @@ function play_initial_picks(g) {
 }
 
 test("end_turn advances after pick_share", () => {
-	let g = rules.setup(42, "3P", {})
+	let g = rules.setup(42, "Gold", { players: 3 })
 	const first = g.active
 	const v = rules.view(g, first)
 	assert.ok(v.actions.pick_share?.length, "should offer pick_share")
@@ -103,7 +103,7 @@ test("end_turn advances after pick_share", () => {
 })
 
 test("undo restores state and clears waiting_end_turn", () => {
-	let g = rules.setup(42, "3P", {})
+	let g = rules.setup(42, "Gold", { players: 3 })
 	const first = g.active
 	const orig = clone(g)
 	const v = rules.view(g, first)
@@ -115,18 +115,18 @@ test("undo restores state and clears waiting_end_turn", () => {
 	g = take(g, first, "undo")
 	assert.equal(g.waiting_end_turn, false, "waiting_end_turn must be cleared by undo")
 	assert.equal(g.undo.length, 0, "undo stack empty after pop")
-	assert.deepEqual(g.players[rules.roles("3P").indexOf(first)].shares,
-		orig.players[rules.roles("3P").indexOf(first)].shares,
+	assert.deepEqual(g.players[rules.roles("Gold", { players: 3 }).indexOf(first)].shares,
+		orig.players[rules.roles("Gold", { players: 3 }).indexOf(first)].shares,
 		"shares restored")
 })
 
 test("undo throws if nothing to undo", () => {
-	const g = rules.setup(42, "3P", {})
+	const g = rules.setup(42, "Gold", { players: 3 })
 	assert.throws(() => take(g, g.active, "undo"), /Nothing to undo/)
 })
 
 test("undo throws if not active player", () => {
-	let g = rules.setup(42, "3P", {})
+	let g = rules.setup(42, "Gold", { players: 3 })
 	const first = g.active
 	const v = rules.view(g, first)
 	g = take(g, first, "pick_share", v.actions.pick_share[0])
@@ -135,14 +135,14 @@ test("undo throws if not active player", () => {
 })
 
 test("end_turn throws if waiting_end_turn is false", () => {
-	const g = rules.setup(42, "3P", {})
+	const g = rules.setup(42, "Gold", { players: 3 })
 	assert.throws(() => take(g, g.active, "end_turn"), /No turn to end/)
 })
 
 // ── Bid phase tests ──────────────────────────────────────────────
 
 test("bid phase: undo available after raise", () => {
-	let g = rules.setup(42, "3P", {})
+	let g = rules.setup(42, "Gold", { players: 3 })
 	g = play_initial_picks(g)
 	assert.equal(g.phase, "bid", `expected bid phase, got ${g.phase}`)
 
@@ -160,7 +160,7 @@ test("bid phase: undo available after raise", () => {
 })
 
 test("undo clears on active player change", () => {
-	let g = rules.setup(42, "3P", {})
+	let g = rules.setup(42, "Gold", { players: 3 })
 	const first = g.active
 	const v = rules.view(g, first)
 	g = take(g, first, "pick_share", v.actions.pick_share[0])
@@ -173,7 +173,7 @@ test("undo clears on active player change", () => {
 // ── Replay simulation: view called during replay must not mutate state ──
 
 test("view does not mutate state (replay-safe)", () => {
-	const g = rules.setup(42, "3P", {})
+	const g = rules.setup(42, "Gold", { players: 3 })
 	const before = JSON.stringify(g)
 	rules.view(g, g.active)
 	rules.view(g, "Observer")
@@ -185,14 +185,14 @@ test("view does not mutate state (replay-safe)", () => {
 // ── Mid-turn undo visibility ─────────────────────────────────────
 
 test("undo always exposed mid-turn in pick_share view", () => {
-	const g = rules.setup(42, "3P", {})
+	const g = rules.setup(42, "Gold", { players: 3 })
 	const v = rules.view(g, g.active)
 	// First action of turn — undo stack empty, so undo should be 0 (present, disabled)
 	assert.equal(v.actions.undo, 0, "undo present but disabled when stack empty")
 })
 
 test("undo exposed during bid phase actions", () => {
-	let g = rules.setup(42, "3P", {})
+	let g = rules.setup(42, "Gold", { players: 3 })
 	g = play_initial_picks(g)
 	if (g.phase !== "bid") return
 	const v = rules.view(g, g.active)
@@ -200,7 +200,7 @@ test("undo exposed during bid phase actions", () => {
 })
 
 test("buy_shares prompt includes 'Bid $x must pay $y'", () => {
-	let g = rules.setup(42, "3P", {})
+	let g = rules.setup(42, "Gold", { players: 3 })
 	g = play_initial_picks(g)
 	// Pass through bid phase
 	let safety = 30
@@ -216,7 +216,7 @@ test("buy_shares prompt includes 'Bid $x must pay $y'", () => {
 })
 
 test("undo enabled after a build action mid-turn", () => {
-	let g = rules.setup(42, "3P", {})
+	let g = rules.setup(42, "Gold", { players: 3 })
 	g = play_initial_picks(g)
 	// Pass through bid phase
 	let safety = 60
@@ -244,24 +244,24 @@ test("undo enabled after a build action mid-turn", () => {
 // ── Group A: Error cases ─────────────────────────────────────────
 
 test("unknown action throws in initial_share_pick", () => {
-	const g = rules.setup(42, "3P", {})
+	const g = rules.setup(42, "Gold", { players: 3 })
 	assert.throws(() => take(g, g.active, "flurble"), /Must pick a share|Unknown/)
 })
 
 test("unknown role throws in action()", () => {
-	const g = rules.setup(42, "3P", {})
+	const g = rules.setup(42, "Gold", { players: 3 })
 	assert.throws(() => take(g, "Chartreuse", "pick_share", 0), /Unknown role/)
 })
 
 test("wrong-phase action throws", () => {
-	const g = rules.setup(42, "3P", {})
+	const g = rules.setup(42, "Gold", { players: 3 })
 	// claim is not valid in initial_share_pick
 	assert.throws(() => take(g, g.active, "claim", "5_2"))
 })
 
 test("pick_share throws for already-held company", () => {
-	let g = rules.setup(42, "3P", {})
-	const pi = rules.roles("3P").indexOf(g.active)
+	let g = rules.setup(42, "Gold", { players: 3 })
+	const pi = rules.roles("Gold", { players: 3 }).indexOf(g.active)
 	const held_ci = g.players[pi].shares[0]
 	assert.throws(
 		() => take(g, g.active, "pick_share", held_ci),
@@ -270,7 +270,7 @@ test("pick_share throws for already-held company", () => {
 })
 
 test("bid raise below current_bid throws", () => {
-	let g = rules.setup(42, "3P", {})
+	let g = rules.setup(42, "Gold", { players: 3 })
 	g = play_initial_picks(g)
 	assert.equal(g.phase, "bid")
 	// Set current bid above 1 so a raise of 1 is invalid
@@ -280,7 +280,7 @@ test("bid raise below current_bid throws", () => {
 })
 
 test("bid raise above player cash throws", () => {
-	let g = rules.setup(42, "3P", {})
+	let g = rules.setup(42, "Gold", { players: 3 })
 	g = play_initial_picks(g)
 	assert.equal(g.phase, "bid")
 	assert.throws(() => take(g, g.active, "raise", 99999), /enough cash/)
@@ -289,12 +289,12 @@ test("bid raise above player cash throws", () => {
 test("bid view.actions.raise includes all valid amounts, not just minimum", () => {
 	// Regression: previously only [min_raise] was in the array, so the framework's
 	// send_action(.includes check) silently rejected any bid above the minimum.
-	let g = rules.setup(42, "3P", {})
+	let g = rules.setup(42, "Gold", { players: 3 })
 	g = play_initial_picks(g)
 	assert.equal(g.phase, "bid")
 
 	const bidder = g.active
-	const pi = rules.roles("3P").indexOf(bidder)
+	const pi = rules.roles("Gold", { players: 3 }).indexOf(bidder)
 	const cash = g.players[pi].cash
 	const min_raise = g.bid.current_bid + 1
 
@@ -332,7 +332,7 @@ function play_to_claim_land(g) {
 }
 
 test("claim places disc on hex and advances pending", () => {
-	let g = rules.setup(42, "3P", {})
+	let g = rules.setup(42, "Gold", { players: 3 })
 	g = play_initial_picks(g)
 	g = play_to_claim_land(g)
 	if (g.phase !== "claim_land") return
@@ -345,13 +345,13 @@ test("claim places disc on hex and advances pending", () => {
 	const before_pending = g.claim_land.pending.length
 	g = take(g, actor, "claim", hex_id)
 
-	assert.equal(g.hex_state[hex_id].disc, rules.roles("3P").indexOf(actor),
+	assert.equal(g.hex_state[hex_id].disc, rules.roles("Gold", { players: 3 }).indexOf(actor),
 		"disc placed with correct player index")
 	assert.equal(g.claim_land.pending.length, before_pending - 1, "pending shrinks by 1")
 })
 
 test("claim throws for city hex", () => {
-	let g = rules.setup(42, "3P", {})
+	let g = rules.setup(42, "Gold", { players: 3 })
 	g = play_initial_picks(g)
 	g = play_to_claim_land(g)
 	if (g.phase !== "claim_land") return
@@ -364,7 +364,7 @@ test("claim throws for city hex", () => {
 })
 
 test("claim throws for already-claimed hex", () => {
-	let g = rules.setup(42, "3P", {})
+	let g = rules.setup(42, "Gold", { players: 3 })
 	g = play_initial_picks(g)
 	g = play_to_claim_land(g)
 	if (g.phase !== "claim_land") return
@@ -382,7 +382,7 @@ test("claim throws for already-claimed hex", () => {
 })
 
 test("claim throws for hex with a road", () => {
-	let g = rules.setup(42, "3P", {})
+	let g = rules.setup(42, "Gold", { players: 3 })
 	g = play_initial_picks(g)
 	g = play_to_claim_land(g)
 	if (g.phase !== "claim_land") return
@@ -400,13 +400,13 @@ test("claim throws for hex with a road", () => {
 })
 
 test("claim throws when player has no claims left", () => {
-	let g = rules.setup(42, "3P", {})
+	let g = rules.setup(42, "Gold", { players: 3 })
 	g = play_initial_picks(g)
 	g = play_to_claim_land(g)
 	if (g.phase !== "claim_land") return
 
 	const actor = g.active
-	const pi = rules.roles("3P").indexOf(actor)
+	const pi = rules.roles("Gold", { players: 3 }).indexOf(actor)
 	const v = rules.view(g, actor)
 	if (!v.actions?.claim?.length) return
 
@@ -445,7 +445,7 @@ function play_to_building(g) {
 }
 
 test("mountain build costs 2 BP", () => {
-	let g = rules.setup(42, "3P", {})
+	let g = rules.setup(42, "Gold", { players: 3 })
 	g = play_initial_picks(g)
 	g = play_to_build_roads(g)
 	g = play_to_building(g)
@@ -468,7 +468,7 @@ test("mountain build costs 2 BP", () => {
 })
 
 test("desert build drains company treasury by 1", () => {
-	let g = rules.setup(42, "3P", {})
+	let g = rules.setup(42, "Gold", { players: 3 })
 	g = play_initial_picks(g)
 	g = play_to_build_roads(g)
 	g = play_to_building(g)
@@ -491,7 +491,7 @@ test("desert build drains company treasury by 1", () => {
 })
 
 test("building over a disc records claim and nulls disc", () => {
-	let g = rules.setup(42, "3P", {})
+	let g = rules.setup(42, "Gold", { players: 3 })
 	g = play_initial_picks(g)
 	g = play_to_build_roads(g)
 	g = play_to_building(g)
@@ -520,7 +520,7 @@ test("building over a disc records claim and nulls disc", () => {
 
 test("compute_scores: totals are cash + shares + claims", () => {
 	// Build a minimal end-game state to verify scoring formula
-	let g = rules.setup(99, "3P", {})
+	let g = rules.setup(99, "Gold", { players: 3 })
 	g = clone(g)
 
 	// Force game_end with known cash values
@@ -542,7 +542,7 @@ test("compute_scores: totals are cash + shares + claims", () => {
 })
 
 test("compute_scores: winner is first in sorted array", () => {
-	let g = rules.setup(99, "3P", {})
+	let g = rules.setup(99, "Gold", { players: 3 })
 	g = clone(g)
 	// Give player 2 much more cash so they definitely win
 	g.players[2].cash = 999
@@ -551,7 +551,7 @@ test("compute_scores: winner is first in sorted array", () => {
 	for (const p of g.players) p.shares = []
 	for (const co of g.companies) { co.shares = []; co.claims = []; co.claim_owners = []; co.road_track = 25 }
 
-	const roles = rules.roles("3P")
+	const roles = rules.roles("Gold", { players: 3 })
 	g = rules.resign(g, roles[0])
 
 	assert.equal(g.final_scores[0].player, 2, "player 2 should win")
@@ -559,7 +559,7 @@ test("compute_scores: winner is first in sorted array", () => {
 })
 
 test("compute_scores: game.result set to winner role name", () => {
-	let g = rules.setup(99, "3P", {})
+	let g = rules.setup(99, "Gold", { players: 3 })
 	g = clone(g)
 	g.players[1].cash = 999
 	g.players[0].cash = 1
@@ -567,7 +567,7 @@ test("compute_scores: game.result set to winner role name", () => {
 	for (const p of g.players) p.shares = []
 	for (const co of g.companies) { co.shares = []; co.claims = []; co.claim_owners = []; co.road_track = 25 }
 
-	const roles = rules.roles("3P")
+	const roles = rules.roles("Gold", { players: 3 })
 	g = rules.resign(g, roles[0])
 
 	assert.equal(g.final_scores[0].player, 1)
@@ -575,13 +575,13 @@ test("compute_scores: game.result set to winner role name", () => {
 })
 
 test("compute_scores: shared victory when all tiebreakers equal", () => {
-	let g = rules.setup(99, "3P", {})
+	let g = rules.setup(99, "Gold", { players: 3 })
 	g = clone(g)
 	// Give all players identical totals with no shares or claims
 	for (const p of g.players) { p.cash = 50; p.shares = [] }
 	for (const co of g.companies) { co.shares = []; co.claims = []; co.claim_owners = []; co.road_track = 25 }
 
-	const roles = rules.roles("3P")
+	const roles = rules.roles("Gold", { players: 3 })
 	g = rules.resign(g, roles[0])
 
 	assert.ok(g.result.includes(roles[0]), "result includes Blue")
@@ -593,7 +593,7 @@ test("compute_scores: shared victory when all tiebreakers equal", () => {
 // ── Group E: resign ───────────────────────────────────────────────
 
 test("resign triggers game_end with final_scores", () => {
-	const g = rules.setup(42, "3P", {})
+	const g = rules.setup(42, "Gold", { players: 3 })
 	const role = g.active
 	const g2 = rules.resign(g, role)
 	assert.equal(g2.phase, "game_end", "phase must be game_end after resign")
@@ -602,7 +602,7 @@ test("resign triggers game_end with final_scores", () => {
 })
 
 test("resign: each score entry has player, cash, shares, claims, total", () => {
-	const g = rules.setup(42, "3P", {})
+	const g = rules.setup(42, "Gold", { players: 3 })
 	const g2 = rules.resign(g, g.active)
 	for (const s of g2.final_scores) {
 		assert.ok("player" in s && "cash" in s && "shares" in s && "claims" in s && "total" in s,
@@ -613,7 +613,7 @@ test("resign: each score entry has player, cash, shares, claims, total", () => {
 // ── Group F: Rules edge cases ─────────────────────────────────────
 
 test("7-share shutdown deactivates a company", () => {
-	let g = rules.setup(42, "3P", {})
+	let g = rules.setup(42, "Gold", { players: 3 })
 	g = play_initial_picks(g)
 	g = clone(g)
 	// Manually give company 0 the maximum 7 shares
@@ -624,7 +624,7 @@ test("7-share shutdown deactivates a company", () => {
 })
 
 test("game ends when fewer than 2 companies remain active after 7-share shutdown", () => {
-	let g = rules.setup(42, "3P", {})
+	let g = rules.setup(42, "Gold", { players: 3 })
 	g = play_initial_picks(g)
 	g = clone(g)
 	// In a 3P game there are 4 companies. Giving 3 of them 7 shares means
@@ -638,7 +638,7 @@ test("game ends when fewer than 2 companies remain active after 7-share shutdown
 })
 
 test("stalemate: game ends when 0 roads are built in build phase", () => {
-	let g = rules.setup(42, "3P", {})
+	let g = rules.setup(42, "Gold", { players: 3 })
 	g = play_initial_picks(g)
 	g = clone(g)
 	// Block all builds without deactivating companies: mark every city hex as already
@@ -663,7 +663,7 @@ test("stalemate: game ends when 0 roads are built in build phase", () => {
 // is called before all mutations in do_build_roads draft path.
 
 test("build draft: undo available after pick_company with no shareholders", () => {
-	let g = rules.setup(42, "3P", {})
+	let g = rules.setup(42, "Gold", { players: 3 })
 	g = play_initial_picks(g)
 	g = play_to_build_roads(g)
 	if (g.phase !== "build_roads" || g.build_roads.state !== "draft") return
@@ -686,7 +686,7 @@ test("build draft: undo available after pick_company with no shareholders", () =
 })
 
 test("build draft: undo of no-shareholder pick restores full state", () => {
-	let g = rules.setup(42, "3P", {})
+	let g = rules.setup(42, "Gold", { players: 3 })
 	g = play_initial_picks(g)
 	g = play_to_build_roads(g)
 	if (g.phase !== "build_roads" || g.build_roads.state !== "draft") return
@@ -716,14 +716,14 @@ test("build draft: undo available when drafter has no shares but others do", () 
 	// The drafter picks a company they don't own shares in; another player does.
 	// build_queue excludes the drafter → waiting_end_turn = true before build starts.
 	// Regression: this path also needed push_undo() to have been called.
-	let g = rules.setup(42, "3P", {})
+	let g = rules.setup(42, "Gold", { players: 3 })
 	g = play_initial_picks(g)
 	g = play_to_build_roads(g)
 	if (g.phase !== "build_roads" || g.build_roads.state !== "draft") return
 
 	const ci = g.active_box[0]
 	const drafter = g.active
-	const drafter_pi = rules.roles("3P").indexOf(drafter)
+	const drafter_pi = rules.roles("Gold", { players: 3 }).indexOf(drafter)
 
 	g = clone(g)
 	// Remove drafter's shares in ci
@@ -744,7 +744,7 @@ test("build draft: undo available when drafter has no shares but others do", () 
 
 test("build draft: undo after end_turn is not available (clear_undo was called)", () => {
 	// end_turn unconditionally calls clear_undo(), so after it fires, undo stack is empty.
-	let g = rules.setup(42, "3P", {})
+	let g = rules.setup(42, "Gold", { players: 3 })
 	g = play_initial_picks(g)
 	g = play_to_build_roads(g)
 	if (g.phase !== "build_roads" || g.build_roads.state !== "draft") return
@@ -764,7 +764,7 @@ test("build draft: undo after end_turn is not available (clear_undo was called)"
 })
 
 test("build action: undo restores hex road and build points", () => {
-	let g = rules.setup(42, "3P", {})
+	let g = rules.setup(42, "Gold", { players: 3 })
 	g = play_initial_picks(g)
 	g = play_to_build_roads(g)
 	g = play_to_building(g)
@@ -829,17 +829,17 @@ test("map.js: hex_label returns correct 18xx coordinates", () => {
 })
 
 test("setup: game.map_id defaults to 'gold' when options is empty", () => {
-	const g = rules.setup(42, "3P", {})
+	const g = rules.setup(42, "Gold", { players: 3 })
 	assert.equal(g.map_id, "gold", "map_id must be stored in game state")
 })
 
-test("setup: Granite_map option selects granite", () => {
-	const g = rules.setup(42, "3P", { Granite_map: true })
-	assert.equal(g.map_id, "granite", "Granite_map option must select granite map")
+test("setup: Granite scenario sets map_id to granite", () => {
+	const g = rules.setup(42, "Granite", { players: 3 })
+	assert.equal(g.map_id, "granite", "Granite scenario must set map_id to granite")
 })
 
 test("view: map_id present for active player, inactive player, and observer", () => {
-	const g = rules.setup(42, "3P", {})
+	const g = rules.setup(42, "Gold", { players: 3 })
 	const roles    = ["Blue", "Purple", "Magenta"]
 	const inactive = roles.find(r => r !== g.active)
 
@@ -854,7 +854,7 @@ test("view: map_id present for active player, inactive player, and observer", ()
 
 test("setup: hex_state terrain matches MAPS.gold for known hexes", () => {
 	// Use 5P so all 17 rows are present in the game
-	const g = rules.setup(42, "5P", {})
+	const g = rules.setup(42, "Gold", { players: 5 })
 	assert.equal(g.hex_state["9_3"]?.terrain,  "city",     "9_3  terrain: city")
 	assert.equal(g.hex_state["9_9"]?.terrain,  "city",     "9_9  terrain: city")
 	assert.equal(g.hex_state["8_6"]?.terrain,  "mountain", "8_6  terrain: mountain")
@@ -868,19 +868,19 @@ test("setup: hex_state respects player_row_skip for each player count", () => {
 	// so this test stays correct when player_row_skip values change or a
 	// new map with a different row count / skip table is added.
 	const map = MAPS.gold
-	for (const [scenario, pc] of [["3P", 3], ["4P", 4], ["5P", 5]]) {
-		const g      = rules.setup(42, scenario, {})
+	for (const pc of [3, 4, 5]) {
+		const g      = rules.setup(42, "Gold", { players: pc })
 		const skip   = map.player_row_skip[pc] || 0
 		const max_r  = map.rows.length - skip
 		const last_visible = max_r - 1
 		const first_hidden = max_r
 
 		assert.ok(g.hex_state[`${last_visible}_0`] !== undefined,
-			`${scenario}: row ${last_visible} must be present (last visible row)`)
+			`${pc}P: row ${last_visible} must be present (last visible row)`)
 
 		if (skip > 0) {
 			assert.ok(g.hex_state[`${first_hidden}_0`] === undefined,
-				`${scenario}: row ${first_hidden} must be absent (first skipped row)`)
+				`${pc}P: row ${first_hidden} must be absent (first skipped row)`)
 		}
 	}
 })
@@ -902,9 +902,9 @@ test("map.js: hex labels are top-anchored to the full map, stable under row-skip
 
 	// 1. Same (r, c) yields the same label across every player count.
 	for (const r of [0, 5, 11]) {
-		const labels = ["3P", "4P", "5P"].map(s => {
-			rules.setup(42, s, {})            // skip changes per scenario…
-			return hex_label(map, r, 0)        // …but the label must not.
+		const labels = [3, 4, 5].map(pc => {
+			rules.setup(42, "Gold", { players: pc }) // skip changes per player count…
+			return hex_label(map, r, 0)              // …but the label must not.
 		})
 		assert.equal(labels[0], labels[1], `row ${r}: 3P and 4P labels must match`)
 		assert.equal(labels[1], labels[2], `row ${r}: 4P and 5P labels must match`)
@@ -912,13 +912,13 @@ test("map.js: hex labels are top-anchored to the full map, stable under row-skip
 
 	// 2. The top-VISIBLE row (highest surviving array index) carries its
 	//    full-map letter, not a relabeled "A".
-	for (const [scenario, pc] of [["3P", 3], ["4P", 4], ["5P", 5]]) {
+	for (const pc of [3, 4, 5]) {
 		const skip    = map.player_row_skip[pc] || 0
 		const top_row = map.rows.length - skip - 1   // highest visible index = top of screen
 		const letter  = String.fromCharCode(65 + (map.rows.length - 1 - top_row))
 		const label   = hex_label(map, top_row, 0)
 		assert.ok(label.startsWith(letter),
-			`${scenario}: top visible row ${top_row} must be letter ${letter}, got ${label}`)
+			`${pc}P: top visible row ${top_row} must be letter ${letter}, got ${label}`)
 	}
 	// Spell out the expected anchoring so the intent is obvious if this breaks.
 	assert.ok(hex_label(map, 16, 0).startsWith("A"), "5P top visible row (r=16) → A")
@@ -966,16 +966,15 @@ test("map.js: every map is structurally valid", () => {
 	}
 })
 
-test("setup: a non-default map round-trips through setup for every player count", () => {
-	// Proves the option path works for a map that is NOT the default,
-	// across all scenarios — not just that the default value is stored.
-	for (const [scenario, pc] of [["3P", 3], ["4P", 4], ["5P", 5]]) {
-		const g = rules.setup(42, scenario, { Granite_map: true })
-		assert.equal(g.map_id, "granite", `${scenario}: granite map_id must round-trip`)
+test("setup: Granite scenario round-trips map_id for every player count", () => {
+	// Proves the Granite scenario works correctly for all player counts.
+	for (const pc of [3, 4, 5]) {
+		const g = rules.setup(42, "Granite", { players: pc })
+		assert.equal(g.map_id, "granite", `${pc}P: granite map_id must round-trip`)
 		const skip  = MAPS.granite.player_row_skip[pc] || 0
 		const max_r = MAPS.granite.rows.length - skip
 		assert.ok(g.hex_state[`${max_r - 1}_0`] !== undefined,
-			`${scenario}: last visible row must exist on granite`)
+			`${pc}P: last visible row must exist on granite`)
 	}
 })
 
@@ -989,7 +988,7 @@ test("map.js: granite cities land at their published 18xx coordinates", () => {
 })
 
 test("setup: granite hex_state marks city terrain at the right hexes", () => {
-	const g = rules.setup(42, "5P", { Granite_map: true })
+	const g = rules.setup(42, "Granite", { players: 5 })
 	assert.equal(g.hex_state["0_4"]?.terrain, "city",  "Q11 (0_4) must be a city")
 	assert.equal(g.hex_state["2_8"]?.terrain, "city",  "O19 (2_8) must be a city")
 	assert.equal(g.hex_state["6_0"]?.terrain, "city",  "K5  (6_0) must be a city")
@@ -999,14 +998,14 @@ test("setup: granite hex_state marks city terrain at the right hexes", () => {
 // ── Subsidies variant ─────────────────────────────────────────────
 
 test("setup: Subsidies_variant is stored in game state", () => {
-	const g_on  = rules.setup(42, "3P", { Subsidies_variant: true })
-	const g_off = rules.setup(42, "3P", {})
+	const g_on  = rules.setup(42, "Gold", { players: 3, Subsidies_variant: true })
+	const g_off = rules.setup(42, "Gold", { players: 3 })
 	assert.equal(g_on.subsidies,  true,  "Subsidies_variant:true must set subsidies=true")
 	assert.equal(g_off.subsidies, false, "omitted option must set subsidies=false")
 })
 
 test("subsidies: each company receives $2 per share per player per unissued share", () => {
-	let g = rules.setup(1, "3P", { Subsidies_variant: true })
+	let g = rules.setup(1, "Gold", { players: 3, Subsidies_variant: true })
 	// 3P: per-share subsidy = $2 * 3 players = $6
 	// 4 companies, 3 players each hold 2 shares → 6 shares total
 	// Each company can hold at most 2; subsidy = (2 - held) * $6
@@ -1023,7 +1022,7 @@ test("subsidies: each company receives $2 per share per player per unissued shar
 })
 
 test("subsidies: no treasury added when variant is off", () => {
-	let g = rules.setup(1, "3P", {})
+	let g = rules.setup(1, "Gold", { players: 3 })
 	g = play_initial_picks(g)
 	for (const co of g.companies)
 		assert.equal(co.treasury, 0, `${co.name}: treasury must be $0 without Subsidies variant`)
@@ -1032,16 +1031,16 @@ test("subsidies: no treasury added when variant is off", () => {
 test("subsidies: per-share subsidy scales $2/share/player across player counts", () => {
 	// Always exactly 2 unissued shares; per-share = $2 * num_players
 	// 3P: 2 * ($2*3) = $12   4P: 2 * ($2*4) = $16   5P: 2 * ($2*5) = $20
-	for (const [scenario, expected] of [["3P", 12], ["4P", 16], ["5P", 20]]) {
-		let g = rules.setup(7, scenario, { Subsidies_variant: true })
+	for (const [pc, expected] of [[3, 12], [4, 16], [5, 20]]) {
+		let g = rules.setup(7, "Gold", { players: pc, Subsidies_variant: true })
 		g = play_initial_picks(g)
 		const total = g.companies.reduce((sum, co) => sum + co.treasury, 0)
-		assert.equal(total, expected, `${scenario}: total subsidy must be $${expected}`)
+		assert.equal(total, expected, `${pc}P: total subsidy must be $${expected}`)
 	}
 })
 
 test("subsidies: works with Granite map", () => {
-	let g = rules.setup(3, "4P", { Granite_map: true, Subsidies_variant: true })
+	let g = rules.setup(3, "Granite", { players: 4, Subsidies_variant: true })
 	assert.equal(g.map_id,    "granite", "granite map must be selected")
 	assert.equal(g.subsidies, true,      "subsidies flag must be set")
 	g = play_initial_picks(g)

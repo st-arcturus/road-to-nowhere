@@ -17,11 +17,11 @@ const { MAPS, get_terrain, hex_label } = require("./map.js")
 
 const ROLE_NAMES = ["Blue", "Purple", "Magenta", "Orange", "Yellow"]
 
-exports.scenarios = [ "3P", "4P", "5P" ]
+exports.scenarios        = ["Gold", "Granite"]
+exports.default_scenario = "Gold"
 
-exports.roles = function (scenario) {
-	const n = { "3P": 3, "4P": 4, "5P": 5 }[scenario]
-	return ROLE_NAMES.slice(0, n)
+exports.roles = function (scenario, options) {
+	return ROLE_NAMES.slice(0, Number(options?.players) || 4)
 }
 
 // ── Module-level game variable ────────────────────────────────────
@@ -682,10 +682,10 @@ exports.static_view = function (game) {
 // ── exports.setup ─────────────────────────────────────────────────
 
 exports.setup = function (seed, scenario, options) {
-	const pc = { "3P": 3, "4P": 4, "5P": 5 }[scenario]
+	const pc = Number(options?.players) || 4
 	const cc = pc + 1
 	const starting_cash = { 3: 25, 4: 30, 5: 35 }[pc]
-	const map_id   = options?.Granite_map      ? "granite" : "gold"
+	const map_id    = scenario.toLowerCase()          // "gold" or "granite"
 	const subsidies = !!options?.Subsidies_variant
 	const map    = MAPS[map_id]
 	const skip   = map.player_row_skip[pc] || 0
