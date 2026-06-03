@@ -1,14 +1,31 @@
+<style>
+.map_info { display: none }
+.map_info.show { display: block }
+</style>
+
 <p>
 The scenario selects player count (3P, 4P, or 5P).
 Starting cash and map size adjust automatically.
 </p>
 
 <p>
-<label>
-<input type="checkbox" name="Granite_map" value="true">
-Granite map (default: Gold)
-</label>
+Map:
+<select id="map_select">
+<option value="gold">Gold</option>
+<option value="granite">Granite</option>
+</select>
 </p>
+
+<div class="map_info show" id="map_info_gold">
+<p><i>Balanced map recommended for first time players.</i></p>
+</div>
+
+<div class="map_info" id="map_info_granite">
+<p><i>WIP for testing purposes only. Do not play.</i></p>
+</div>
+
+<!-- Hidden checkbox: checked when Granite is selected; drives the Granite_map option -->
+<input type="checkbox" name="Granite_map" value="true" style="display:none">
 
 <p>
 <label>
@@ -16,3 +33,15 @@ Granite map (default: Gold)
 Subsidies variant
 </label>
 </p>
+
+<script>
+let map_select = document.getElementById("map_select")
+let granite_checkbox = document.querySelector("input[name='Granite_map']")
+
+map_select.onchange = function () {
+	document.querySelectorAll(".map_info").forEach(e => e.classList.remove("show"))
+	document.getElementById("map_info_" + map_select.value).classList.add("show")
+	granite_checkbox.checked = (map_select.value === "granite")
+}
+map_select.onchange()
+</script>
