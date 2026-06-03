@@ -1,13 +1,24 @@
-<p>
-The scenario selects player count (3P, 4P, or 5P).
-Starting cash and map size adjust automatically.
-</p>
+<style>
+.map_info { display: none }
+.map_info.show { display: block }
+</style>
+
+<div class="map_info" id="map_info_Gold">
+<p><i>Balanced map recommended for first time players.</i>
+</div>
+
+<div class="map_info" id="map_info_Granite">
+<p><i>WIP for testing purposes only. Do not play.</i>
+</div>
 
 <p>
-<label>
-<input type="checkbox" name="Granite_map" value="true">
-Granite map (default: Gold)
-</label>
+Player count:
+<br>
+<select name="players">
+<option value="">5 Player</option>
+<option value="4">4 Player</option>
+<option value="3">3 Player</option>
+</select>
 </p>
 
 <p>
@@ -16,3 +27,12 @@ Granite map (default: Gold)
 Subsidies variant
 </label>
 </p>
+
+<script>
+let map_select = document.querySelector("select[name='scenario']")
+map_select.onchange = function () {
+	document.querySelectorAll(".map_info").forEach(e => e.classList.remove("show"))
+	document.getElementById("map_info_" + map_select.value).classList.add("show")
+}
+map_select.onchange()
+</script>
