@@ -6,11 +6,8 @@
 //   rules.js  — const { MAPS, get_terrain, hex_label } = require("./map.js")
 //   play.js   — via <script src="map.js"> (lands as globals)
 //
-// To add a second map:
-//   1. Add an entry to MAPS with the same shape as "gold".
-//   2. Add exports.options in rules.js:
-//        exports.options = () => [{ name:"map", label:"Map", items: Object.keys(MAPS) }]
-//   3. The RTT lobby will show the dropdown automatically.
+// To add a map: add an entry to MAPS with the same shape as "gold",
+// then add its name to exports.scenarios in rules.js.
 
 const MAPS = {
 	gold: {
