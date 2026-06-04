@@ -833,6 +833,19 @@ test("setup: game.map_id defaults to 'gold' when options is empty", () => {
 	assert.equal(g.map_id, "gold", "map_id must be stored in game state")
 })
 
+test("setup: throws on invalid player count", () => {
+	assert.throws(() => rules.setup(42, "Gold", { players: 2 }), /Invalid player count/)
+	assert.throws(() => rules.setup(42, "Gold", { players: 6 }), /Invalid player count/)
+})
+
+test("setup: throws on unknown scenario", () => {
+	assert.throws(() => rules.setup(42, "Mars", { players: 3 }), /Unknown scenario/)
+})
+
+test("roles: throws on invalid player count", () => {
+	assert.throws(() => rules.roles("Gold", { players: 2 }), /Invalid player count/)
+})
+
 test("setup: Granite scenario sets map_id to granite", () => {
 	const g = rules.setup(42, "Granite", { players: 3 })
 	assert.equal(g.map_id, "granite", "Granite scenario must set map_id to granite")

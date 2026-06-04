@@ -20,8 +20,12 @@ const ROLE_NAMES = ["Blue", "Purple", "Magenta", "Orange", "Yellow"]
 exports.scenarios        = ["Gold", "Granite"]
 exports.default_scenario = "Gold"
 
+const VALID_PLAYER_COUNTS = new Set([3, 4, 5])
+
 exports.roles = function (scenario, options) {
-	return ROLE_NAMES.slice(0, Number(options?.players) || 5)
+	const pc = Number(options?.players) || 5
+	if (!VALID_PLAYER_COUNTS.has(pc)) throw new Error(`Invalid player count: ${pc}`)
+	return ROLE_NAMES.slice(0, pc)
 }
 
 // ── Module-level game variable ────────────────────────────────────
@@ -683,9 +687,11 @@ exports.static_view = function (game) {
 
 exports.setup = function (seed, scenario, options) {
 	const pc = Number(options?.players) || 5
+	if (!VALID_PLAYER_COUNTS.has(pc)) throw new Error(`Invalid player count: ${pc}`)
+	const map_id = scenario.toLowerCase()
+	if (!MAPS[map_id]) throw new Error(`Unknown scenario: ${scenario}`)
 	const cc = pc + 1
 	const starting_cash = { 3: 25, 4: 30, 5: 35 }[pc]
-	const map_id    = scenario.toLowerCase()          // "gold" or "granite"
 	const subsidies = !!options?.Subsidies_variant
 	const map    = MAPS[map_id]
 	const skip   = map.player_row_skip[pc] || 0
