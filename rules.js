@@ -777,8 +777,8 @@ exports.setup = function (seed, scenario, options) {
 		game.companies[ci].shares.push(p)
 	}
 
-	// Active box starts as ALL companies — second share picks can duplicate first
-	// (the constraint is just "not the same company you already hold")
+	// Pool is all cc companies. A player's 2nd pick can coincide with another
+	// player's 1st share — only your own first share is excluded (checked in do_initial_pick).
 	game.active_box = Array.from({ length: cc }, (_, i) => i)
 
 	// Pick queue for second shares is reverse of init_order
