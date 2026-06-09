@@ -973,12 +973,18 @@ exports.view = function (state, current) {
 	return view
 }
 
-// ── exports.resign ────────────────────────────────────────────────
+// ── exports.finish ────────────────────────────────────────────────
+// Called by the server on resign: finish(state, result, message).
+// result = all non-resigning roles joined (used by server for DB/ratings).
+// message = e.g. "Blue resigned." (shown as the game-end prompt).
+// We run compute_scores for the full score breakdown, then override
+// game.victory with the resign message so the prompt is correct.
 
-exports.resign = function (state, current) {
+exports.finish = function (state, result, message) {
 	load_game(state)
-	add_log(`${current} has resigned.`)
+	add_log(message)
 	game.phase = "game_end"
 	compute_scores()
+	game.victory = message
 	return save_game()
 }

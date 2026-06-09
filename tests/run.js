@@ -530,9 +530,10 @@ test("compute_scores: totals are cash + shares + claims", () => {
 	for (const co of g.companies) { co.shares = []; co.claims = []; co.claim_owners = []; co.road_track = 25 }
 	g.final_scores = null
 
-	// Trigger compute_scores via resign
+	// Trigger compute_scores via finish
 	const role = g.active
-	g = rules.resign(g, role)
+	const others = ["Blue","Purple","Magenta"].filter(r => r !== role).join(", ")
+	g = rules.finish(g, others, `${role} resigned.`)
 
 	assert.ok(g.final_scores, "final_scores should be set")
 	for (const s of g.final_scores) {
@@ -552,7 +553,7 @@ test("compute_scores: winner is first in sorted array", () => {
 	for (const co of g.companies) { co.shares = []; co.claims = []; co.claim_owners = []; co.road_track = 25 }
 
 	const roles = rules.roles("Gold", { players: 3 })
-	g = rules.resign(g, roles[0])
+	g = rules.finish(g, roles.slice(1).join(", "), `${roles[0]} resigned.`)
 
 	assert.equal(g.final_scores[0].player, 2, "player 2 should win")
 	assert.ok(g.final_scores[0].total > g.final_scores[1].total, "winner has highest total")
@@ -568,7 +569,7 @@ test("compute_scores: game.result set to winner role name", () => {
 	for (const co of g.companies) { co.shares = []; co.claims = []; co.claim_owners = []; co.road_track = 25 }
 
 	const roles = rules.roles("Gold", { players: 3 })
-	g = rules.resign(g, roles[0])
+	g = rules.finish(g, roles.slice(1).join(", "), `${roles[0]} resigned.`)
 
 	assert.equal(g.final_scores[0].player, 1)
 	assert.equal(g.result, roles[1], "result should be winner's role name")
@@ -582,28 +583,32 @@ test("compute_scores: shared victory when all tiebreakers equal", () => {
 	for (const co of g.companies) { co.shares = []; co.claims = []; co.claim_owners = []; co.road_track = 25 }
 
 	const roles = rules.roles("Gold", { players: 3 })
-	g = rules.resign(g, roles[0])
+	g = rules.finish(g, roles.slice(1).join(", "), `${roles[0]} resigned.`)
 
 	assert.ok(g.result.includes(roles[0]), "result includes Blue")
 	assert.ok(g.result.includes(roles[1]), "result includes Purple")
 	assert.ok(g.result.includes(roles[2]), "result includes Magenta")
-	assert.ok(g.victory.includes("tie"), "victory message says tie")
+	// game.victory is the resign message when finish() is used; tie is indicated by
+	// game.result containing multiple role names, verified by the three assertions above.
 })
 
-// ── Group E: resign ───────────────────────────────────────────────
+// ── Group E: finish (resign) ──────────────────────────────────────
 
-test("resign triggers game_end with final_scores", () => {
+test("finish triggers game_end with final_scores", () => {
 	const g = rules.setup(42, "Gold", { players: 3 })
 	const role = g.active
-	const g2 = rules.resign(g, role)
-	assert.equal(g2.phase, "game_end", "phase must be game_end after resign")
+	const others = ["Blue","Purple","Magenta"].filter(r => r !== role).join(", ")
+	const g2 = rules.finish(g, others, `${role} resigned.`)
+	assert.equal(g2.phase, "game_end", "phase must be game_end after finish")
 	assert.ok(Array.isArray(g2.final_scores), "final_scores must be an array")
 	assert.equal(g2.final_scores.length, 3, "one score entry per player")
 })
 
-test("resign: each score entry has player, cash, shares, claims, total", () => {
+test("finish: each score entry has player, cash, shares, claims, total", () => {
 	const g = rules.setup(42, "Gold", { players: 3 })
-	const g2 = rules.resign(g, g.active)
+	const role = g.active
+	const others = ["Blue","Purple","Magenta"].filter(r => r !== role).join(", ")
+	const g2 = rules.finish(g, others, `${role} resigned.`)
 	for (const s of g2.final_scores) {
 		assert.ok("player" in s && "cash" in s && "shares" in s && "claims" in s && "total" in s,
 			"score entry has all fields")
