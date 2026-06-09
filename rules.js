@@ -329,7 +329,6 @@ function compute_scores() {
 
 function add_log(msg) {
 	game.log.push(msg)
-	if (game.log.length > 200) game.log.splice(0, game.log.length - 200)
 }
 
 // ── Phase transitions ─────────────────────────────────────────────
